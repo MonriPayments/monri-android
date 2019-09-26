@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/card_number_textView_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/card_number_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/card_number_label"
+                android:textColor="@color/card_number_color"
+                android:textSize="14dp" />
+
+            <ImageView
+                android:id="@+id/iv_card_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/ic_unknown" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/ev_card_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginStart="-5dp"
+            android:digits=" 0123456789"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="@string/card_number_hint"
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:maxLength="19"
+            android:nextFocusDown="@+id/edit_text_cardholder_name"
+            android:textSize="18dp"
+            android:visibility="visible"
+            tools:ignore="RtlHardcoded" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edit_text_cardholder_name"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_expiry_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/expiry_date_label"
+                    android:textColor="@color/card_number_color"
+                    android:textSize="14dp" />
+
+                <EditText
+                    android:id="@+id/et_expiration_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-5dp"
+                    android:digits="/0123456789"
+                    android:hint="@string/expiry_date_label"
+                    android:inputType="number"
+                    android:maxLines="1"
+                    android:nextFocusRight="@id/et_cvv_number"
+                    android:textSize="18dp"
+                    tools:ignore="TextFields" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/cvc_textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cvc_number_label"
+                    android:textColor="@color/card_number_color"
+                    android:textSize="14dp" />
+
+                <EditText
+                    android:id="@+id/et_cvv_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-5dp"
+                    android:digits="0123456789"
+                    android:hint="@string/cvc_number_label"
+                    android:inputType="number"
+                    android:maxLength="4"
+                    android:maxLines="1"
+                    android:textSize="18dp"
+                    tools:ignore="TextFields" />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</FrameLayout>

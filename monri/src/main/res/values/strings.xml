@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MonriAndroidSdk</string>
+    <string name="card_number_label">Card Number</string>
+    <string name="card_number_hint">**** **** **** ****</string>
+    <string name="expiry_date_label">Expiration Date</string>
+    <string name="cvc_number_label">CVV</string>
+</resources>
