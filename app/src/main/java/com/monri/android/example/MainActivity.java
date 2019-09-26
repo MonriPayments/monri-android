@@ -7,13 +7,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.monri.android.Monri;
 import com.monri.android.MonriTextUtils;
 import com.monri.android.TokenCallback;
@@ -33,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
     CardMultilineWidget widget;
 
+    Button payButton;
+
     public static Intent createIntent(Context context) {
         return new Intent(context, MainActivity.class);
     }
@@ -45,22 +46,21 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         widget = findViewById(R.id.card_multiline_widget);
+        payButton = findViewById(R.id.pay_button);
 
+
+
+//        TODO: replace with your merchant's authenticity token
         String authenticityToken = "6a13d79bde8da9320e88923cb3472fb638619ccb";
-
-        final Monri monri = new Monri(this.getApplicationContext(), authenticityToken);
-
-
+//        TODO: replace with your merchant's merchant key
         final String merchantKey = "TestKeyXULLyvgWyPJSwOHe";
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+//        Step one - instantiate monri
+        final Monri monri = new Monri(this.getApplicationContext(), authenticityToken);
+
+        payButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-
+            public void onClick(View v) {
                 final String timestamp = isoFormat.format(new Date());
                 final String token = UUID.randomUUID().toString();
 
@@ -84,8 +84,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 }
-
-
             }
         });
 
