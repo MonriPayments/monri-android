@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
         payButton = findViewById(R.id.pay_button);
 
 
-
 //        TODO: replace with your merchant's authenticity token
         String authenticityToken = "6a13d79bde8da9320e88923cb3472fb638619ccb";
 //        TODO: replace with your merchant's merchant key
@@ -75,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
                     monri.createToken(tokenRequest, card, new TokenCallback() {
                         @Override
                         public void onSuccess(Token token) {
-                            Toast.makeText(MainActivity.this, token.getId(), Toast.LENGTH_LONG).show();
+                            submitTokenToBackend(token);
+                            Toast.makeText(MainActivity.this, String.format("Token successfully created\n%s", token.getId()), Toast.LENGTH_LONG).show();
                         }
 
                         @Override
@@ -87,6 +87,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void submitTokenToBackend(Token token) {
+        // Submit token to backend to charge card - authorization, purchase
     }
 
 
