@@ -1,127 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="10dp">
+    android:layout_height="wrap_content">
 
-    <LinearLayout
+    <com.monri.android.view.IconTextInputLayout
+        android:id="@+id/tl_add_source_card_number_ml"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:hint="@string/acc_label_card_number"
+        android:layout_marginTop="@dimen/add_card_element_vertical_margin"
+        >
 
-        <LinearLayout
-            android:id="@+id/card_number_textView_wrapper"
+        <com.monri.android.view.CardNumberEditText
+            android:id="@+id/et_add_source_card_number_ml"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/card_number_textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="@string/card_number_label"
-                android:textColor="@color/card_number_color"
-                android:textSize="14dp" />
-
-            <ImageView
-                android:id="@+id/iv_card_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:src="@drawable/ic_unknown" />
-        </LinearLayout>
-
-        <EditText
-            android:id="@+id/ev_card_number"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:layout_marginStart="-5dp"
-            android:digits=" 0123456789"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:hint="@string/card_number_hint"
+            android:digits="@string/valid_digits"
+            android:drawableLeft="@drawable/ic_unknown"
+            android:drawablePadding="@dimen/card_icon_multiline_padding"
+            android:drawableStart="@drawable/ic_unknown"
             android:imeOptions="actionDone"
             android:inputType="number"
-            android:maxLength="19"
-            android:nextFocusDown="@+id/edit_text_cardholder_name"
-            android:textSize="18dp"
-            android:visibility="visible"
-            tools:ignore="RtlHardcoded" />
+            android:nextFocusDown="@+id/et_add_source_expiry_ml"
+            android:nextFocusForward="@+id/et_add_source_expiry_ml"
+            />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+    </com.monri.android.view.IconTextInputLayout>
+
+    <LinearLayout
+        android:id="@+id/second_row_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/add_card_element_vertical_margin"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        >
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_add_source_expiry_ml"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_below="@id/edit_text_cardholder_name"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
+            android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
+            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
+            android:layout_weight="1"
+            android:hint="@string/acc_label_expiry_date"
+            >
 
-            <LinearLayout
-                android:layout_width="0dp"
+            <com.monri.android.view.ExpiryDateEditText
+                android:id="@+id/et_add_source_expiry_ml"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:imeOptions="actionDone"
+                android:inputType="date"
+                android:maxLength="@integer/date_length"
+                android:nextFocusDown="@+id/et_add_source_cvc_ml"
+                android:nextFocusForward="@+id/et_add_source_cvc_ml"
+                />
 
-                <TextView
-                    android:id="@+id/tv_expiry_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/expiry_date_label"
-                    android:textColor="@color/card_number_color"
-                    android:textSize="14dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <EditText
-                    android:id="@+id/et_expiration_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="-5dp"
-                    android:digits="/0123456789"
-                    android:hint="@string/expiry_date_label"
-                    android:inputType="number"
-                    android:maxLines="1"
-                    android:nextFocusRight="@id/et_cvv_number"
-                    android:textSize="18dp"
-                    tools:ignore="TextFields" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_add_source_cvc_ml"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
+            android:layout_marginRight="@dimen/add_card_expiry_middle_margin"
+            android:layout_weight="1"
+            >
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
+            <com.monri.android.view.MonriEditText
+                android:id="@+id/et_add_source_cvc_ml"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:digits="@string/valid_digits"
+                android:imeOptions="actionDone"
+                android:inputType="number"
+                android:nextFocusDown="@+id/et_add_source_postal_ml"
+                android:nextFocusForward="@+id/et_add_source_postal_ml"
+                />
 
-                <TextView
-                    android:id="@+id/cvc_textView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/cvc_number_label"
-                    android:textColor="@color/card_number_color"
-                    android:textSize="14dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <EditText
-                    android:id="@+id/et_cvv_number"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="-5dp"
-                    android:digits="0123456789"
-                    android:hint="@string/cvc_number_label"
-                    android:inputType="number"
-                    android:maxLength="4"
-                    android:maxLines="1"
-                    android:textSize="18dp"
-                    tools:ignore="TextFields" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_add_source_postal_ml"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            >
 
+            <!--In future releases we will remove the android:digits restriction
+            to support international postal codes.-->
+            <com.monri.android.view.MonriEditText
+                android:id="@+id/et_add_source_postal_ml"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="@string/valid_digits"
+                android:hint="@string/acc_label_zip"
+                android:imeOptions="actionDone"
+                android:inputType="number"
+                android:maxLength="5"
+                />
 
-            </LinearLayout>
-
-        </LinearLayout>
-
+        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
-
-
-</FrameLayout>
+</merge>

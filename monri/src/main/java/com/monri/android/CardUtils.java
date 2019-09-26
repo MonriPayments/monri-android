@@ -1,7 +1,8 @@
 package com.monri.android;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.monri.android.model.Card;
 
@@ -36,7 +37,7 @@ public class CardUtils {
      * @return {@code true} if and only if the input value is a valid card number
      */
     public static boolean isValidCardNumber(@Nullable String cardNumber) {
-        String normalizedNumber = StripeTextUtils.removeNonDigits(cardNumber);
+        String normalizedNumber = MonriTextUtils.removeNonDigits(cardNumber);
         return isValidLuhnNumber(normalizedNumber) && isValidCardLength(normalizedNumber);
     }
 
@@ -119,28 +120,28 @@ public class CardUtils {
     @Card.CardBrand
     private static String getPossibleCardType(@Nullable String cardNumber,
                                               boolean shouldNormalize) {
-        if (StripeTextUtils.isBlank(cardNumber)) {
+        if (MonriTextUtils.isBlank(cardNumber)) {
             return Card.UNKNOWN;
         }
 
         String spacelessCardNumber = cardNumber;
         if (shouldNormalize) {
-            spacelessCardNumber = StripeTextUtils.removeNonDigits(cardNumber);
+            spacelessCardNumber = MonriTextUtils.removeNonDigits(cardNumber);
         }
 
-        if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_AMERICAN_EXPRESS)) {
+        if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_AMERICAN_EXPRESS)) {
             return Card.AMERICAN_EXPRESS;
-        } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DISCOVER)) {
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DISCOVER)) {
             return Card.DISCOVER;
-        } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_JCB)) {
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_JCB)) {
             return Card.JCB;
-        } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DINERS_CLUB)) {
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DINERS_CLUB)) {
             return Card.DINERS_CLUB;
-        } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_VISA)) {
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_VISA)) {
             return Card.VISA;
-        } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_MASTERCARD)) {
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_MASTERCARD)) {
             return Card.MASTERCARD;
-        } else if (StripeTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_UNIONPAY)) {
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_UNIONPAY)) {
             return Card.UNIONPAY;
         } else {
             return Card.UNKNOWN;

@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents a response from the Stripe servers.
+ * Represents a response from the Monri servers.
  */
-class StripeResponse {
+class MonriResponse {
 
     private String mResponseBody;
     private int mResponseCode;
@@ -21,7 +21,7 @@ class StripeResponse {
      * @param responseBody the body of the response
      * @param responseHeaders any headers associated with the response
      */
-    StripeResponse(
+    MonriResponse(
             int responseCode,
             String responseBody,
             @Nullable Map<String, List<String>> responseHeaders) {

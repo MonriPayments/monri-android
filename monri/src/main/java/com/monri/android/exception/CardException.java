@@ -5,7 +5,7 @@ package com.monri.android.exception;
  * Card errors are the most common type of error you should expect to handle.
  * They result when the user enters a card that can't be charged for some reason.
  */
-public class CardException extends StripeException {
+public class CardException extends MonriException {
 
     private String code;
     private String param;

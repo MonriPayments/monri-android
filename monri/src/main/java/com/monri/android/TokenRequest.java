@@ -14,4 +14,16 @@ public class TokenRequest {
         this.digest = digest;
         this.timestamp = timestamp;
     }
+
+    public String getToken() {
+        return token;
+    }
+
+    public String getDigest() {
+        return digest;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
 }

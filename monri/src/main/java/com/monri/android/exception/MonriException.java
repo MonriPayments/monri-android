@@ -1,22 +1,22 @@
 package com.monri.android.exception;
 
 /**
- * A base class for Stripe-related {@link Exception Exceptions}.
+ * A base class for Monri-related {@link Exception Exceptions}.
  */
-public abstract class StripeException extends Exception {
+public abstract class MonriException extends Exception {
 
     protected static final long serialVersionUID = 1L;
 
     private String requestId;
     private Integer statusCode;
 
-    public StripeException(String message, String requestId, Integer statusCode) {
+    public MonriException(String message, String requestId, Integer statusCode) {
         super(message, null);
         this.requestId = requestId;
         this.statusCode = statusCode;
     }
 
-    public StripeException(String message, String requestId, Integer statusCode, Throwable e) {
+    public MonriException(String message, String requestId, Integer statusCode, Throwable e) {
         super(message, e);
         this.statusCode = statusCode;
         this.requestId = requestId;

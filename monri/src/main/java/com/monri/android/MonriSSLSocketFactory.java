@@ -17,7 +17,7 @@ import javax.net.ssl.SSLSocketFactory;
  * Created by jasminsuljic on 2019-09-26.
  * MonriAndroid
  */
-class StripeSSLSocketFactory extends SSLSocketFactory {
+class MonriSSLSocketFactory extends SSLSocketFactory {
 
     private final SSLSocketFactory under;
     private final boolean tlsv11Supported;
@@ -29,7 +29,7 @@ class StripeSSLSocketFactory extends SSLSocketFactory {
     /**
      * Constructor for a socket factory instance.
      */
-    StripeSSLSocketFactory() {
+    MonriSSLSocketFactory() {
         this.under = HttpsURLConnection.getDefaultSSLSocketFactory();
 
         // For Android prior to 4.1, TLSv1.1 and TLSv1.2 might not be supported

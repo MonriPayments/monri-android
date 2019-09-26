@@ -7,7 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A helper class for parsing errors coming from Stripe servers.
+ * A helper class for parsing errors coming from Monri servers.
  */
 class ErrorParser {
 
@@ -24,27 +24,27 @@ class ErrorParser {
     private static final String FIELD_TYPE = "type";
 
     @NonNull
-    static StripeError parseError(String rawError) {
-        StripeError stripeError = new StripeError();
+    static MonriError parseError(String rawError) {
+        MonriError monriError = new MonriError();
         try {
             JSONObject jsonError = new JSONObject(rawError);
             JSONObject errorObject = jsonError.getJSONObject(FIELD_ERROR);
-            stripeError.charge = errorObject.optString(FIELD_CHARGE);
-            stripeError.code = errorObject.optString(FIELD_CODE);
-            stripeError.decline_code = errorObject.optString(FIELD_DECLINE_CODE);
-            stripeError.message = errorObject.optString(FIELD_MESSAGE);
-            stripeError.param = errorObject.optString(FIELD_PARAM);
-            stripeError.type = errorObject.optString(FIELD_TYPE);
+            monriError.charge = errorObject.optString(FIELD_CHARGE);
+            monriError.code = errorObject.optString(FIELD_CODE);
+            monriError.decline_code = errorObject.optString(FIELD_DECLINE_CODE);
+            monriError.message = errorObject.optString(FIELD_MESSAGE);
+            monriError.param = errorObject.optString(FIELD_PARAM);
+            monriError.type = errorObject.optString(FIELD_TYPE);
         } catch (JSONException jsonException) {
-            stripeError.message = MALFORMED_RESPONSE_MESSAGE;
+            monriError.message = MALFORMED_RESPONSE_MESSAGE;
         }
-        return stripeError;
+        return monriError;
     }
 
     /**
      * A model for error objects sent from the server.
      */
-    static class StripeError {
+    static class MonriError {
         public String type;
 
         public String message;

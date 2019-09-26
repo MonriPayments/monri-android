@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
-import com.monri.android.StripeTextUtils;
+import com.monri.android.MonriTextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * A set of JSON parsing utility functions.
  */
-public class StripeJsonUtils {
+public class MonriJsonUtils {
 
     private static final String EMPTY = "";
     private static final String NULL = "null";
@@ -402,7 +402,7 @@ public class StripeJsonUtils {
             @NonNull JSONObject jsonObject,
             @NonNull @Size(min = 1) String fieldName,
             @Nullable String value) {
-        if (!StripeTextUtils.isBlank(value)) {
+        if (!MonriTextUtils.isBlank(value)) {
             try {
                 jsonObject.put(fieldName, value);
             } catch (JSONException ignored) {

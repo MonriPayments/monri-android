@@ -4,7 +4,7 @@ package com.monri.android.exception;
 /**
  * An {@link Exception} indicating that invalid parameters were used in a request.
  */
-public class InvalidRequestException extends StripeException {
+public class InvalidRequestException extends MonriException {
 
     private final String param;
 
