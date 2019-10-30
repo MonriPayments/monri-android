@@ -3,6 +3,7 @@ package com.monri.android.example;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +27,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+
 public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SimpleDateFormat") private final DateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -33,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
     CardMultilineWidget widget;
 
     Button payButton;
+
+
+    ExampleApi exampleApi;
 
     public static Intent createIntent(Context context) {
         return new Intent(context, MainActivity.class);
@@ -48,8 +57,11 @@ public class MainActivity extends AppCompatActivity {
         widget = findViewById(R.id.card_multiline_widget);
         payButton = findViewById(R.id.pay_button);
 
+        ExampleModule module = new ExampleModule("https://mobile.webteh.hr/");
+        exampleApi = module.publicApi();
 
-//        TODO: replace with your merchant's authenticity token
+
+//        TODO: replace with your merchant's authenticity monriToken
         String authenticityToken = "6a13d79bde8da9320e88923cb3472fb638619ccb";
 //        TODO: replace with your merchant's merchant key
         final String merchantKey = "TestKeyXULLyvgWyPJSwOHe";
@@ -75,12 +87,11 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(Token token) {
                             submitTokenToBackend(token);
-                            Toast.makeText(MainActivity.this, String.format("Token successfully created\n%s", token.getId()), Toast.LENGTH_LONG).show();
                         }
 
                         @Override
                         public void onError(Exception exception) {
-                            Toast.makeText(MainActivity.this, exception.getMessage(), Toast.LENGTH_LONG).show();
+                            handleOrderFailure(exception);
                         }
                     });
                 }
@@ -90,7 +101,48 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void submitTokenToBackend(Token token) {
-        // Submit token to backend to charge card - authorization, purchase
+        // Submit monriToken to backend to charge card - authorization, purchase
+
+        //noinspection unused
+        final Disposable disposable = exampleApi
+                .order(new OrderRequest(token.getId(), UUID.randomUUID().toString()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<OrderResponse>() {
+                    @Override
+                    public void accept(OrderResponse orderResponse) throws Exception {
+                        handleOrderResponse(orderResponse);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        handleOrderFailure(throwable);
+                    }
+                });
+    }
+
+    void handleOrderResponse(OrderResponse orderResponse) {
+        final String status = orderResponse.getStatus();
+        switch (status) {
+            case OrderResponse.STATUS_ACTION_REQUIRED:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(orderResponse.getAction().getRedirectTo()));
+                startActivity(browserIntent);
+                break;
+            case OrderResponse.STATUS_APPROVED:
+                Toast.makeText(MainActivity.this, "Order approved", Toast.LENGTH_LONG).show();
+                break;
+            case OrderResponse.STATUS_DECLINED:
+                Toast.makeText(MainActivity.this, "Order declined", Toast.LENGTH_LONG).show();
+                break;
+            default:
+                Toast.makeText(MainActivity.this, String.format("Unknown status %s", status), Toast.LENGTH_LONG).show();
+                break;
+        }
+    }
+
+    void handleOrderFailure(Throwable throwable) {
+        throwable.printStackTrace();
+        Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_LONG).show();
     }
 
 
@@ -114,5 +166,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+
+        final Uri uri = intent.getData();
+        if (uri == null) {
+            return;
+        }
+//        monriapp://example.monri.com/transaction-result?order_number=$id
+        final String orderNumber = uri.getQueryParameter("order_number");
+        Toast.makeText(this, String.format("Received result for %s", orderNumber), Toast.LENGTH_LONG).show();
+        super.onNewIntent(intent);
     }
 }
