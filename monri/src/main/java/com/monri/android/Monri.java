@@ -14,8 +14,6 @@ import com.monri.android.model.Token;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import static com.monri.android.MonriNetworkUtils.hashMapFromCard;
-
 /**
  * Created by jasminsuljic on 2019-08-21.
  * MonriAndroidSDK
@@ -62,11 +60,12 @@ public final class Monri {
 
     public void createToken(@NonNull TokenRequest tokenRequest, @NonNull Card card, @NonNull final TokenCallback callback) {
 
-        mTokenCreator.create(
-                hashMapFromCard(card, tokenRequest, authenticityToken),
-                null,
-                callback);
-
+        try {
+            final CreateTokenRequest createTokenRequest = CreateTokenRequest.create(card, tokenRequest, authenticityToken);
+            mTokenCreator.create(createTokenRequest.toJson(), null, callback);
+        } catch (Exception e) {
+            callback.onError(e);
+        }
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {

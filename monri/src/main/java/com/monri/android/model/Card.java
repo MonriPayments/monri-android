@@ -90,6 +90,8 @@ public class Card {
     private String cvc;
     private Integer expMonth;
     private Integer expYear;
+    private boolean tokenizePan;
+
     @Size(4) private String last4;
     @CardBrand private String brand;
 
@@ -340,6 +342,15 @@ public class Card {
             return false;
         }
         return !ModelUtils.hasMonthPassed(expYear, expMonth, now);
+    }
+
+    public boolean isTokenizePan() {
+        return tokenizePan;
+    }
+
+    public Card setTokenizePan(boolean tokenizePan) {
+        this.tokenizePan = tokenizePan;
+        return this;
     }
 
     private String normalizeCardNumber(String number) {

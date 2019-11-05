@@ -79,9 +79,12 @@ public class MainActivity extends AppCompatActivity {
 
                 final Card card = widget.getCard();
 
+
                 if (card == null) {
                     Toast.makeText(MainActivity.this, "Card data invalid", Toast.LENGTH_LONG).show();
                 } else {
+
+                    card.setTokenizePan(true);
 
                     monri.createToken(tokenRequest, card, new TokenCallback() {
                         @Override

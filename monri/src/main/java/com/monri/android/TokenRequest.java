@@ -5,9 +5,9 @@ package com.monri.android;
  * MonriAndroidSDK
  */
 public class TokenRequest {
-    final String token;
-    final String digest;
-    final String timestamp;
+    private final String token;
+    private final String digest;
+    private final String timestamp;
 
     public TokenRequest(String token, String digest, String timestamp) {
         this.token = token;
