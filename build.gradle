@@ -4,6 +4,7 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
@@ -12,6 +13,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.1'
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
     }
 }
 
@@ -19,23 +21,19 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url "https://dl.bintray.com/jasminsuljic/MonriAndroid"
-        }
     }
 }
 
 ext {
     buildToolsVersion = "27.0.3"
-    compileSdkVersion = 27
+    compileSdkVersion = 28
     supportLibVersion = '28.0.0'
 
     javaAnnotationVersion = "1.0"
     junitVersion = "4.12"
     mockitoCoreVersion = "2.10.0"
     robolectricVersion = '4.3'
+    monriSdkVersion = '1.0.2'
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+

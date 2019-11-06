@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.monri.android.example"
@@ -30,7 +30,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.6.2'
 
 
-    implementation 'com.monri:monri-android:1.0.1'
+    implementation 'com.monri:monri-android:1.0.2'
 
     //Retrofit converters
     implementation 'com.squareup.retrofit2:converter-jackson:2.6.2'

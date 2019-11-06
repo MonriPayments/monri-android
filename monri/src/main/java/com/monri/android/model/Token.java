@@ -1,5 +1,6 @@
 package com.monri.android.model;
 
+
 import androidx.annotation.Nullable;
 
 import org.json.JSONException;
@@ -41,7 +42,7 @@ public class Token {
     }
 
     @Nullable
-    public static Token fromJson(@Nullable JSONObject jsonObject) {
+    private static Token fromJson(@Nullable JSONObject jsonObject) {
         if (jsonObject == null) {
             return null;
         }

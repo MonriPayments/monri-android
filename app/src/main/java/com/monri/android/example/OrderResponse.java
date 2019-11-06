@@ -1,5 +1,6 @@
 package com.monri.android.example;
 
+
 import androidx.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
