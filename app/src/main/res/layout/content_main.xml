@@ -14,10 +14,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <Button
+    <LinearLayout
         android:layout_width="match_parent"
-        android:text="PAY"
-        android:id="@+id/pay_button"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/content_main_cb_save_card_for_future_payments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/content_main_cb_txt_save_card_for_future_payments" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/content_main_btn_pay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/content_main_btn_pay" />
 
 </LinearLayout>

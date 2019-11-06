@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,8 +39,9 @@ public class MainActivity extends AppCompatActivity {
 
     CardMultilineWidget widget;
 
-    Button payButton;
+    Button btnPay;
 
+    CheckBox cbSaveCardForFuturePayments;
 
     ExampleApi exampleApi;
 
@@ -55,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         widget = findViewById(R.id.card_multiline_widget);
-        payButton = findViewById(R.id.pay_button);
+        btnPay = findViewById(R.id.content_main_btn_pay);
+        cbSaveCardForFuturePayments = findViewById(R.id.content_main_cb_save_card_for_future_payments);
 
         ExampleModule module = new ExampleModule("https://mobile.webteh.hr/");
         exampleApi = module.publicApi();
@@ -69,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 //        Step one - instantiate monri
         final Monri monri = new Monri(this.getApplicationContext(), authenticityToken);
 
-        payButton.setOnClickListener(new View.OnClickListener() {
+        btnPay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final String timestamp = isoFormat.format(new Date());
@@ -79,12 +82,11 @@ public class MainActivity extends AppCompatActivity {
 
                 final Card card = widget.getCard();
 
-
                 if (card == null) {
                     Toast.makeText(MainActivity.this, "Card data invalid", Toast.LENGTH_LONG).show();
                 } else {
 
-                    card.setTokenizePan(true);
+                    card.setTokenizePan(cbSaveCardForFuturePayments.isChecked());
 
                     monri.createToken(tokenRequest, card, new TokenCallback() {
                         @Override
