@@ -33,7 +33,7 @@ ext {
     junitVersion = "4.12"
     mockitoCoreVersion = "2.10.0"
     robolectricVersion = '4.3'
-    monriSdkVersion = '1.0.2'
+    monriSdkVersion = '1.0.3'
 }
 
 

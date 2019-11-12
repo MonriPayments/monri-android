@@ -83,6 +83,9 @@ class OrderResponse {
         @JsonProperty("order_number")
         String orderNumber;
 
+        @JsonProperty("pan_token")
+        String panToken;
+
         public Transaction() {
         }
 
@@ -104,6 +107,10 @@ class OrderResponse {
             return "Transaction{" + "status='" + status + '\'' +
                     ", orderNumber='" + orderNumber + '\'' +
                     '}';
+        }
+
+        public String getPanToken() {
+            return panToken;
         }
     }
 }

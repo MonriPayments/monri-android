@@ -3,4 +3,9 @@
     <string name="action_settings">Settings</string>
     <string name="content_main_btn_pay">PAY</string>
     <string name="content_main_cb_txt_save_card_for_future_payments">Save card for future payments</string>
+    <string name="btn_payment_with_new_card">Payment with new card</string>
+    <string name="btn_payment_with_saved_card">Payment with saved card</string>
+    <string name="pick_payment_method">Pick Payment Method</string>
+    <string name="btn_payment_method_1">VISA 440960******2830</string>
+    <string name="btn_payment_method_2">VISA 403530******4083</string>
 </resources>

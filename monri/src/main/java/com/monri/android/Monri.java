@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.exception.MonriException;
-import com.monri.android.model.Card;
+import com.monri.android.model.PaymentMethod;
 import com.monri.android.model.Token;
 
 import java.util.Map;
@@ -58,10 +58,10 @@ public final class Monri {
         this.authenticityToken = authenticityToken;
     }
 
-    public void createToken(@NonNull TokenRequest tokenRequest, @NonNull Card card, @NonNull final TokenCallback callback) {
+    public void createToken(@NonNull TokenRequest tokenRequest, @NonNull PaymentMethod paymentMethod, @NonNull final TokenCallback callback) {
 
         try {
-            final CreateTokenRequest createTokenRequest = CreateTokenRequest.create(card, tokenRequest, authenticityToken);
+            final CreateTokenRequest createTokenRequest = CreateTokenRequest.create(paymentMethod, tokenRequest, authenticityToken);
             mTokenCreator.create(createTokenRequest.toJson(), null, callback);
         } catch (Exception e) {
             callback.onError(e);

@@ -1,5 +1,6 @@
 package com.monri.android.model;
 
+import android.annotation.SuppressLint;
 import android.text.TextUtils;
 
 import androidx.annotation.IntRange;
@@ -17,11 +18,30 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.monri.android.MonriTextUtils.nullIfBlank;
+
 
 /**
  * A model object representing a Card in the Android SDK.
  */
-public class Card {
+public class Card extends PaymentMethod {
+
+    @Override
+    public String paymentMethodType() {
+        return PaymentMethod.TYPE_CARD;
+    }
+
+    @SuppressLint("DefaultLocale")
+    @Override
+    public Map<String, Object> data() {
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("pan", nullIfBlank(getNumber()));
+        data.put("expiration_date", String.format("%d%02d", getExpYear() - 2000, getExpMonth()));
+        data.put("cvv", nullIfBlank(getCVC()));
+        data.put("tokenize_pan", isTokenizePan());
+        return data;
+    }
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -279,7 +299,6 @@ public class Card {
     public void setExpYear(Integer expYear) {
         this.expYear = expYear;
     }
-
 
 
     /**

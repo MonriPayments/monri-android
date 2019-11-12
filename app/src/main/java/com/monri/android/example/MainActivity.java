@@ -28,11 +28,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
-
 public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SimpleDateFormat") private final DateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -43,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     CheckBox cbSaveCardForFuturePayments;
 
-    ExampleApi exampleApi;
+    OrderRepository orderRepository;
 
     public static Intent createIntent(Context context) {
         return new Intent(context, MainActivity.class);
@@ -60,17 +55,11 @@ public class MainActivity extends AppCompatActivity {
         btnPay = findViewById(R.id.content_main_btn_pay);
         cbSaveCardForFuturePayments = findViewById(R.id.content_main_cb_save_card_for_future_payments);
 
-        ExampleModule module = new ExampleModule("https://mobile.webteh.hr/");
-        exampleApi = module.publicApi();
 
-
-//        TODO: replace with your merchant's authenticity monriToken
-        String authenticityToken = "6a13d79bde8da9320e88923cb3472fb638619ccb";
-//        TODO: replace with your merchant's merchant key
-        final String merchantKey = "TestKeyXULLyvgWyPJSwOHe";
+        orderRepository = new OrderRepository(this);
 
 //        Step one - instantiate monri
-        final Monri monri = new Monri(this.getApplicationContext(), authenticityToken);
+        final Monri monri = new Monri(this.getApplicationContext(), orderRepository.authenticityToken());
 
         btnPay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 final String timestamp = isoFormat.format(new Date());
                 final String token = UUID.randomUUID().toString();
 
-                TokenRequest tokenRequest = new TokenRequest(token, MonriTextUtils.sha512HashInput(String.format("%s%s%s", merchantKey, token, timestamp)), timestamp);
+                TokenRequest tokenRequest = new TokenRequest(token, MonriTextUtils.sha512HashInput(String.format("%s%s%s", orderRepository.merchantKey(), token, timestamp)), timestamp);
 
                 final Card card = widget.getCard();
 
@@ -91,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                     monri.createToken(tokenRequest, card, new TokenCallback() {
                         @Override
                         public void onSuccess(Token token) {
-                            submitTokenToBackend(token);
+                            orderRepository.order(token);
                         }
 
                         @Override
@@ -103,46 +92,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    private void submitTokenToBackend(Token token) {
-        // Submit monriToken to backend to charge card - authorization, purchase
-
-        //noinspection unused
-        final Disposable disposable = exampleApi
-                .order(new OrderRequest(token.getId(), UUID.randomUUID().toString()))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<OrderResponse>() {
-                    @Override
-                    public void accept(OrderResponse orderResponse) throws Exception {
-                        handleOrderResponse(orderResponse);
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        handleOrderFailure(throwable);
-                    }
-                });
-    }
-
-    void handleOrderResponse(OrderResponse orderResponse) {
-        final String status = orderResponse.getStatus();
-        switch (status) {
-            case OrderResponse.STATUS_ACTION_REQUIRED:
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(orderResponse.getAction().getRedirectTo()));
-                startActivity(browserIntent);
-                break;
-            case OrderResponse.STATUS_APPROVED:
-                Toast.makeText(MainActivity.this, "Order approved", Toast.LENGTH_LONG).show();
-                break;
-            case OrderResponse.STATUS_DECLINED:
-                Toast.makeText(MainActivity.this, "Order declined", Toast.LENGTH_LONG).show();
-                break;
-            default:
-                Toast.makeText(MainActivity.this, String.format("Unknown status %s", status), Toast.LENGTH_LONG).show();
-                break;
-        }
     }
 
     void handleOrderFailure(Throwable throwable) {
