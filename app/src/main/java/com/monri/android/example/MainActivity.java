@@ -1,13 +1,11 @@
 package com.monri.android.example;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Toast;
@@ -16,21 +14,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.monri.android.Monri;
-import com.monri.android.MonriTextUtils;
 import com.monri.android.TokenCallback;
 import com.monri.android.TokenRequest;
 import com.monri.android.model.Card;
 import com.monri.android.model.Token;
 import com.monri.android.view.CardMultilineWidget;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
-
 public class MainActivity extends AppCompatActivity {
-
-    @SuppressLint("SimpleDateFormat") private final DateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     CardMultilineWidget widget;
 
@@ -40,8 +30,10 @@ public class MainActivity extends AppCompatActivity {
 
     OrderRepository orderRepository;
 
-    public static Intent createIntent(Context context) {
-        return new Intent(context, MainActivity.class);
+    public static Intent createIntent(Context context, PrepareTransactionResponse prepareTransactionResponse) {
+        final Intent intent = new Intent(context, MainActivity.class);
+        intent.putExtra("PREPARE_TRANSACTION_RESPONSE", prepareTransactionResponse);
+        return intent;
     }
 
     @Override
@@ -57,38 +49,37 @@ public class MainActivity extends AppCompatActivity {
 
 
         orderRepository = new OrderRepository(this);
-
-//        Step one - instantiate monri
         final Monri monri = new Monri(this.getApplicationContext(), orderRepository.authenticityToken());
 
-        btnPay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String timestamp = isoFormat.format(new Date());
-                final String token = UUID.randomUUID().toString();
+        final PrepareTransactionResponse prepareTransactionResponse = getIntent().getParcelableExtra("PREPARE_TRANSACTION_RESPONSE");
 
-                TokenRequest tokenRequest = new TokenRequest(token, MonriTextUtils.sha512HashInput(String.format("%s%s%s", orderRepository.merchantKey(), token, timestamp)), timestamp);
+        TokenRequest tokenRequest = new TokenRequest(prepareTransactionResponse.token, prepareTransactionResponse.digest, prepareTransactionResponse.timestamp);
 
-                final Card card = widget.getCard();
 
-                if (card == null) {
-                    Toast.makeText(MainActivity.this, "Card data invalid", Toast.LENGTH_LONG).show();
-                } else {
+        btnPay.setOnClickListener(v -> {
+            v.setEnabled(false);
 
-                    card.setTokenizePan(cbSaveCardForFuturePayments.isChecked());
+            final Card card = widget.getCard();
 
-                    monri.createToken(tokenRequest, card, new TokenCallback() {
-                        @Override
-                        public void onSuccess(Token token) {
-                            orderRepository.order(token);
-                        }
+            if (card == null) {
+                Toast.makeText(MainActivity.this, "Card data invalid", Toast.LENGTH_LONG).show();
+            } else {
 
-                        @Override
-                        public void onError(Exception exception) {
-                            handleOrderFailure(exception);
-                        }
-                    });
-                }
+                card.setTokenizePan(cbSaveCardForFuturePayments.isChecked());
+
+                monri.createToken(tokenRequest, card, new TokenCallback() {
+                    @Override
+                    public void onSuccess(Token token) {
+                        v.setEnabled(true);
+                        orderRepository.order(token);
+                    }
+
+                    @Override
+                    public void onError(Exception exception) {
+                        v.setEnabled(true);
+                        handleOrderFailure(exception);
+                    }
+                });
             }
         });
 

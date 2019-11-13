@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.monri.android.Monri;
-import com.monri.android.MonriTextUtils;
 import com.monri.android.TokenCallback;
 import com.monri.android.TokenRequest;
 import com.monri.android.model.SavedCard;
@@ -20,8 +18,6 @@ import com.monri.android.model.Token;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
 
 public class SavedCardPaymentActivity extends AppCompatActivity {
 
@@ -30,12 +26,13 @@ public class SavedCardPaymentActivity extends AppCompatActivity {
     public static Intent createIntent(Context context,
                                       String panToken,
                                       String maskedPan,
-                                      String cardType
-    ) {
+                                      String cardType,
+                                      PrepareTransactionResponse prepareTransactionResponse) {
         final Intent intent = new Intent(context, SavedCardPaymentActivity.class);
         intent.putExtra("PAN_TOKEN", panToken);
         intent.putExtra("MASKED_PAN", maskedPan);
         intent.putExtra("CARD_TYPE", cardType);
+        intent.putExtra("PREPARE_TRANSACTION_RESPONSE", prepareTransactionResponse);
         return intent;
     }
 
@@ -57,6 +54,10 @@ public class SavedCardPaymentActivity extends AppCompatActivity {
         final String maskedPan = intent.getStringExtra("MASKED_PAN");
         final String cardType = intent.getStringExtra("CARD_TYPE");
 
+        final PrepareTransactionResponse prepareTransactionResponse = getIntent().getParcelableExtra("PREPARE_TRANSACTION_RESPONSE");
+
+        TokenRequest tokenRequest = new TokenRequest(prepareTransactionResponse.token, prepareTransactionResponse.digest, prepareTransactionResponse.timestamp);
+
         orderRepository = new OrderRepository(this);
 
 
@@ -71,27 +72,19 @@ public class SavedCardPaymentActivity extends AppCompatActivity {
 //        Step one - instantiate monri
         final Monri monri = new Monri(this.getApplicationContext(), orderRepository.authenticityToken());
 
-        btnPay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String timestamp = isoFormat.format(new Date());
-                final String token = UUID.randomUUID().toString();
+        btnPay.setOnClickListener(v -> {
+            SavedCard savedCard = new SavedCard(panToken, etCvv.getText().toString());
+            monri.createToken(tokenRequest, savedCard, new TokenCallback() {
+                @Override
+                public void onSuccess(Token token) {
+                    orderRepository.order(token);
+                }
 
-                TokenRequest tokenRequest = new TokenRequest(token, MonriTextUtils.sha512HashInput(String.format("%s%s%s", orderRepository.merchantKey(), token, timestamp)), timestamp);
-
-                SavedCard savedCard = new SavedCard(panToken, etCvv.getText().toString());
-                monri.createToken(tokenRequest, savedCard, new TokenCallback() {
-                    @Override
-                    public void onSuccess(Token token) {
-                        orderRepository.order(token);
-                    }
-
-                    @Override
-                    public void onError(Exception exception) {
-                        orderRepository.handleOrderFailure(exception);
-                    }
-                });
-            }
+                @Override
+                public void onError(Exception exception) {
+                    orderRepository.handleOrderFailure(exception);
+                }
+            });
         });
     }
 }

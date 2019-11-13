@@ -9,9 +9,9 @@ import com.monri.android.model.Token;
 
 import java.util.UUID;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -34,26 +34,16 @@ public class OrderRepository {
                 .order(new OrderRequest(token.getId(), UUID.randomUUID().toString()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<OrderResponse>() {
-                    @Override
-                    public void accept(OrderResponse orderResponse) throws Exception {
-                        handleOrderResponse(orderResponse);
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        handleOrderFailure(throwable);
-                    }
-                });
+                .subscribe(this::handleOrderResponse, this::handleOrderFailure);
     }
 
-
-    //        TODO: replace with your merchant's merchant key
-    String merchantKey() {
-        return "TestKeyXULLyvgWyPJSwOHe";
+    Single<PrepareTransactionResponse> prepareTransaction() {
+        return exampleApi.prepareTransaction()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
-    //        TODO: replace with your merchant's authenticity monriToken
+    //        TODO: replace with your merchant's authenticity token
     String authenticityToken() {
         return "6a13d79bde8da9320e88923cb3472fb638619ccb";
     }
