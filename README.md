@@ -95,7 +95,7 @@ if (!card.validateCard()) {
 ```
 You can also simply take the data from a `CardInputWidget`.
 
-```
+```java
 // Remember that the card object will be null if the user inputs invalid data.
 Card card = cardInputWidget.getCard();
 if (card == null) {
@@ -105,7 +105,7 @@ if (card == null) {
 However you create your `Card` object, you can now use it to collect payment.
 ### Tokens api
 
-```
+```java
 final Monri monri = new Monri(
     getContext(),
     "authenticity_token",
@@ -119,18 +119,19 @@ final TokenRequest tokenRequest = new TokenRequest(
 
 monri.createToken(
 	tokenRequest,
-    card,
-    new TokenCallback() {
-        public void onSuccess(@NonNull Token token) {
-          // Send token to your server
-        }
+    	card,
+    	new TokenCallback() {
+        	public void onSuccess(@NonNull Token token) {
+	        // Send token to your server
+        	}
 
-        public void onError(@NonNull Exception error) {
-            // Show localized error message
-            Toast.makeText(getContext(),
-                error.getLocalizedString(),
-                Toast.LENGTH_LONG
-            ).show();
+	        public void onError(@NonNull Exception error) {
+	        // Show localized error message
+            	Toast.makeText(
+			getContext(),
+                	error.getLocalizedString(),
+                	Toast.LENGTH_LONG
+            	).show();
         }
     }
 )
