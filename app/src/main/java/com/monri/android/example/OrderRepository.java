@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.widget.Toast;
 
+import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.Token;
 
 import java.util.UUID;
@@ -25,7 +26,8 @@ public class OrderRepository {
 
     public OrderRepository(Context context) {
         this.context = context;
-        ExampleModule module = new ExampleModule("https://mobile.webteh.hr/");
+        String url = "https://mobile.webteh.hr/";
+        ExampleModule module = new ExampleModule(url);
         exampleApi = module.publicApi();
     }
 
@@ -43,9 +45,23 @@ public class OrderRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    Single<NewPaymentResponse> createPayment() {
+        return createPayment(false);
+    }
+
+    Single<NewPaymentResponse> createPayment(boolean addPaymentMethod) {
+        return exampleApi.createPaymentSession(new NewPaymentRequest(addPaymentMethod))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     //        TODO: replace with your merchant's authenticity token
     String authenticityToken() {
         return "6a13d79bde8da9320e88923cb3472fb638619ccb";
+    }
+
+    MonriApiOptions monriApiOptions() {
+        return MonriApiOptions.create(authenticityToken(), true);
     }
 
     void handleOrderResponse(OrderResponse orderResponse) {

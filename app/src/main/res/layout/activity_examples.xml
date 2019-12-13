@@ -18,4 +18,10 @@
         android:layout_height="wrap_content"
         android:text="@string/btn_payment_with_saved_card" />
 
+    <Button
+        android:id="@+id/btn_payment_session_create"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_payment_session_create" />
+
 </LinearLayout>

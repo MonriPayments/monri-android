@@ -22,7 +22,7 @@ final class CreateTokenRequest {
     private final String token;
     private final PaymentMethod paymentMethod;
 
-    private CreateTokenRequest(String authenticityToken, String tempCardId, String timestamp, String digest, String token, Map<String, Object> data, PaymentMethod paymentMethod) {
+    private CreateTokenRequest(String authenticityToken, String tempCardId, String timestamp, String digest, String token, PaymentMethod paymentMethod) {
         this.authenticityToken = authenticityToken;
         this.tempCardId = tempCardId;
         this.timestamp = timestamp;
@@ -35,15 +35,13 @@ final class CreateTokenRequest {
     @SuppressLint("DefaultLocale")
     static CreateTokenRequest create(PaymentMethod paymentMethod, TokenRequest tokenRequest, String authenticityToken) {
 
-        final Map<String, Object> data = paymentMethod.data();
-
         return new CreateTokenRequest(
                 authenticityToken,
                 nullIfBlank(tokenRequest.getToken()),
                 nullIfBlank(tokenRequest.getTimestamp()),
                 tokenRequest.getDigest(),
                 tokenRequest.getToken(),
-                data, paymentMethod);
+                paymentMethod);
     }
 
     Map<String, Object> toJson() {

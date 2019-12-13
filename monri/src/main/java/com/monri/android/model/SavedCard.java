@@ -33,8 +33,8 @@ public final class SavedCard extends PaymentMethod {
     }
 
     @Override
-    public Map<String, Object> data() {
-        final HashMap<String, Object> data = new HashMap<>();
+    public Map<String, String> data() {
+        final HashMap<String, String> data = new HashMap<>();
         data.put("cvv", cvv);
         data.put("pan_token", panToken);
         return data;

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".PaymentActivity">
+
+    <Button
+        android:id="@+id/btn_payment_example"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_payment_example" />
+
+    <Button
+        android:id="@+id/btn_payment_example_3ds1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_payment_example_3ds1" />
+
+    <Button
+        android:id="@+id/btn_add_payment_method_example"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_add_payment_method_example" />
+
+    <Button
+        android:id="@+id/btn_add_payment_method_example_3ds1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_add_payment_method_example_3ds1" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:id="@+id/txt_result_payment_example"
+        android:layout_weight="1"
+        android:padding="20dp"
+        android:gravity="center"
+        tools:text="jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text"
+        android:layout_height="0dp"/>
+
+
+</LinearLayout>

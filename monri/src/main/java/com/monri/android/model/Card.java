@@ -33,15 +33,16 @@ public class Card extends PaymentMethod {
 
     @SuppressLint("DefaultLocale")
     @Override
-    public Map<String, Object> data() {
-        Map<String, Object> data = new HashMap<>();
+    public Map<String, String> data() {
+        Map<String, String> data = new HashMap<>();
 
         data.put("pan", nullIfBlank(getNumber()));
         data.put("expiration_date", String.format("%d%02d", getExpYear() - 2000, getExpMonth()));
         data.put("cvv", nullIfBlank(getCVC()));
-        data.put("tokenize_pan", isTokenizePan());
+        data.put("tokenize_pan", Boolean.toString(isTokenizePan()));
         return data;
     }
+
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({

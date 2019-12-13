@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         orderRepository = new OrderRepository(this);
-        final Monri monri = new Monri(this.getApplicationContext(), orderRepository.authenticityToken());
+        final Monri monri = new Monri(this.getApplicationContext(), orderRepository.monriApiOptions());
 
         final PrepareTransactionResponse prepareTransactionResponse = getIntent().getParcelableExtra("PREPARE_TRANSACTION_RESPONSE");
 
