@@ -12,7 +12,10 @@ import java.util.Map;
  */
 public enum PaymentStatus {
 
-    APPROVED("approved"), DECLINED("declined"), ACTION_REQUIRED("action_required");
+    APPROVED("approved"),
+    EXECUTED("executed"),
+    DECLINED("declined"),
+    ACTION_REQUIRED("action_required"); // pending
 
     private final String status;
 
@@ -20,6 +23,7 @@ public enum PaymentStatus {
 
     static {
         namesMap.put("approved", APPROVED);
+        namesMap.put("executed", EXECUTED);
         namesMap.put("declined", DECLINED);
         namesMap.put("action_required", ACTION_REQUIRED);
     }

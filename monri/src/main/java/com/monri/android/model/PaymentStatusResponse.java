@@ -13,11 +13,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class PaymentStatusResponse implements Parcelable {
 
-    @JsonProperty("executed")
-    boolean executed;
 
-    @JsonProperty("pending")
-    boolean pending;
+    @JsonProperty("payment_status")
+    PaymentStatus paymentStatus;
+
+    @JsonProperty("status")
+    String status;
 
     @Nullable
     @JsonProperty("payment_result")
@@ -27,25 +28,10 @@ public class PaymentStatusResponse implements Parcelable {
     public PaymentStatusResponse() {
     }
 
-    public PaymentStatusResponse(boolean executed, boolean pending, @Nullable PaymentResult paymentResult) {
-        this.executed = executed;
-        this.pending = pending;
-        this.paymentResult = paymentResult;
-    }
-
-    public boolean isExecuted() {
-        return executed;
-    }
-
-    public boolean isPending() {
-        return pending;
-    }
-
     @Nullable
     public PaymentResult getPaymentResult() {
         return paymentResult;
     }
-
 
 
     @Override
@@ -55,14 +41,15 @@ public class PaymentStatusResponse implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte(this.executed ? (byte) 1 : (byte) 0);
-        dest.writeByte(this.pending ? (byte) 1 : (byte) 0);
+        dest.writeInt(this.paymentStatus == null ? -1 : this.paymentStatus.ordinal());
+        dest.writeString(this.status);
         dest.writeParcelable(this.paymentResult, flags);
     }
 
     protected PaymentStatusResponse(Parcel in) {
-        this.executed = in.readByte() != 0;
-        this.pending = in.readByte() != 0;
+        int tmpPaymentStatus = in.readInt();
+        this.paymentStatus = tmpPaymentStatus == -1 ? null : PaymentStatus.values()[tmpPaymentStatus];
+        this.status = in.readString();
         this.paymentResult = in.readParcelable(PaymentResult.class.getClassLoader());
     }
 

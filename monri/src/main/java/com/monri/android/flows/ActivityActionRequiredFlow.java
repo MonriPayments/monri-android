@@ -3,12 +3,16 @@ package com.monri.android.flows;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.widget.ProgressBar;
 
 import com.monri.android.MonriApi;
 import com.monri.android.ResultCallback;
+import com.monri.android.logger.MonriLogger;
+import com.monri.android.logger.MonriLoggerFactory;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.model.PaymentStatusParams;
@@ -31,6 +35,10 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
     private final AtomicInteger atomicInteger = new AtomicInteger();
     private final PaymentAuthWebViewClient client;
+    private final MonriLogger logger = MonriLoggerFactory.get(ActivityActionRequiredFlow.class);
+
+
+    private InvokationState invokationState = InvokationState.CALLBACK_NOT_INVOKED;
 
     @SuppressLint("SetJavaScriptEnabled")
     public ActivityActionRequiredFlow(Activity activity, PaymentAuthWebView webView, ProgressBar progressBar, MonriApi monriApi) {
@@ -39,7 +47,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
         this.progressBar = progressBar;
         this.monriApi = monriApi;
         webView.setWebChromeClient(new WebChromeClient());
-        client = new PaymentAuthWebViewClient(PaymentAuthWebViewClient.Delegate.loggerProxy(this));
+        client = new PaymentAuthWebViewClient(this);
         webView.setWebViewClient(client);
         // TODO: investigate XSS vulnerability
         webView.getSettings().setJavaScriptEnabled(true);
@@ -47,37 +55,83 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
     @Override
     public void handleResult(ConfirmPaymentResponse confirmPaymentResponse) {
-        webView.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
-        client.setAcsUrl(confirmPaymentResponse.getActionRequired().getAcsUrl());
-        webView.loadUrl(confirmPaymentResponse.getActionRequired().getRedirectTo());
+
+        executeIfStatus(InvokationState.CALLBACK_NOT_INVOKED, InvokationState.HANDLE_RESULT, () -> {
+            final String acsUrl = confirmPaymentResponse.getActionRequired().getAcsUrl();
+            logger.info("Handle result invoked with acsUrl = [%s]", acsUrl);
+            client.setAcsUrl(acsUrl);
+            executeOnUiThread(() -> {
+                webView.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
+                webView.loadUrl(confirmPaymentResponse.getActionRequired().getRedirectTo());
+            });
+        });
     }
 
     @Override
     public void threeDs1Result(String status, String clientSecret) {
-        atomicInteger.set(0);
-        progressBar.setVisibility(View.INVISIBLE);
-        webView.setVisibility(View.GONE);
 
-        checkPaymentStatus(clientSecret, atomicInteger.incrementAndGet());
+        executeIfStatus(InvokationState.ACS_AUTHENTICATION_FINISHED, InvokationState.THREE_DS_RESULT, () -> {
+            logger.info("ThreeDs1Result, status = %s, clientSecret = %s", status, clientSecret);
+            atomicInteger.set(0);
+            executeOnUiThread(() -> {
+                progressBar.setVisibility(View.INVISIBLE);
+                webView.setVisibility(View.GONE);
+            });
+
+            checkPaymentStatus(clientSecret, atomicInteger.incrementAndGet());
+        });
+
     }
 
     @Override
     public void redirectingToAcs() {
-        webView.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
+
+        executeIfStatus(InvokationState.HANDLE_RESULT, InvokationState.REDIRECTING_TO_ACS, () -> {
+            logger.info("redirectingToAcs");
+            executeOnUiThread(() -> {
+                webView.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
+            });
+        });
     }
 
     @Override
     public void acsLoadFinished() {
-        webView.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.INVISIBLE);
+        executeIfStatus(InvokationState.REDIRECTING_TO_ACS, InvokationState.ACS_LOAD_FINISHED, () -> {
+            logger.info("acsLoadFinished");
+            executeOnUiThread(() -> {
+                webView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.INVISIBLE);
+            });
+        });
     }
 
     @Override
     public void acsAuthenticationFinished() {
-        webView.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
+        executeIfStatus(InvokationState.ACS_LOAD_FINISHED, InvokationState.ACS_AUTHENTICATION_FINISHED, () -> {
+            logger.info("acsAuthenticationFinished");
+            executeOnUiThread(() -> {
+                webView.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
+            });
+        });
+
+    }
+
+
+    private void executeIfStatus(InvokationState state, InvokationState newState, Runnable runnable) {
+        if (invokationState != state) {
+            logger.warn("Tried changing to state = [%s] from state [%s], currentState = [%s]", newState.name(), state.name(), invokationState.name());
+        } else {
+            this.invokationState = newState;
+            runnable.run();
+        }
+    }
+
+    private void executeOnUiThread(Runnable runnable) {
+        // Code here will run in UI thread
+        new Handler(Looper.getMainLooper()).post(runnable);
     }
 
     private void checkPaymentStatus(String clientSecret, int count) {
@@ -92,16 +146,10 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
             monriApi.paymentStatus(new PaymentStatusParams(clientSecret), new ResultCallback<PaymentStatusResponse>() {
                 @Override
                 public void onSuccess(PaymentStatusResponse result) {
-
-                    if (result.isPending()) {
-                        // TODO: log this case, should not happen
-                        checkPaymentStatus(clientSecret, atomicInteger.incrementAndGet());
-                    } else {
-                        Intent intent = new Intent();
-                        intent.putExtra(PaymentResult.BUNDLE_NAME, result.getPaymentResult());
-                        activity.setResult(Activity.RESULT_OK, intent);
-                        activity.finish();
-                    }
+                    Intent intent = new Intent();
+                    intent.putExtra(PaymentResult.BUNDLE_NAME, result.getPaymentResult());
+                    activity.setResult(Activity.RESULT_OK, intent);
+                    activity.finish();
                 }
 
                 @Override
@@ -110,6 +158,16 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
                 }
             });
         }
-
     }
+
+    enum InvokationState {
+        CALLBACK_NOT_INVOKED,
+        THREE_DS_RESULT,
+        REDIRECTING_TO_ACS,
+        ACS_LOAD_FINISHED,
+        ACS_AUTHENTICATION_FINISHED,
+        HANDLE_RESULT
+    }
+
+
 }

@@ -11,11 +11,16 @@ class MonriLoggerImpl implements MonriLogger {
     private final String tag;
 
     MonriLoggerImpl(Class targetClass) {
-        this.tag = targetClass.getName().substring(0, 24);
+        this.tag = targetClass.getSimpleName().substring(0, 24);
     }
 
     @Override
     public void info(String message, Object... args) {
+        Log.i(tag, String.format(message, args));
+    }
+
+    @Override
+    public void trace(String message, Object... args) {
         Log.i(tag, String.format(message, args));
     }
 

@@ -54,32 +54,32 @@ public class PaymentAuthWebViewClient extends WebViewClient {
         super.onPageFinished(view, url);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Nullable
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+        loadingUrlChange(request.getUrl(), true);
+        return super.shouldInterceptRequest(view, request);
+    }
+
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        loadingUrlChange(Uri.parse(url));
+        loadingUrlChange(Uri.parse(url), true);
         return super.shouldInterceptRequest(view, url);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        loadingUrlChange(request.getUrl());
+        loadingUrlChange(request.getUrl(), false);
         return super.shouldOverrideUrlLoading(view, request);
     }
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        loadingUrlChange(Uri.parse(url));
+        loadingUrlChange(Uri.parse(url), false);
         return super.shouldOverrideUrlLoading(view, url);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @Nullable
-    @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        loadingUrlChange(request.getUrl());
-        return super.shouldInterceptRequest(view, request);
     }
 
     public void setAcsUrl(String acsHost) {
@@ -87,26 +87,29 @@ public class PaymentAuthWebViewClient extends WebViewClient {
     }
 
 
-    private void loadingUrlChange(Uri uri) {
+    private void loadingUrlChange(Uri uri, boolean interceptedRequest) {
         final String url = uri.toString();
-        logger.info("loadingUrlChange, url changed = {%s}", url);
+
 
         if (!validateHost(url)) {
             Log.d("PaymentAuthWebClient", "Host validation failed");
             return;
         }
 
-        if (url.contains("/client_redirect")) {
-            delegate.redirectingToAcs();
-        } else if (url.contains("/client_return")) {
-            delegate.acsAuthenticationFinished();
-        } else if (url.contains("v2/payment/hooks/3ds1")) {
-            delegate.threeDs1Result(uri.getQueryParameter("status"), uri.getQueryParameter("client_secret"));
+        if (interceptedRequest) {
+            logger.trace("intercepted url [%s]", url);
+            if (url.contains("/client_redirect")) {
+                delegate.redirectingToAcs();
+            } else if (url.contains("/client_return")) {
+                delegate.acsAuthenticationFinished();
+            }
         } else {
-            // TODO: log? unknown urls?
+            logger.trace("shouldOverrideUrlLoading url = [%s]", url);
+            if (url.contains("v2/payment/hooks/3ds1")) {
+                delegate.threeDs1Result(uri.getQueryParameter("status"), uri.getQueryParameter("client_secret"));
+            }
         }
     }
-
 
 
     private boolean validateHost(String url) {
@@ -133,8 +136,5 @@ public class PaymentAuthWebViewClient extends WebViewClient {
 
         void acsAuthenticationFinished();
 
-        static Delegate loggerProxy(Delegate delegate) {
-            return new PaymentAuthWebViewClientDelegateProxy(delegate);
-        }
     }
 }
