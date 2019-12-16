@@ -7,5 +7,5 @@ package com.monri.android;
 public class MonriConfig {
 //    public static final String TEST_ENV_HOST = "http://10.0.2.2:3000/";
     public static final String TEST_ENV_HOST = "https://ipgtest.monri.com";
-    public static final String MONRI_HOST = "https://ipg.monri.com/";
+    public static final String PROD_ENV_HOST = "https://ipg.monri.com/";
 }

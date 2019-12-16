@@ -11,14 +11,11 @@ import android.webkit.WebViewClient;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.monri.android.BuildConfig;
 import com.monri.android.logger.MonriLogger;
 import com.monri.android.logger.MonriLoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static com.monri.android.MonriConfig.TEST_ENV_HOST;
 
 /**
  * Created by jasminsuljic on 2019-12-08.
@@ -30,8 +27,7 @@ public class PaymentAuthWebViewClient extends WebViewClient {
             "https://ipgtest.monri.com",
             "https://ipg.monri.com",
             "https://ipgtest.webteh.hr",
-            "https://ipg.webteh.hr",
-            BuildConfig.DEBUG ? TEST_ENV_HOST : null
+            "https://ipg.webteh.hr"
     );
 
     private final Delegate delegate;

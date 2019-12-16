@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -28,7 +27,7 @@ import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-import static com.monri.android.MonriConfig.MONRI_HOST;
+import static com.monri.android.MonriConfig.PROD_ENV_HOST;
 import static com.monri.android.MonriConfig.TEST_ENV_HOST;
 
 /**
@@ -86,8 +85,7 @@ public final class Monri {
 
         Converter.Factory converterFactory = JacksonConverterFactory.create(mapper);
 
-        //                TODO: how to parametrize this?
-        String url = Build.FINGERPRINT.contains("generic") ? TEST_ENV_HOST : MONRI_HOST;
+        String url = monriApiOptions.isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
 
         final OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
 
