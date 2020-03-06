@@ -15,6 +15,7 @@ import com.monri.android.R;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,15 +47,15 @@ public class Card extends PaymentMethod {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-                       AMERICAN_EXPRESS,
-                       DISCOVER,
-                       JCB,
-                       DINERS_CLUB,
-                       VISA,
-                       MASTERCARD,
-                       UNIONPAY,
-                       UNKNOWN
-               })
+            AMERICAN_EXPRESS,
+            DISCOVER,
+            JCB,
+            DINERS_CLUB,
+            VISA,
+            MASTERCARD,
+            UNIONPAY,
+            UNKNOWN
+    })
     public @interface CardBrand {
     }
 
@@ -112,9 +113,12 @@ public class Card extends PaymentMethod {
     private Integer expMonth;
     private Integer expYear;
     private boolean tokenizePan;
+    private Map<String, Object> metaData;
 
-    @Size(4) private String last4;
-    @CardBrand private String brand;
+    @Size(4)
+    private String last4;
+    @CardBrand
+    private String brand;
 
     /**
      * Converts an unchecked String value to a {@link CardBrand} or {@code null}.
@@ -156,17 +160,204 @@ public class Card extends PaymentMethod {
      * @param expYear  the expiry year
      * @param cvc      the CVC code
      */
-    public Card(
+    private Card(
             String number,
             Integer expMonth,
             Integer expYear,
             String cvc) {
+
+        this(number, expMonth, expYear, cvc, new HashMap<>());
+    }
+
+    /**
+     * @param number   the card number
+     * @param expMonth the expiry month
+     * @param expYear  the expiry year
+     * @param cvc      the CVC code
+     * @param metaData additional data for name, zip, address, country, email
+     */
+    private Card(String number,
+                 Integer expMonth,
+                 Integer expYear,
+                 String cvc,
+                 Map<String, Object> metaData) {
         this.number = MonriTextUtils.nullIfBlank(normalizeCardNumber(number));
         this.expMonth = expMonth;
         this.expYear = expYear;
         this.cvc = MonriTextUtils.nullIfBlank(cvc);
         this.brand = getBrand();
         this.last4 = MonriTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
+        this.metaData = metaData;
+    }
+
+    /**
+     * Builder class for Card model
+     */
+    public static class CardBuilder {
+
+        private final Map<String, Object> metaData;
+        private final Card card;
+
+        /**
+         * @param number   the credit card number
+         * @param expMonth the expiry month, as an integer value between 1 and 12
+         * @param expYear  expiry year
+         * @param cvc      the card CVC number
+         * @param metaData additional data for name, zip, address, country, email
+         */
+        private CardBuilder(final String number,
+                            final Integer expMonth,
+                            final Integer expYear,
+                            final String cvc,
+                            Map<String, Object> metaData) {
+
+            this.metaData = new HashMap<>(metaData);
+            this.card = new Card(number, expMonth, expYear, cvc);
+        }
+
+        public CardBuilder name(final String name) {
+            this.metaData.put(AdditionalData.FULL_NAME.getFieldName(), name);
+            return this;
+        }
+
+        public Object getName() {
+            return metaData.get(AdditionalData.FULL_NAME.getFieldName());
+        }
+
+        public CardBuilder address(final String address) {
+            this.metaData.put(AdditionalData.ADDRESS.getFieldName(), address);
+            return this;
+        }
+
+        public Object getAddress() {
+            return metaData.get(AdditionalData.ADDRESS.getFieldName());
+        }
+
+        public Object getCity() {
+            return metaData.get(AdditionalData.CITY.getFieldName());
+        }
+
+        public CardBuilder city(final String city) {
+            this.metaData.put(AdditionalData.CITY.getFieldName(), city);
+            return this;
+        }
+
+        public CardBuilder zip(final String zip) {
+            this.metaData.put(AdditionalData.ZIP.getFieldName(), zip);
+            return this;
+        }
+
+        public Object getZip() {
+            return metaData.get(AdditionalData.ZIP.getFieldName());
+        }
+
+        public CardBuilder country(final String country) {
+            this.metaData.put(AdditionalData.COUNTRY.getFieldName(), country);
+            return this;
+        }
+
+        public Object getCountry() {
+            return metaData.get(AdditionalData.COUNTRY.getFieldName());
+        }
+
+        public Object getPhone() {
+            return metaData.get(AdditionalData.PHONE.getFieldName());
+        }
+
+        public CardBuilder phone(final String phone) {
+            this.metaData.put(AdditionalData.PHONE.getFieldName(), phone);
+            return this;
+        }
+
+        public CardBuilder email(final String email) {
+            this.metaData.put(AdditionalData.EMAIL.getFieldName(), email);
+            return this;
+        }
+
+        public Object getEmail() {
+            return metaData.get(AdditionalData.EMAIL.getFieldName());
+        }
+
+        public CardBuilder metaData(Map<String, Object> metaData) {
+            this.metaData.put(AdditionalData.META_DATA.getFieldName(), metaData);
+            return this;
+        }
+
+
+        public Map<String, Object> getMetaData() {
+            //noinspection unchecked
+            return Collections.unmodifiableMap((Map<String, Object>) metaData.get(AdditionalData.META_DATA.getFieldName()));
+        }
+
+        public boolean validate() {
+
+            return card.validateCard(Calendar.getInstance()) && validateMetaData();
+
+        }
+
+        /**
+         * Checks whether or not additional data is valid
+         *
+         * @return 'true' if all additional data is valid, 'false' otherwise
+         */
+        private boolean validateMetaData() {
+
+            for (String metaDataKey : metaData.keySet()) {
+                final Object metaDataValue = metaData.get(metaDataKey);
+
+                if (metaDataValue == null) {
+                    return false;
+                }
+
+                final AdditionalData additionalData = AdditionalData.fromValue(metaDataKey);
+
+                if (!additionalData.isValid(metaDataValue)) {
+                    return false;
+                }
+            }
+
+            return true;
+
+        }
+
+        /**
+         * @return Card instance
+         */
+        public Card build() {
+            card.setMetaData(this.metaData);
+            return card;
+        }
+
+    }
+
+    /**
+     * @return a CardBuilder populated with the fields of this Card instance
+     */
+    public CardBuilder toBuilder() {
+        return new CardBuilder(number, expMonth, expYear, cvc, metaData);
+    }
+
+    /**
+     * @param number   the card number
+     * @param expMonth the expiry month
+     * @param expYear  the expiry year
+     * @param cvc      the CVC code
+     * @return Card object with populated fields
+     */
+    public static Card create(final String number,
+                              final Integer expMonth,
+                              final Integer expYear,
+                              final String cvc) {
+        return new CardBuilder(number, expMonth, expYear, cvc, new HashMap<>())
+                .build();
+    }
+
+    private void setMetaData(final Map<String, Object> metaData) {
+        this.metaData = metaData;
+    }
+
+    public Map<String, Object> getMetaData() {
+        return Collections.unmodifiableMap(metaData);
     }
 
     /**
