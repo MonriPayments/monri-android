@@ -21,24 +21,24 @@ public class CardTest {
         final Card card2 = card1.toBuilder().zip("71000").build();
 
         //card should have null ip and country
-        Assert.assertNull(card.getMetaData().get(AdditionalData.COUNTRY.getFieldName()));
-        Assert.assertNull(card.getMetaData().get(AdditionalData.ZIP.getFieldName()));
+        Assert.assertNull(card.getData().get(AdditionalData.COUNTRY.getFieldName()));
+        Assert.assertNull(card.getData().get(AdditionalData.ZIP.getFieldName()));
 
         //card1 should have only country set
-        Assert.assertNull(card1.getMetaData().get(AdditionalData.ZIP.getFieldName()));
-        Assert.assertEquals("BIH", card1.getMetaData().get(AdditionalData.COUNTRY.getFieldName()));
+        Assert.assertNull(card1.getData().get(AdditionalData.ZIP.getFieldName()));
+        Assert.assertEquals("BIH", card1.getData().get(AdditionalData.COUNTRY.getFieldName()));
 
         //card2 should have zip and country
-        Assert.assertEquals("BIH", card2.getMetaData().get(AdditionalData.COUNTRY.getFieldName()));
-        Assert.assertEquals("71000", card2.getMetaData().get(AdditionalData.ZIP.getFieldName()));
+        Assert.assertEquals("BIH", card2.getData().get(AdditionalData.COUNTRY.getFieldName()));
+        Assert.assertEquals("71000", card2.getData().get(AdditionalData.ZIP.getFieldName()));
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testMetaDataImmutable() {
+    public void testDataImmutable() {
         final Card exampleCard = createExampleCard();
-        exampleCard.getMetaData().put(AdditionalData.ZIP.getFieldName(), "71000");
+        exampleCard.getData().put(AdditionalData.ZIP.getFieldName(), "71000");
 
-        Assert.assertNull(exampleCard.getMetaData().get(AdditionalData.ZIP.getFieldName()));
+        Assert.assertNull(exampleCard.getData().get(AdditionalData.ZIP.getFieldName()));
     }
 
     @Test
@@ -48,8 +48,8 @@ public class CardTest {
 
         final Card modifiedCard = exampleCard.toBuilder().name(name).build();
 
-        Assert.assertNull(exampleCard.getMetaData().get(AdditionalData.FULL_NAME.getFieldName()));
-        Assert.assertEquals(name, modifiedCard.getMetaData().get(AdditionalData.FULL_NAME.getFieldName()));
+        Assert.assertNull(exampleCard.getData().get(AdditionalData.FULL_NAME.getFieldName()));
+        Assert.assertEquals(name, modifiedCard.getData().get(AdditionalData.FULL_NAME.getFieldName()));
 
         Assert.assertTrue(modifiedCard.toBuilder().validate());
         Assert.assertTrue(exampleCard.validateCard());
@@ -66,8 +66,8 @@ public class CardTest {
                 .address(address)
                 .build();
 
-        Assert.assertEquals(address, modifiedCard.getMetaData().get(AdditionalData.ADDRESS.getFieldName()));
-        Assert.assertNull(exampleCard.getMetaData().get(AdditionalData.ADDRESS.getFieldName()));
+        Assert.assertEquals(address, modifiedCard.getData().get(AdditionalData.ADDRESS.getFieldName()));
+        Assert.assertNull(exampleCard.getData().get(AdditionalData.ADDRESS.getFieldName()));
 
         Assert.assertTrue(modifiedCard.toBuilder().validate());
         Assert.assertTrue(exampleCard.validateCard());
@@ -83,8 +83,8 @@ public class CardTest {
                 .city(city)
                 .build();
 
-        Assert.assertEquals(city, modifiedCard.getMetaData().get(AdditionalData.CITY.getFieldName()));
-        Assert.assertNull(exampleCard.getMetaData().get(AdditionalData.CITY.getFieldName()));
+        Assert.assertEquals(city, modifiedCard.getData().get(AdditionalData.CITY.getFieldName()));
+        Assert.assertNull(exampleCard.getData().get(AdditionalData.CITY.getFieldName()));
 
         Assert.assertTrue(modifiedCard.toBuilder().validate());
         Assert.assertTrue(exampleCard.validateCard());
@@ -102,8 +102,8 @@ public class CardTest {
                 .build();
 
         Assert.assertTrue(modifiedCard.toBuilder().validate());
-        Assert.assertEquals(zip, modifiedCard.getMetaData().get(AdditionalData.ZIP.getFieldName()));
-        Assert.assertNull(exampleCard.getMetaData().get(AdditionalData.ZIP.getFieldName()));
+        Assert.assertEquals(zip, modifiedCard.getData().get(AdditionalData.ZIP.getFieldName()));
+        Assert.assertNull(exampleCard.getData().get(AdditionalData.ZIP.getFieldName()));
 
     }
 
@@ -116,8 +116,8 @@ public class CardTest {
                 .phone(phoneNumber)
                 .build();
 
-        Assert.assertEquals(phoneNumber, modifiedCard.getMetaData().get(AdditionalData.PHONE.getFieldName()));
-        Assert.assertNull(exampleCard.getMetaData().get(AdditionalData.PHONE.getFieldName()));
+        Assert.assertEquals(phoneNumber, modifiedCard.getData().get(AdditionalData.PHONE.getFieldName()));
+        Assert.assertNull(exampleCard.getData().get(AdditionalData.PHONE.getFieldName()));
 
         Assert.assertTrue(modifiedCard.toBuilder().validate());
         Assert.assertTrue(exampleCard.validateCard());
@@ -134,8 +134,8 @@ public class CardTest {
                 .email(email)
                 .build();
 
-        Assert.assertEquals(email, modifiedCard.getMetaData().get(AdditionalData.EMAIL.getFieldName()));
-        Assert.assertNull(exampleCard.getMetaData().get(AdditionalData.EMAIL.getFieldName()));
+        Assert.assertEquals(email, modifiedCard.getData().get(AdditionalData.EMAIL.getFieldName()));
+        Assert.assertNull(exampleCard.getData().get(AdditionalData.EMAIL.getFieldName()));
 
         Assert.assertTrue(modifiedCard.toBuilder().validate());
         Assert.assertTrue(exampleCard.validateCard());
@@ -144,16 +144,16 @@ public class CardTest {
     }
 
     @Test
-    public void validMetaData() {
+    public void validData() {
         final Card exampleCard = createExampleCard();
-        final Map<String, Object> testMetaData = new HashMap<String, Object>(){{
+        final Map<String, Object> testData = new HashMap<String, Object>(){{
             put("vip","true");
             put("business","yea");
         }};
 
 
         final Card modifiedCard = exampleCard.toBuilder()
-                .metaData(testMetaData)
+                .data(testData)
                 .build();
 
         Assert.assertTrue(modifiedCard.toBuilder().validate());
@@ -163,9 +163,9 @@ public class CardTest {
     }
 
     @Test
-    public void validAllMetaData() {
+    public void validAllData() {
         final Card exampleCard = createExampleCard();
-        final boolean isMetaDataValid = exampleCard.toBuilder()
+        final boolean isDataValid = exampleCard.toBuilder()
                 .name("Adnan")
                 .address("Zagrebačka br. 19")
                 .city("Sarajevo")
@@ -174,10 +174,10 @@ public class CardTest {
                 .email("zbregov@protein.com")
                 .validate();
 
-        final boolean isCardValidAfterAddingMetaData = exampleCard.validateCard();
+        final boolean isCardValidAfterAddingData = exampleCard.validateCard();
 
-        Assert.assertTrue(isCardValidAfterAddingMetaData);
-        Assert.assertTrue(isMetaDataValid);
+        Assert.assertTrue(isCardValidAfterAddingData);
+        Assert.assertTrue(isDataValid);
 
         Assert.assertTrue(exampleCard.validateCard());
     }

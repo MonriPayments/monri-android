@@ -2,17 +2,17 @@ package com.monri.android.model;
 
 import java.util.Map;
 
-public enum AdditionalData {
+enum AdditionalData {
     //todo consider min and max length that can be included in regex..
     //todo meta data is map no validation?
-    FULL_NAME(ValidationType.REGEX, "ch_full_name", Constants.ALPHA_NUMERIC_REGEX, 3, 30),
-    ADDRESS(ValidationType.REGEX, "ch_address", Constants.ALPHA_NUMERIC_REGEX, 3, 100),
-    CITY(ValidationType.REGEX, "ch_city", Constants.ALPHA_NUMERIC_REGEX, 3, 30),
-    ZIP(ValidationType.REGEX, "ch_zip", Constants.ALPHA_NUMERIC_REGEX, 3, 9),
-    COUNTRY(ValidationType.REGEX, "ch_country", Constants.ALPHA_NUMERIC_REGEX, 3, 30),
-    PHONE(ValidationType.REGEX, "ch_phone", Constants.PHONE_NUMBER_REGEX, 3, 30),
-    EMAIL(ValidationType.REGEX, "ch_email", Constants.EMAIL_REGEX, 3, 100),
-    META_DATA(ValidationType.META_DATA_VALIDATION, "meta_data", "", 0, 255);
+    FULL_NAME(ValidationType.REGEX, Constants.FULL_NAME, Constants.ALPHA_NUMERIC_REGEX, 3, 30),
+    ADDRESS(ValidationType.REGEX, Constants.ADDRESS, Constants.ALPHA_NUMERIC_REGEX, 3, 100),
+    CITY(ValidationType.REGEX, Constants.CITY, Constants.ALPHA_NUMERIC_REGEX, 3, 30),
+    ZIP(ValidationType.REGEX, Constants.ZIP, Constants.ALPHA_NUMERIC_REGEX, 3, 9),
+    COUNTRY(ValidationType.REGEX, Constants.COUNTRY, Constants.ALPHA_NUMERIC_REGEX, 3, 30),
+    PHONE(ValidationType.REGEX, Constants.PHONE, Constants.PHONE_NUMBER_REGEX, 3, 30),
+    EMAIL(ValidationType.REGEX, Constants.EMAIL, Constants.EMAIL_REGEX, 3, 100),
+    META_DATA(ValidationType.MAP_SIZE_VALIDATION, Constants.META_DATA, "", 0, 255);
 
     private final ValidationType validationType;
     private final String fieldName;
@@ -66,7 +66,7 @@ public enum AdditionalData {
                 }
                 final String value = (String) fieldValue;
                 return value.matches(validationData) && value.length() >= minLength && value.length() <= maxLength;
-            case META_DATA_VALIDATION:
+            case MAP_SIZE_VALIDATION:
                 if (!(fieldValue instanceof Map)) {
                     return false;
                 }
@@ -78,9 +78,18 @@ public enum AdditionalData {
 
     }
 
-    private static class Constants {
+    static class Constants {
+        static final String FULL_NAME = "ch_full_name";
+        static final String ADDRESS = "ch_address";
+        static final String CITY = "ch_city";
+        static final String ZIP = "ch_zip";
+        static final String COUNTRY = "ch_country";
+        static final String PHONE = "ch_phone";
+        static final String EMAIL = "ch_email";
+        static final String META_DATA = "meta_data";
+
         private static final String ALPHA_NUMERIC_REGEX = "^[\\p{L}\\p{Z}\\p{N}\\.]+$";
-        private static final String EMAIL_REGEX ="^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$";
+        private static final String EMAIL_REGEX = "^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$";
         private static final String PHONE_NUMBER_REGEX = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$";
     }
 }

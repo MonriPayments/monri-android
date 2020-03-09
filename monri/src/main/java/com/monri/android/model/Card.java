@@ -113,7 +113,7 @@ public class Card extends PaymentMethod {
     private Integer expMonth;
     private Integer expYear;
     private boolean tokenizePan;
-    private Map<String, Object> metaData;
+    private Map<String, Object> data;
 
     @Size(4)
     private String last4;
@@ -153,14 +153,16 @@ public class Card extends PaymentMethod {
     }
 
     /**
-     * Convenience constructor for a Card object with a minimum number of inputs.
-     *
      * @param number   the card number
      * @param expMonth the expiry month
      * @param expYear  the expiry year
      * @param cvc      the CVC code
+     * @deprecated public constructor will be removed in next version, use Card.create(number, expMonth, expYear,cvc) instead.
+     * <p>
+     * Convenience constructor for a Card object with a minimum number of inputs.
      */
-    private Card(
+    @Deprecated
+    public Card(
             String number,
             Integer expMonth,
             Integer expYear,
@@ -174,20 +176,20 @@ public class Card extends PaymentMethod {
      * @param expMonth the expiry month
      * @param expYear  the expiry year
      * @param cvc      the CVC code
-     * @param metaData additional data for name, zip, address, country, email
+     * @param data additional data for name, zip, address, country, email
      */
     private Card(String number,
                  Integer expMonth,
                  Integer expYear,
                  String cvc,
-                 Map<String, Object> metaData) {
+                 Map<String, Object> data) {
         this.number = MonriTextUtils.nullIfBlank(normalizeCardNumber(number));
         this.expMonth = expMonth;
         this.expYear = expYear;
         this.cvc = MonriTextUtils.nullIfBlank(cvc);
         this.brand = getBrand();
         this.last4 = MonriTextUtils.nullIfBlank(last4) == null ? getLast4() : last4;
-        this.metaData = metaData;
+        this.data = data;
     }
 
     /**
@@ -195,7 +197,7 @@ public class Card extends PaymentMethod {
      */
     public static class CardBuilder {
 
-        private final Map<String, Object> metaData;
+        private final Map<String, Object> data;
         private final Card card;
 
         /**
@@ -203,95 +205,95 @@ public class Card extends PaymentMethod {
          * @param expMonth the expiry month, as an integer value between 1 and 12
          * @param expYear  expiry year
          * @param cvc      the card CVC number
-         * @param metaData additional data for name, zip, address, country, email
+         * @param data additional data for name, zip, address, country, email
          */
         private CardBuilder(final String number,
                             final Integer expMonth,
                             final Integer expYear,
                             final String cvc,
-                            Map<String, Object> metaData) {
+                            Map<String, Object> data) {
 
-            this.metaData = new HashMap<>(metaData);
+            this.data = new HashMap<>(data);
             this.card = new Card(number, expMonth, expYear, cvc);
         }
 
         public CardBuilder name(final String name) {
-            this.metaData.put(AdditionalData.FULL_NAME.getFieldName(), name);
+            this.data.put(AdditionalData.Constants.FULL_NAME, name);
             return this;
         }
 
-        public Object getName() {
-            return metaData.get(AdditionalData.FULL_NAME.getFieldName());
+        public String getName() {
+            return (String) data.get(AdditionalData.Constants.FULL_NAME);
         }
 
         public CardBuilder address(final String address) {
-            this.metaData.put(AdditionalData.ADDRESS.getFieldName(), address);
+            this.data.put(AdditionalData.Constants.ADDRESS, address);
             return this;
         }
 
-        public Object getAddress() {
-            return metaData.get(AdditionalData.ADDRESS.getFieldName());
+        public String getAddress() {
+            return (String) data.get(AdditionalData.Constants.ADDRESS);
         }
 
-        public Object getCity() {
-            return metaData.get(AdditionalData.CITY.getFieldName());
+        public String getCity() {
+            return (String) data.get(AdditionalData.Constants.CITY);
         }
 
         public CardBuilder city(final String city) {
-            this.metaData.put(AdditionalData.CITY.getFieldName(), city);
+            this.data.put(AdditionalData.Constants.CITY, city);
             return this;
         }
 
         public CardBuilder zip(final String zip) {
-            this.metaData.put(AdditionalData.ZIP.getFieldName(), zip);
+            this.data.put(AdditionalData.Constants.ZIP, zip);
             return this;
         }
 
-        public Object getZip() {
-            return metaData.get(AdditionalData.ZIP.getFieldName());
+        public String getZip() {
+            return (String) data.get(AdditionalData.Constants.ZIP);
         }
 
         public CardBuilder country(final String country) {
-            this.metaData.put(AdditionalData.COUNTRY.getFieldName(), country);
+            this.data.put(AdditionalData.Constants.COUNTRY, country);
             return this;
         }
 
-        public Object getCountry() {
-            return metaData.get(AdditionalData.COUNTRY.getFieldName());
+        public String getCountry() {
+            return (String) data.get(AdditionalData.Constants.COUNTRY);
         }
 
-        public Object getPhone() {
-            return metaData.get(AdditionalData.PHONE.getFieldName());
+        public String getPhone() {
+            return (String) data.get(AdditionalData.Constants.PHONE);
         }
 
         public CardBuilder phone(final String phone) {
-            this.metaData.put(AdditionalData.PHONE.getFieldName(), phone);
+            this.data.put(AdditionalData.Constants.PHONE, phone);
             return this;
         }
 
         public CardBuilder email(final String email) {
-            this.metaData.put(AdditionalData.EMAIL.getFieldName(), email);
+            this.data.put(AdditionalData.Constants.EMAIL, email);
             return this;
         }
 
-        public Object getEmail() {
-            return metaData.get(AdditionalData.EMAIL.getFieldName());
+        public String getEmail() {
+            return (String) data.get(AdditionalData.Constants.EMAIL);
         }
 
-        public CardBuilder metaData(Map<String, Object> metaData) {
-            this.metaData.put(AdditionalData.META_DATA.getFieldName(), metaData);
+        public CardBuilder data(Map<String, Object> data) {
+            this.data.put(AdditionalData.Constants.META_DATA, data);
             return this;
         }
 
 
-        public Map<String, Object> getMetaData() {
+        public Map<String, Object> getData() {
             //noinspection unchecked
-            return Collections.unmodifiableMap((Map<String, Object>) metaData.get(AdditionalData.META_DATA.getFieldName()));
+            return Collections.unmodifiableMap((Map<String, Object>) data.get(AdditionalData.Constants.META_DATA));
         }
 
         public boolean validate() {
 
-            return card.validateCard(Calendar.getInstance()) && validateMetaData();
+            return card.validateCard(Calendar.getInstance()) && validateData();
 
         }
 
@@ -300,18 +302,18 @@ public class Card extends PaymentMethod {
          *
          * @return 'true' if all additional data is valid, 'false' otherwise
          */
-        private boolean validateMetaData() {
+        private boolean validateData() {
 
-            for (String metaDataKey : metaData.keySet()) {
-                final Object metaDataValue = metaData.get(metaDataKey);
+            for (String dataKey : data.keySet()) {
+                final Object dataValue = data.get(dataKey);
 
-                if (metaDataValue == null) {
+                if (dataValue == null) {
                     return false;
                 }
 
-                final AdditionalData additionalData = AdditionalData.fromValue(metaDataKey);
+                final AdditionalData additionalData = AdditionalData.fromValue(dataKey);
 
-                if (!additionalData.isValid(metaDataValue)) {
+                if (!additionalData.isValid(dataValue)) {
                     return false;
                 }
             }
@@ -324,7 +326,7 @@ public class Card extends PaymentMethod {
          * @return Card instance
          */
         public Card build() {
-            card.setMetaData(this.metaData);
+            card.setData(this.data);
             return card;
         }
 
@@ -334,7 +336,7 @@ public class Card extends PaymentMethod {
      * @return a CardBuilder populated with the fields of this Card instance
      */
     public CardBuilder toBuilder() {
-        return new CardBuilder(number, expMonth, expYear, cvc, metaData);
+        return new CardBuilder(number, expMonth, expYear, cvc, data);
     }
 
     /**
@@ -352,12 +354,12 @@ public class Card extends PaymentMethod {
                 .build();
     }
 
-    private void setMetaData(final Map<String, Object> metaData) {
-        this.metaData = metaData;
+    private void setData(final Map<String, Object> data) {
+        this.data = data;
     }
 
-    public Map<String, Object> getMetaData() {
-        return Collections.unmodifiableMap(metaData);
+    public Map<String, Object> getData() {
+        return Collections.unmodifiableMap(data);
     }
 
     /**
