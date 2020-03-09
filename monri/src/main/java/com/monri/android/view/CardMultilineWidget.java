@@ -122,7 +122,8 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
             int[] cardDate = mExpiryDateEditText.getValidDateFields();
             String cvcValue = mCvcEditText.getText().toString();
 
-            Card card = new Card(cardNumber, cardDate[0], cardDate[1], cvcValue);
+            Card card = Card.create(cardNumber, cardDate[0], cardDate[1], cvcValue);
+
             if (mShouldShowPostalCode) {
 //                card.setAddressZip(mPostalCodeEditText.getText().toString());
             }

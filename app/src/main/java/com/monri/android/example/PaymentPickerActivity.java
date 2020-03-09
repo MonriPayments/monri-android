@@ -129,11 +129,11 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
     }
 
     PaymentMethodParams nonThreeDsCard() {
-        return new Card("4111 1111 1111 1111", 12, 2024, "123").toPaymentMethodParams();
+        return Card.create("4111 1111 1111 1111", 12, 2024, "123").toPaymentMethodParams();
     }
 
     PaymentMethodParams threeDsCard() {
-        return new Card("4341 7920 0000 0044", 12, 2024, "123").toPaymentMethodParams();
+        return Card.create("4341 7920 0000 0044", 12, 2024, "123").toPaymentMethodParams();
     }
 
     @Override
