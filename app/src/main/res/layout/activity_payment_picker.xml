@@ -9,6 +9,7 @@
     <com.monri.android.view.CardMultilineWidget
         android:id="@+id/payment_picker_card"
         android:layout_width="match_parent"
+        android:theme="@style/TextLabel"
         android:layout_height="wrap_content" />
 
     <Button

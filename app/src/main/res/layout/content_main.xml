@@ -32,6 +32,13 @@
 
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:id="@+id/main_trx_status"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:layout_height="wrap_content"/>
+
     <Button
         android:id="@+id/content_main_btn_pay"
         android:layout_width="match_parent"

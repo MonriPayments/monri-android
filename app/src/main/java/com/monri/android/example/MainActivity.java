@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,11 +21,13 @@ import com.monri.android.model.Card;
 import com.monri.android.model.Token;
 import com.monri.android.view.CardMultilineWidget;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ViewDelegate {
 
     CardMultilineWidget widget;
 
     Button btnPay;
+
+    TextView tvMainTrxStatus;
 
     CheckBox cbSaveCardForFuturePayments;
 
@@ -46,9 +49,10 @@ public class MainActivity extends AppCompatActivity {
         widget = findViewById(R.id.card_multiline_widget);
         btnPay = findViewById(R.id.content_main_btn_pay);
         cbSaveCardForFuturePayments = findViewById(R.id.content_main_cb_save_card_for_future_payments);
+        tvMainTrxStatus = findViewById(R.id.main_trx_status);
 
 
-        orderRepository = new OrderRepository(this);
+        orderRepository = new OrderRepository(this, this);
         final Monri monri = new Monri(this.getApplicationContext(), orderRepository.monriApiOptions());
 
         final PrepareTransactionResponse prepareTransactionResponse = getIntent().getParcelableExtra("PREPARE_TRANSACTION_RESPONSE");
@@ -62,7 +66,8 @@ public class MainActivity extends AppCompatActivity {
             final Card card = widget.getCard();
 
             if (card == null) {
-                Toast.makeText(MainActivity.this, "Card data invalid", Toast.LENGTH_LONG).show();
+                statusMessage("Card data invalid");
+
             } else {
 
                 card.setTokenizePan(cbSaveCardForFuturePayments.isChecked());
@@ -85,9 +90,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void statusMessage(String message) {
+        Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+        tvMainTrxStatus.setText(message);
+    }
+
     void handleOrderFailure(Throwable throwable) {
         throwable.printStackTrace();
-        Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_LONG).show();
+        statusMessage(throwable.getMessage());
     }
 
 
@@ -122,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         }
 //        monriapp://example.monri.com/transaction-result?order_number=$id
         final String orderNumber = uri.getQueryParameter("order_number");
-        Toast.makeText(this, String.format("Received result for %s", orderNumber), Toast.LENGTH_LONG).show();
+        statusMessage(String.format("Received result for %s", orderNumber));
         super.onNewIntent(intent);
     }
 }

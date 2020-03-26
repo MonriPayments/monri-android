@@ -3,7 +3,6 @@ package com.monri.android.example;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.widget.Toast;
 
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.Token;
@@ -23,9 +22,11 @@ public class OrderRepository {
 
     private final ExampleApi exampleApi;
     private final Context context;
+    private final ViewDelegate viewDelegate;
 
-    public OrderRepository(Context context) {
+    public OrderRepository(Context context, ViewDelegate viewDelegate) {
         this.context = context;
+        this.viewDelegate = viewDelegate;
         String url = "https://mobile.webteh.hr/";
         ExampleModule module = new ExampleModule(url);
         exampleApi = module.publicApi();
@@ -72,19 +73,19 @@ public class OrderRepository {
                 context.startActivity(browserIntent);
                 break;
             case OrderResponse.STATUS_APPROVED:
-                Toast.makeText(context, "Order approved", Toast.LENGTH_LONG).show();
+                viewDelegate.statusMessage("Order approved");
                 break;
             case OrderResponse.STATUS_DECLINED:
-                Toast.makeText(context, "Order declined", Toast.LENGTH_LONG).show();
+                viewDelegate.statusMessage("Order declined");
                 break;
             default:
-                Toast.makeText(context, String.format("Unknown status %s", status), Toast.LENGTH_LONG).show();
+                viewDelegate.statusMessage(String.format("Unknown status %s", status));
                 break;
         }
     }
 
     void handleOrderFailure(Throwable throwable) {
         throwable.printStackTrace();
-        Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_LONG).show();
+        viewDelegate.statusMessage(throwable.getMessage());
     }
 }

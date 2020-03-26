@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import io.reactivex.disposables.Disposable;
 
-public class ExamplesActivity extends AppCompatActivity {
+public class ExamplesActivity extends AppCompatActivity implements ViewDelegate {
 
     public static Intent createIntent(Context context) {
         return new Intent(context, ExamplesActivity.class);
@@ -21,7 +21,7 @@ public class ExamplesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_examples);
 
-        final OrderRepository orderRepository = new OrderRepository(this);
+        final OrderRepository orderRepository = new OrderRepository(this, this);
 
         this.<Button>findViewById(R.id.btn_payment_with_new_card).setOnClickListener(v -> {
             v.setEnabled(false);
@@ -50,5 +50,10 @@ public class ExamplesActivity extends AppCompatActivity {
 
     void handleError(Throwable throwable) {
         Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void statusMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }

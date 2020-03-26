@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,7 +20,7 @@ import com.monri.android.model.Token;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-public class SavedCardPaymentActivity extends AppCompatActivity {
+public class SavedCardPaymentActivity extends AppCompatActivity implements ViewDelegate {
 
     @SuppressLint("SimpleDateFormat") private final DateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
@@ -58,7 +59,7 @@ public class SavedCardPaymentActivity extends AppCompatActivity {
 
         TokenRequest tokenRequest = new TokenRequest(prepareTransactionResponse.token, prepareTransactionResponse.digest, prepareTransactionResponse.timestamp);
 
-        orderRepository = new OrderRepository(this);
+        orderRepository = new OrderRepository(this, this);
 
 
         tvCardType = findViewById(R.id.tv_card_type);
@@ -86,5 +87,10 @@ public class SavedCardPaymentActivity extends AppCompatActivity {
                 }
             });
         });
+    }
+
+    @Override
+    public void statusMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }

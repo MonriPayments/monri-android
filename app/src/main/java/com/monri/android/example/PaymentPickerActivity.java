@@ -28,7 +28,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
-public class PaymentPickerActivity extends AppCompatActivity implements ResultCallback<PaymentResult> {
+public class PaymentPickerActivity extends AppCompatActivity implements ResultCallback<PaymentResult>, ViewDelegate {
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     OrderRepository orderRepository;
@@ -56,7 +56,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        orderRepository = new OrderRepository(this);
+        orderRepository = new OrderRepository(this, this);
         monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
         threeDsCard = getIntent().getBooleanExtra("THREE_DS_CARD", false);
         addPaymentMethodScenario = getIntent().getBooleanExtra("ADD_PAYMENT_METHOD_SCENARIO", false);
@@ -113,7 +113,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                         .setCity("Sarajevo")
                         .setZip("71000")
                         .setPhone("+38761000111")
-                        .setCountry("Bosnia And Herzegovina")
+                        .setCountry("BA")
                         .setEmail("tester+android_sdk@monri.com");
 
                 monri.confirmPayment(this, ConfirmPaymentParams.create(
@@ -138,8 +138,8 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-
-        final boolean monriPaymentResult = monri.onPaymentResult(requestCode, data, this);
+        ResultCallback<PaymentResult> callback = this;
+        final boolean monriPaymentResult = monri.onPaymentResult(requestCode, data, callback);
         if (!monriPaymentResult) {
             super.onActivityResult(requestCode, resultCode, data);
         }
@@ -155,5 +155,10 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
     public void onError(Throwable throwable) {
         txtViewResult.setText(String.format("%s\n\n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
         Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void statusMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }

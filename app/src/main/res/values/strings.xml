@@ -9,7 +9,7 @@
     <string name="btn_payment_method_1">VISA 440960******2830</string>
     <string name="btn_payment_method_2">VISA 403530******4083</string>
     <string name="btn_payment_example">New Payment</string>
-    <string name="btn_payment_session_create">New Payment</string>
+    <string name="btn_payment_session_create">Payment Sessions - New Payment</string>
     <string name="btn_payment_example_3ds1">New Payment - 3DS1</string>
     <string name="btn_add_payment_method_example">New Payment Method</string>
     <string name="btn_add_payment_method_example_3ds1">New Payment Method - 3DS1</string>
