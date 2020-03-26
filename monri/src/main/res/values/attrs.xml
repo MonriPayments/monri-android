@@ -7,6 +7,7 @@
     </declare-styleable>
 
     <declare-styleable name="CardMultilineWidget">
-        <attr name="shouldShowPostalCode" format="boolean" />
+        <attr name="cardTintColor" format="color"/>
+        <attr name="shouldShowPostalCode" format="boolean"/>
     </declare-styleable>
 </resources>

@@ -23,6 +23,7 @@ import java.util.concurrent.Executor;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -35,40 +36,36 @@ import static com.monri.android.MonriConfig.TEST_ENV_HOST;
  * MonriAndroidSDK
  */
 public final class Monri {
-    @SuppressWarnings("FieldCanBeLocal") private final Context context;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final Context context;
     private final String authenticityToken;
     private final MonriApiOptions apiOptions;
     private final MonriApi monriApi;
     private final PaymentController paymentController;
-    @VisibleForTesting private
-    TokenCreator mTokenCreator = new TokenCreator() {
-        @Override
-        public void create(
-                final Map<String, Object> tokenParams,
-                final Executor executor,
-                final TokenCallback callback) {
-            @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, ResponseWrapper> task =
-                    new AsyncTask<Void, Void, ResponseWrapper>() {
-                        @Override
-                        protected ResponseWrapper doInBackground(Void... params) {
-                            try {
-                                Token token = MonriApiHandler.createToken(
-                                        tokenParams
-                                );
-                                return new ResponseWrapper(token);
-                            } catch (MonriException e) {
-                                return new ResponseWrapper(e);
-                            }
+    @VisibleForTesting
+    private
+    TokenCreator mTokenCreator = (tokenParams, executor, callback) -> {
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, ResponseWrapper> task =
+                new AsyncTask<Void, Void, ResponseWrapper>() {
+                    @Override
+                    protected ResponseWrapper doInBackground(Void... params) {
+                        try {
+                            Token token = MonriApiHandler.createToken(
+                                    tokenParams
+                            );
+                            return new ResponseWrapper(token);
+                        } catch (MonriException e) {
+                            return new ResponseWrapper(e);
                         }
+                    }
 
-                        @Override
-                        protected void onPostExecute(ResponseWrapper result) {
-                            tokenTaskPostExecution(result, callback);
-                        }
-                    };
+                    @Override
+                    protected void onPostExecute(ResponseWrapper result) {
+                        tokenTaskPostExecution(result, callback);
+                    }
+                };
 
-            executeTask(executor, task);
-        }
+        executeTask(executor, task);
     };
 
 
@@ -132,11 +129,6 @@ public final class Monri {
         paymentController.confirmPayment(context, confirmPaymentParams);
     }
 
-    public void handleActionRequired(Activity context,
-                                     String paymentId) {
-        paymentController.handleActionRequired(context, paymentId);
-    }
-
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
         if (result.token != null) {
             callback.onSuccess(result.token);
@@ -144,7 +136,7 @@ public final class Monri {
             callback.onError(result.error);
         } else {
             callback.onError(new RuntimeException("Somehow got neither a token response or an " +
-                                                          "error response"));
+                    "error response"));
         }
     }
 

@@ -75,32 +75,9 @@
                 android:digits="@string/valid_digits"
                 android:imeOptions="actionDone"
                 android:inputType="number"
-                android:nextFocusDown="@+id/et_add_source_postal_ml"
-                android:nextFocusForward="@+id/et_add_source_postal_ml"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tl_add_source_postal_ml"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            >
-
-            <!--In future releases we will remove the android:digits restriction
-            to support international postal codes.-->
-            <com.monri.android.view.MonriEditText
-                android:id="@+id/et_add_source_postal_ml"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:digits="@string/valid_digits"
-                android:hint="@string/acc_label_zip"
-                android:imeOptions="actionDone"
-                android:inputType="number"
-                android:maxLength="5"
-                />
-
-        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 </merge>

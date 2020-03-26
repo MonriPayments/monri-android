@@ -13,8 +13,6 @@ import com.monri.android.model.PaymentResult;
 public interface PaymentController {
     void confirmPayment(Activity activity, ConfirmPaymentParams params);
 
-    void handleActionRequired(Activity activity, String paymentId);
-
     boolean shouldHandlePaymentResult(int requestCode, Intent data);
 
     void handlePaymentResult(int requestCode, Intent data, ResultCallback<PaymentResult> callback);

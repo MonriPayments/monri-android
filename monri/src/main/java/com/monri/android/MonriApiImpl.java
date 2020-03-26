@@ -27,7 +27,6 @@ class MonriApiImpl implements MonriApi {
     public void confirmPayment(ConfirmPaymentParams params, ResultCallback<ConfirmPaymentResponse> callback) {
 
         try {
-            params.setUseSDK(true);
             monriRetrofitApi.confirmPayment(params.getPaymentId(), params).enqueue(new Callback<ConfirmPaymentResponse>() {
                 @Override
                 public void onResponse(@NonNull Call<ConfirmPaymentResponse> call,

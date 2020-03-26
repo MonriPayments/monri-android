@@ -16,7 +16,6 @@ final class MonriPaymentController implements PaymentController {
 
     private final int PAYMENT_REQUEST_CODE = 10000;
     private final int AUTHENTICATE_PAYMENT_REQUEST_CODE = 10001;
-    private final int ADD_PAYMENT_METHOD_REQUEST_CODE = 10002;
 
     private final MonriApiOptions monriApiOptions;
 
@@ -27,11 +26,6 @@ final class MonriPaymentController implements PaymentController {
     @Override
     public void confirmPayment(Activity activity, ConfirmPaymentParams params) {
         activity.startActivityForResult(ConfirmPaymentActivity.createIntent(activity, params, monriApiOptions), PAYMENT_REQUEST_CODE);
-    }
-
-    @Override
-    public void handleActionRequired(Activity activity, String paymentId) {
-
     }
 
     @Override

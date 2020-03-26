@@ -1,6 +1,7 @@
 package com.monri.android.view;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -18,8 +19,8 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.annotation.VisibleForTesting;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.view.ViewCompat;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.monri.android.CardUtils;
@@ -46,22 +47,27 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     static final long CARD_NUMBER_HINT_DELAY = 120L;
     static final long COMMON_HINT_DELAY = 90L;
 
-    private @Nullable CardInputListener mCardInputListener;
+    int[][] states = new int[][]{
+            new int[]{-android.R.attr.state_activated},
+            new int[]{android.R.attr.state_activated},
+    };
+
+    private @Nullable
+    CardInputListener mCardInputListener;
     private CardNumberEditText mCardNumberEditText;
     private ExpiryDateEditText mExpiryDateEditText;
     private MonriEditText mCvcEditText;
-    private MonriEditText mPostalCodeEditText;
     private TextInputLayout mCardNumberTextInputLayout;
     private TextInputLayout mExpiryTextInputLayout;
     private TextInputLayout mCvcTextInputLayout;
-    private TextInputLayout mPostalInputLayout;
 
     private boolean mIsEnabled;
-    private boolean mShouldShowPostalCode;
     private boolean mHasAdjustedDrawable;
 
-    private @Card.CardBrand String mCardBrand;
-    private @ColorInt int mTintColorInt;
+    private @Card.CardBrand
+    String mCardBrand;
+    private @ColorInt
+    int mTintColorInt;
 
     public CardMultilineWidget(Context context) {
         super(context);
@@ -78,13 +84,6 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         initView(attrs);
     }
 
-    @VisibleForTesting
-    CardMultilineWidget(Context context, boolean shouldShowPostalCode) {
-        super(context);
-        mShouldShowPostalCode = false;
-        initView(null);
-    }
-
     /**
      * Clear all entered data and hide all error messages.
      */
@@ -92,11 +91,9 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         mCardNumberEditText.setText("");
         mExpiryDateEditText.setText("");
         mCvcEditText.setText("");
-        mPostalCodeEditText.setText("");
         mCardNumberEditText.setShouldShowError(false);
         mExpiryDateEditText.setShouldShowError(false);
         mCvcEditText.setShouldShowError(false);
-        mPostalCodeEditText.setShouldShowError(false);
         updateBrand(Card.UNKNOWN);
     }
 
@@ -122,12 +119,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
             int[] cardDate = mExpiryDateEditText.getValidDateFields();
             String cvcValue = mCvcEditText.getText().toString();
 
-            Card card = new Card(cardNumber, cardDate[0], cardDate[1], cvcValue);
-            if (mShouldShowPostalCode) {
-//                card.setAddressZip(mPostalCodeEditText.getText().toString());
-            }
-//            return card.addLoggingToken(CARD_MULTILINE_TOKEN);
-            return card;
+            return new Card(cardNumber, cardDate[0], cardDate[1], cvcValue);
         }
 
         return null;
@@ -147,19 +139,10 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         mCardNumberEditText.setShouldShowError(!cardNumberIsValid);
         mExpiryDateEditText.setShouldShowError(!expiryIsValid);
         mCvcEditText.setShouldShowError(!cvcIsValid);
-        boolean postalCodeIsValidOrGone;
-        if (mShouldShowPostalCode) {
-            postalCodeIsValidOrGone = isPostalCodeMaximalLength(true,
-                                                                mPostalCodeEditText.getText().toString());
-            mPostalCodeEditText.setShouldShowError(!postalCodeIsValidOrGone);
-        } else {
-            postalCodeIsValidOrGone = true;
-        }
 
         return cardNumberIsValid
                 && expiryIsValid
-                && cvcIsValid
-                && postalCodeIsValidOrGone;
+                && cvcIsValid;
     }
 
     @Override
@@ -171,7 +154,6 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     }
 
     public void setShouldShowPostalCode(boolean shouldShowPostalCode) {
-        mShouldShowPostalCode = shouldShowPostalCode;
         adjustViewForPostalCodeAttribute();
     }
 
@@ -193,24 +175,6 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         mExpiryDateEditText.addTextChangedListener(expiryDateTextWatcher);
     }
 
-    /**
-     * Expose a text watcher to receive updates when the cvc number is changed.
-     *
-     * @param cvcNumberTextWatcher
-     */
-    public void setCvcNumberTextWatcher(TextWatcher cvcNumberTextWatcher) {
-        mCvcEditText.addTextChangedListener(cvcNumberTextWatcher);
-    }
-
-    /**
-     * Expose a text watcher to receive updates when the cvc number is changed.
-     *
-     * @param postalCodeTextWatcher
-     */
-    public void setPostalCodeTextWatcher(TextWatcher postalCodeTextWatcher) {
-        mPostalCodeEditText.addTextChangedListener(postalCodeTextWatcher);
-    }
-
     @Override
     public boolean isEnabled() {
         return mIsEnabled;
@@ -221,29 +185,20 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         mExpiryTextInputLayout.setEnabled(enabled);
         mCardNumberTextInputLayout.setEnabled(enabled);
         mCvcTextInputLayout.setEnabled(enabled);
-        mPostalInputLayout.setEnabled(enabled);
         mIsEnabled = enabled;
     }
 
     void adjustViewForPostalCodeAttribute() {
         // Set the label/hint to the shorter value if we have three things in a row.
-        @StringRes int expiryLabel = mShouldShowPostalCode
-                ? R.string.expiry_label_short
-                : R.string.acc_label_expiry_date;
+        @StringRes int expiryLabel = R.string.acc_label_expiry_date;
         mExpiryTextInputLayout.setHint(getResources().getString(expiryLabel));
 
-        @IdRes int focusForward = mShouldShowPostalCode
-                ? R.id.et_add_source_postal_ml
-                : NO_ID;
+        @IdRes int focusForward = NO_ID;
         mCvcEditText.setNextFocusForwardId(focusForward);
         mCvcEditText.setNextFocusDownId(focusForward);
 
-        int visibility = mShouldShowPostalCode ? View.VISIBLE : View.GONE;
-        mPostalInputLayout.setVisibility(visibility);
 
-        int marginPixels = mShouldShowPostalCode
-                ? getResources().getDimensionPixelSize(R.dimen.add_card_expiry_middle_margin)
-                : 0;
+        int marginPixels = 0;
         LinearLayout.LayoutParams linearParams =
                 (LinearLayout.LayoutParams) mCvcTextInputLayout.getLayoutParams();
         linearParams.setMargins(0, 0, marginPixels, 0);
@@ -252,10 +207,6 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         }
 
         mCvcTextInputLayout.setLayoutParams(linearParams);
-    }
-
-    static boolean isPostalCodeMaximalLength(boolean isZip, @Nullable String text) {
-        return isZip && text != null && text.length() == 5;
     }
 
     private boolean isCvcLengthValid() {
@@ -278,8 +229,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
                     0, 0);
 
             try {
-                mShouldShowPostalCode =
-                        a.getBoolean(R.styleable.CardMultilineWidget_shouldShowPostalCode, false);
+                mTintColorInt = a.getColor(R.styleable.CardMultilineWidget_cardTintColor, mCardNumberEditText.getHintTextColors().getDefaultColor());
             } finally {
                 a.recycle();
             }
@@ -320,29 +270,21 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         mCardNumberEditText = findViewById(R.id.et_add_source_card_number_ml);
         mExpiryDateEditText = findViewById(R.id.et_add_source_expiry_ml);
         mCvcEditText = findViewById(R.id.et_add_source_cvc_ml);
-        mPostalCodeEditText = findViewById(R.id.et_add_source_postal_ml);
-        mTintColorInt = mCardNumberEditText.getHintTextColors().getDefaultColor();
 
         mCardBrand = Card.UNKNOWN;
-        // This sets the value of mShouldShowPostalCode
-        checkAttributeSet(attrs);
+
 
         mCardNumberTextInputLayout = findViewById(R.id.tl_add_source_card_number_ml);
         mExpiryTextInputLayout = findViewById(R.id.tl_add_source_expiry_ml);
         // We dynamically set the hint of the CVC field, so we need to keep a reference.
         mCvcTextInputLayout = findViewById(R.id.tl_add_source_cvc_ml);
-        mPostalInputLayout = findViewById(R.id.tl_add_source_postal_ml);
 
-        if (mShouldShowPostalCode) {
-            // Set the label/hint to the shorter value if we have three things in a row.
-            mExpiryTextInputLayout.setHint(getResources().getString(R.string.expiry_label_short));
-        }
+        checkAttributeSet(attrs);
 
         initTextInputLayoutErrorHandlers(
                 mCardNumberTextInputLayout,
                 mExpiryTextInputLayout,
-                mCvcTextInputLayout,
-                mPostalInputLayout);
+                mCvcTextInputLayout);
 
         initErrorMessages();
         initFocusChangeListeners();
@@ -384,9 +326,6 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
                     public void onTextChanged(String text) {
                         if (ViewUtils.isCvcMaximalLength(mCardBrand, text)) {
                             updateBrand(mCardBrand);
-                            if (mShouldShowPostalCode) {
-                                mPostalCodeEditText.requestFocus();
-                            }
                             if (mCardInputListener != null) {
                                 mCardInputListener.onCvcComplete();
                             }
@@ -399,18 +338,6 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
 
         adjustViewForPostalCodeAttribute();
 
-        mPostalCodeEditText.setAfterTextChangedListener(
-                new MonriEditText.AfterTextChangedListener() {
-                    @Override
-                    public void onTextChanged(String text) {
-                        if (isPostalCodeMaximalLength(true, text)
-                                && mCardInputListener != null) {
-                            mCardInputListener.onPostalCodeComplete();
-                        }
-                        mPostalCodeEditText.setShouldShowError(false);
-                    }
-                });
-
         mCardNumberEditText.updateLengthFilter();
         updateBrand(Card.UNKNOWN);
         setEnabled(true);
@@ -422,21 +349,12 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
 
         mCvcEditText.setDeleteEmptyListener(
                 new BackUpFieldDeleteListener(mExpiryDateEditText));
-
-        // It doesn't matter whether or not the postal code is shown;
-        // we can still say where you go when you delete an empty field from it.
-        if (mPostalCodeEditText == null) {
-            return;
-        }
-        mPostalCodeEditText.setDeleteEmptyListener(
-                new BackUpFieldDeleteListener(mCvcEditText));
     }
 
     private void initErrorMessages() {
         mCardNumberEditText.setErrorMessage(getContext().getString(R.string.invalid_card_number));
         mExpiryDateEditText.setErrorMessage(getContext().getString(R.string.invalid_expiry_year));
         mCvcEditText.setErrorMessage(getContext().getString(R.string.invalid_cvc));
-        mPostalCodeEditText.setErrorMessage(getContext().getString(R.string.invalid_zip));
     }
 
     private void initFocusChangeListeners() {
@@ -487,41 +405,16 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
             }
         });
 
-        if (mPostalCodeEditText == null) {
-            return;
-        }
-
-        mPostalCodeEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!mShouldShowPostalCode) {
-                    return;
-                }
-                if (hasFocus) {
-                    mPostalCodeEditText.setHintDelayed(R.string.zip_helper, COMMON_HINT_DELAY);
-                    if (mCardInputListener != null) {
-                        mCardInputListener.onFocusChange(FOCUS_POSTAL);
-                    }
-                } else {
-                    mPostalCodeEditText.setHint("");
-                }
-            }
-        });
     }
 
     private void initTextInputLayoutErrorHandlers(
             TextInputLayout cardInputLayout,
             TextInputLayout expiryInputLayout,
-            TextInputLayout cvcTextInputLayout,
-            TextInputLayout postalInputLayout) {
+            TextInputLayout cvcTextInputLayout) {
 
         mCardNumberEditText.setErrorMessageListener(new ErrorListener(cardInputLayout));
         mExpiryDateEditText.setErrorMessageListener(new ErrorListener(expiryInputLayout));
         mCvcEditText.setErrorMessageListener(new ErrorListener(cvcTextInputLayout));
-        if (mPostalCodeEditText == null) {
-            return;
-        }
-        mPostalCodeEditText.setErrorMessageListener(new ErrorListener(postalInputLayout));
     }
 
     private void updateBrand(@NonNull @Card.CardBrand String brand) {

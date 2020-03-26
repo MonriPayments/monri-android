@@ -13,8 +13,8 @@ ext {
 
     libraryDescription = 'Monri Android SDK'
 
-    siteUrl = 'https://github.com/jasminsuljic/monri-android'
-    gitUrl = 'https://github.com/jasminsuljic/monri-android.git'
+    siteUrl = 'https://github.com/MonriPayments/monri-android'
+    gitUrl = 'https://github.com/MonriPayments/monri-android.git'
 
     libraryVersion = rootProject.ext.monriSdkVersion
 

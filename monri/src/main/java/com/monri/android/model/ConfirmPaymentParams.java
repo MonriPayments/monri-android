@@ -15,9 +15,6 @@ public class ConfirmPaymentParams implements Parcelable {
     @JsonIgnore private
     String paymentId;
 
-    @JsonProperty("use_sdk")
-    boolean useSDK;
-
     @JsonProperty("payment_method") private
     PaymentMethodParams paymentMethod;
 
@@ -61,11 +58,6 @@ public class ConfirmPaymentParams implements Parcelable {
 
     public ConfirmPaymentParams setTransaction(TransactionParams transaction) {
         this.transaction = transaction;
-        return this;
-    }
-
-    public ConfirmPaymentParams setUseSDK(boolean useSDK) {
-        this.useSDK = useSDK;
         return this;
     }
 
