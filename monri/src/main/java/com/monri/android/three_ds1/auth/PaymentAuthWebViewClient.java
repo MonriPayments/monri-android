@@ -45,11 +45,13 @@ public class PaymentAuthWebViewClient extends WebViewClient {
 
         logger.trace("onPageFinished url [%s]", url);
         if (url.contains(acsHost)) {
-            delegate.acsLoadFinished();
+//            delegate.acsLoadFinished();
         }
 
         super.onPageFinished(view, url);
     }
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Nullable

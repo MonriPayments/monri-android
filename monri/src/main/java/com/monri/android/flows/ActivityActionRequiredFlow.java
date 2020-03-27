@@ -115,8 +115,8 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
         executeIfStatus(InvokationState.HANDLE_RESULT, InvokationState.REDIRECTING_TO_ACS, () -> {
             logger.info("redirectingToAcs");
             executeOnUiThread(() -> {
-                webView.setVisibility(View.INVISIBLE);
-                progressBar.setVisibility(View.VISIBLE);
+                webView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.INVISIBLE);
             });
         });
     }
@@ -134,7 +134,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
     @Override
     public void acsAuthenticationFinished() {
-        executeIfStatus(InvokationState.ACS_LOAD_FINISHED, InvokationState.ACS_AUTHENTICATION_FINISHED, () -> {
+        executeIfStatus(InvokationState.REDIRECTING_TO_ACS, InvokationState.ACS_AUTHENTICATION_FINISHED, () -> {
             logger.info("acsAuthenticationFinished");
             executeOnUiThread(() -> {
                 webView.setVisibility(View.INVISIBLE);
