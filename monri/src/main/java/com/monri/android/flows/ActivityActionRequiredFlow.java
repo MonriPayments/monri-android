@@ -5,8 +5,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
+import android.webkit.ConsoleMessage;
+import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
 import com.monri.android.MonriApi;
@@ -21,6 +27,7 @@ import com.monri.android.three_ds1.auth.PaymentAuthWebView;
 import com.monri.android.three_ds1.auth.PaymentAuthWebViewClient;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * Created by jasminsuljic on 2019-12-09.
@@ -46,11 +53,29 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
         this.webView = webView;
         this.progressBar = progressBar;
         this.monriApi = monriApi;
-        webView.setWebChromeClient(new WebChromeClient());
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setAllowContentAccess(false);
+        settings.setDomStorageEnabled(true);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                if (consoleMessage != null) {
+                    String message = consoleMessage.message();
+                    if (message != null) {
+                        logger.trace(message);
+                    }
+                }
+                return super.onConsoleMessage(consoleMessage);
+            }
+
+            @Override
+            public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+                return super.onJsConfirm(view, url, message, result);
+            }
+        });
         client = new PaymentAuthWebViewClient(this);
         webView.setWebViewClient(client);
-        // TODO: investigate XSS vulnerability
-        webView.getSettings().setJavaScriptEnabled(true);
     }
 
     @Override
@@ -124,6 +149,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
         if (invokationState != state) {
             logger.warn("Tried changing to state = [%s] from state [%s], currentState = [%s]", newState.name(), state.name(), invokationState.name());
         } else {
+            logger.info("Changing state to state = [%s] from currentState = [%s]", newState.name(), state.name());
             this.invokationState = newState;
             runnable.run();
         }

@@ -43,6 +43,7 @@ public class PaymentAuthWebViewClient extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
 
+        logger.trace("onPageFinished url [%s]", url);
         if (url.contains(acsHost)) {
             delegate.acsLoadFinished();
         }
