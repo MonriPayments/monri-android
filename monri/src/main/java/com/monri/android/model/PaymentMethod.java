@@ -9,7 +9,7 @@ import java.util.Map;
 public abstract class PaymentMethod {
 
     public static final String TYPE_CARD = "card";
-    public static final String TYPE_SAVED_CARD = "card";
+    public static final String TYPE_SAVED_CARD = "saved_card";
 
 
     public PaymentMethod() {

@@ -31,6 +31,10 @@ public class PaymentActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_add_payment_method_example).setOnClickListener(v -> addPaymentMethod(false));
         findViewById(R.id.btn_add_payment_method_example_3ds1).setOnClickListener(v -> addPaymentMethod(true));
+
+        findViewById(R.id.btn_payment_example_saved_card_non_3ds).setOnClickListener(v -> savedCardPayment(false));
+        findViewById(R.id.btn_payment_example_saved_card_3ds).setOnClickListener(v -> savedCardPayment(true));
+
     }
 
     private void addPaymentMethod(boolean threeDS) {
@@ -39,6 +43,25 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void newPayment(boolean threeDS, boolean saveCardForFuturePayments) {
         startActivity(PaymentPickerActivity.createIntent(this, threeDS, false, saveCardForFuturePayments));
+    }
+
+    private void savedCardPayment(boolean threeDS) {
+        if (threeDS) {
+            Intent intent = PaymentPickerActivity
+                    .createIntent(this,
+                            "c32b3465be7278d239f68bb6d7623acf0530bf34574cf3b782754d281c76bd02",
+                            "434179******0044",
+                            "visa"
+                    );
+            startActivity(intent);
+        } else {
+            Intent intent = PaymentPickerActivity
+                    .createIntent(this,
+                            "d5719409d1b8eb92adae0feccd2964b805f93ae3936fdd9d8fc01a800d094584",
+                            "403530******4083",
+                            "visa");
+            startActivity(intent);
+        }
     }
 
 }

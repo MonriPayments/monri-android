@@ -25,6 +25,18 @@
         android:text="@string/btn_payment_example_save_card_for_future_payments" />
 
     <Button
+        android:id="@+id/btn_payment_example_saved_card_non_3ds"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_payment_example_saved_card_non_3ds" />
+
+    <Button
+        android:id="@+id/btn_payment_example_saved_card_3ds"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_payment_example_saved_card_3ds" />
+
+    <Button
         android:id="@+id/btn_add_payment_method_example"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

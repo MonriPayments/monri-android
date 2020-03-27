@@ -3,7 +3,9 @@ package com.monri.android.example;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -13,12 +15,15 @@ import androidx.core.util.Supplier;
 
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
+import com.monri.android.TokenCallback;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentResult;
+import com.monri.android.model.SavedCard;
+import com.monri.android.model.Token;
 import com.monri.android.model.TransactionParams;
 import com.monri.android.view.CardMultilineWidget;
 
@@ -36,8 +41,31 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
 
     TextView txtViewResult;
 
+    EditText etCvv;
+
+    TextView tvCardType;
+    TextView tvMaskedPan;
+    Button btnPay;
+
+    View paymentPickerSavedCardView;
+
+    View paymentPickerNewCardView;
+
+    public static Intent createIntent(Context context,
+                                      String panToken,
+                                      String maskedPan,
+                                      String cardType) {
+        final Intent intent = new Intent(context, PaymentPickerActivity.class);
+        intent.putExtra("NEW_CARD_PAYMENT", false);
+        intent.putExtra("PAN_TOKEN", panToken);
+        intent.putExtra("MASKED_PAN", maskedPan);
+        intent.putExtra("CARD_TYPE", cardType);
+        return intent;
+    }
+
     public static Intent createIntent(Context context, boolean threeDsCard, boolean addPaymentMethodScenario, boolean saveCardForFuturePayments) {
         Intent intent = new Intent(context, PaymentPickerActivity.class);
+        intent.putExtra("NEW_CARD_PAYMENT", true);
         intent.putExtra("THREE_DS_CARD", threeDsCard);
         intent.putExtra("ADD_PAYMENT_METHOD_SCENARIO", addPaymentMethodScenario);
         intent.putExtra("saveCardForFuturePayments", saveCardForFuturePayments);
@@ -55,14 +83,53 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_payment_picker);
 
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
-        threeDsCard = getIntent().getBooleanExtra("THREE_DS_CARD", false);
-        addPaymentMethodScenario = getIntent().getBooleanExtra("ADD_PAYMENT_METHOD_SCENARIO", false);
-        saveCardForFuturePayments = getIntent().getBooleanExtra("saveCardForFuturePayments", false);
 
-        setContentView(R.layout.activity_payment_picker);
+        Intent intent = getIntent();
+        boolean newCardPayment = intent.getBooleanExtra("NEW_CARD_PAYMENT", true);
+
+        paymentPickerNewCardView = findViewById(R.id.payment_picker_new_card);
+        paymentPickerSavedCardView = findViewById(R.id.payment_picker_saved_card);
+
+        if (newCardPayment) {
+            newCardPaymentViewSetup(intent);
+        } else {
+            savedCardPaymentViewSetup(intent);
+        }
+    }
+
+    private void savedCardPaymentViewSetup(Intent intent) {
+        paymentPickerSavedCardView.setVisibility(View.VISIBLE);
+        txtViewResult = findViewById(R.id.txt_result_payment_example_1);
+        final String panToken = intent.getStringExtra("PAN_TOKEN");
+        final String maskedPan = intent.getStringExtra("MASKED_PAN");
+        final String cardType = intent.getStringExtra("CARD_TYPE");
+        tvCardType = findViewById(R.id.tv_card_type);
+        tvMaskedPan = findViewById(R.id.tv_masked_pan);
+        etCvv = findViewById(R.id.et_cvv);
+        btnPay = findViewById(R.id.btn_payment);
+
+        tvCardType.setText(cardType);
+        tvMaskedPan.setText(maskedPan);
+
+        btnPay.setOnClickListener(v -> {
+            SavedCard savedCard = new SavedCard(panToken, etCvv.getText().toString());
+            final Disposable subscribe = orderRepository
+                    .createPayment(false)
+                    .subscribe(handlePaymentSessionResponse(savedCard::toPaymentMethodParams));
+            compositeDisposable.add(subscribe);
+        });
+    }
+
+    private void newCardPaymentViewSetup(Intent intent) {
+        paymentPickerNewCardView.setVisibility(View.VISIBLE);
+        threeDsCard = intent.getBooleanExtra("THREE_DS_CARD", false);
+        addPaymentMethodScenario = intent.getBooleanExtra("ADD_PAYMENT_METHOD_SCENARIO", false);
+        saveCardForFuturePayments = intent.getBooleanExtra("saveCardForFuturePayments", false);
+
         continueWithPayment = findViewById(R.id.continue_with_payment);
         txtViewResult = findViewById(R.id.txt_result_payment_example);
 
@@ -97,8 +164,6 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
 
             compositeDisposable.add(subscribe);
         });
-
-
     }
 
     Consumer<NewPaymentResponse> handlePaymentSessionResponse(Supplier<PaymentMethodParams> paymentMethodParamsSupplier) {
