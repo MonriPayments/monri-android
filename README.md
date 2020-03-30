@@ -5,14 +5,14 @@ Monri has created a Java library for Android, allowing you to easily submit paym
 
 Your app will receive the token back, and can then send the token to an endpoint on your server, where it can be used to process a payment.
 
-We support Android 4.4 (API level 19) and above. The library has no external dependencies other than Google’s [Android Support Libraries](https://developer.android.com/topic/libraries/support-library).
+We support Android 4.4 (API level 19) and above.
 
 ## Installation[](https://monri.com/docs/mobile/android#installation)
 
 Installing the Monri Android library is simple using  [Android Studio](https://developer.android.com/studio/intro)  and  [IntelliJ](https://www.jetbrains.com/help/idea/getting-started-with-android-development.html). You don’t need to clone a repo or download any files. Just add the following to your project’s  `build.gradle`  file, inside the dependencies section.
 
 ```gradle
-implementation 'com.monri:monri-android:1.1.1'
+implementation 'com.monri:monri-android:1.1.3'
 ```
 ## Collecting credit card information[](https://monri.com/docs/mobile/android#collecting-credit-card-information)
 
