@@ -2,10 +2,15 @@ package com.monri.android;
 
 import androidx.annotation.NonNull;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -18,9 +23,11 @@ import retrofit2.Response;
 class MonriApiImpl implements MonriApi {
 
     private final MonriRetrofitApi monriRetrofitApi;
+    private final ObjectMapper objectMapper;
 
-    MonriApiImpl(MonriRetrofitApi monriRetrofitApi) {
+    MonriApiImpl(MonriRetrofitApi monriRetrofitApi, ObjectMapper objectMapper) {
         this.monriRetrofitApi = monriRetrofitApi;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -31,7 +38,7 @@ class MonriApiImpl implements MonriApi {
                 @Override
                 public void onResponse(@NonNull Call<ConfirmPaymentResponse> call,
                                        @NonNull Response<ConfirmPaymentResponse> response) {
-                    callback.onSuccess(response.body());
+                    responseHandler(response, callback);
                 }
 
                 @Override
@@ -46,6 +53,23 @@ class MonriApiImpl implements MonriApi {
 
     }
 
+    private <T> void responseHandler(Response<T> response, ResultCallback<T> callback) {
+        if (response.isSuccessful()) {
+            callback.onSuccess(response.body());
+        } else if (422 == response.code()) {
+            try {
+                String string = response.errorBody().string();
+                ApiException apiException = objectMapper.readValue(string, ApiException.class);
+                callback.onError(apiException);
+            } catch (IOException e) {
+                callback.onError(e);
+            }
+        } else {
+            // TODO: log this case
+            callback.onError(new ApiException(Collections.singletonList("Payment failed")));
+        }
+    }
+
     @Override
     public void paymentStatus(PaymentStatusParams params, ResultCallback<PaymentStatusResponse> callback) {
         try {
@@ -53,8 +77,7 @@ class MonriApiImpl implements MonriApi {
                     .enqueue(new Callback<PaymentStatusResponse>() {
                         @Override
                         public void onResponse(@NonNull Call<PaymentStatusResponse> call, @NonNull Response<PaymentStatusResponse> response) {
-
-                            callback.onSuccess(response.body());
+                            responseHandler(response, callback);
                         }
 
                         @Override

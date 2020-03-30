@@ -109,8 +109,7 @@ public final class Monri {
                 .validateEagerly(true)
                 .build();
 
-
-        this.monriApi = new MonriApiImpl(retrofit.create(MonriRetrofitApi.class));
+        this.monriApi = new MonriApiImpl(retrofit.create(MonriRetrofitApi.class), new ObjectMapper());
         paymentController = new MonriPaymentController(monriApiOptions);
     }
 
