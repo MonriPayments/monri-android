@@ -4,6 +4,8 @@ import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
+import com.monri.android.MonriTextUtils;
+
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -19,7 +21,7 @@ public class ModelUtils {
      * @return {@code true} if the input value consists entirely of integers
      */
     static boolean isWholePositiveNumber(@Nullable String value) {
-        return value != null && TextUtils.isDigitsOnly(value);
+        return value != null && MonriTextUtils.isDigitsOnly(value);
     }
 
     /**
