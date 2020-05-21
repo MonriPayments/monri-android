@@ -46,15 +46,16 @@ public class Card extends PaymentMethod {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-                       AMERICAN_EXPRESS,
-                       DISCOVER,
-                       JCB,
-                       DINERS_CLUB,
-                       VISA,
-                       MASTERCARD,
-                       UNIONPAY,
-                       UNKNOWN
-               })
+            AMERICAN_EXPRESS,
+            DISCOVER,
+            JCB,
+            DINERS_CLUB,
+            VISA,
+            MASTERCARD,
+            MAESTRO,
+            UNIONPAY,
+            UNKNOWN
+    })
     public @interface CardBrand {
     }
 
@@ -64,6 +65,7 @@ public class Card extends PaymentMethod {
     public static final String DINERS_CLUB = "Diners Club";
     public static final String VISA = "Visa";
     public static final String MASTERCARD = "MasterCard";
+    public static final String MAESTRO = "Maestro";
     public static final String UNIONPAY = "UnionPay";
     public static final String UNKNOWN = "Unknown";
 
@@ -82,6 +84,7 @@ public class Card extends PaymentMethod {
                 put(Card.DISCOVER, R.drawable.ic_discover);
                 put(Card.JCB, R.drawable.ic_jcb);
                 put(Card.MASTERCARD, R.drawable.ic_mastercard);
+                put(Card.MAESTRO, R.drawable.ic_maestro);
                 put(Card.VISA, R.drawable.ic_visa);
                 put(Card.UNIONPAY, R.drawable.ic_unionpay);
                 put(Card.UNKNOWN, R.drawable.ic_unknown);
@@ -101,11 +104,8 @@ public class Card extends PaymentMethod {
             "270", "271", "2720",
             "50", "51", "52", "53", "54", "55", "67"
     };
+    public static final String[] PREFIXES_MAESTRO = {"56", "58", "67", "502", "503", "506", "639", "5018", "6020"};
     public static final String[] PREFIXES_UNIONPAY = {"62"};
-
-    public static final int MAX_LENGTH_STANDARD = 16;
-    public static final int MAX_LENGTH_AMERICAN_EXPRESS = 15;
-    public static final int MAX_LENGTH_DINERS_CLUB = 14;
 
     private String number;
     private String cvc;
@@ -113,8 +113,10 @@ public class Card extends PaymentMethod {
     private Integer expYear;
     private boolean tokenizePan;
 
-    @Size(4) private String last4;
-    @CardBrand private String brand;
+    @Size(4)
+    private String last4;
+    @CardBrand
+    private String brand;
 
     /**
      * Converts an unchecked String value to a {@link CardBrand} or {@code null}.
@@ -133,6 +135,8 @@ public class Card extends PaymentMethod {
             return Card.AMERICAN_EXPRESS;
         } else if (Card.MASTERCARD.equalsIgnoreCase(possibleCardType)) {
             return Card.MASTERCARD;
+        } else if (Card.MAESTRO.equalsIgnoreCase(possibleCardType)) {
+            return Card.MAESTRO;
         } else if (Card.DINERS_CLUB.equalsIgnoreCase(possibleCardType)) {
             return Card.DINERS_CLUB;
         } else if (Card.DISCOVER.equalsIgnoreCase(possibleCardType)) {
