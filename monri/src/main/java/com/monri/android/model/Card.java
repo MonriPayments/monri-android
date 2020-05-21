@@ -14,10 +14,8 @@ import com.monri.android.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.monri.android.MonriTextUtils.nullIfBlank;
