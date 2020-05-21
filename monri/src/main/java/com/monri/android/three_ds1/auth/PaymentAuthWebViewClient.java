@@ -131,8 +131,6 @@ public class PaymentAuthWebViewClient extends WebViewClient {
 
         void redirectingToAcs();
 
-        void acsLoadFinished();
-
         void acsAuthenticationFinished();
 
     }
