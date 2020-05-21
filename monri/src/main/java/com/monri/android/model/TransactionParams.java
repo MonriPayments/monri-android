@@ -32,7 +32,7 @@ public class TransactionParams implements Parcelable {
         return new TransactionParams();
     }
 
-    Map<String, String> getData() {
+    public Map<String, String> getData() {
         if (data == null) {
             data = new HashMap<>();
         }

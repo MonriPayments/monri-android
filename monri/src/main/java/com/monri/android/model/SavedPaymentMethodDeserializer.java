@@ -12,7 +12,7 @@ import java.io.IOException;
  * Created by jasminsuljic on 2019-12-12.
  * MonriAndroid
  */
-class SavedPaymentMethodDeserializer extends JsonDeserializer<SavedPaymentMethod> {
+    public class SavedPaymentMethodDeserializer extends JsonDeserializer<SavedPaymentMethod> {
 
     public SavedPaymentMethodDeserializer() {
     }

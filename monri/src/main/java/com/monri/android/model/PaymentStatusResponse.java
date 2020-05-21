@@ -28,6 +28,12 @@ public class PaymentStatusResponse implements Parcelable {
     public PaymentStatusResponse() {
     }
 
+    public PaymentStatusResponse(final PaymentStatus paymentStatus, final String status, @Nullable final PaymentResult paymentResult) {
+        this.paymentStatus = paymentStatus;
+        this.status = status;
+        this.paymentResult = paymentResult;
+    }
+
     @Nullable
     public PaymentResult getPaymentResult() {
         return paymentResult;

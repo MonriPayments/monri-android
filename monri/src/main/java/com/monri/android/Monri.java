@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -12,18 +13,23 @@ import androidx.annotation.VisibleForTesting;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monri.android.exception.MonriException;
+import com.monri.android.http.MonriHttpApi;
+import com.monri.android.http.MonriHttpCallback;
+import com.monri.android.http.MonriHttpAsyncTask;
+import com.monri.android.http.MonriHttpException;
+import com.monri.android.http.MonriHttpResult;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.model.Token;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -109,7 +115,28 @@ public final class Monri {
                 .validateEagerly(true)
                 .build();
 
-        this.monriApi = new MonriApiImpl(retrofit.create(MonriRetrofitApi.class), new ObjectMapper());
+        this.monriApi = new MonriApiImpl(retrofit.create(MonriRetrofitApi.class), new ObjectMapper(), new MonriHttpAsyncTask(new MonriHttpCallback() {
+            @Override
+            public void onSuccess(final MonriHttpResult result) {
+                Toast.makeText(context, result.toString(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(final MonriHttpException error) {
+                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        },
+                new MonriHttpApi(
+                        url,
+                        new HashMap<String, String>() {{
+                            put("Authorization", authorizationHeader);
+                            put("Content-Type", "application/json; charset=UTF-8");
+                            put("Accept", "application/json");
+                        }}
+                )
+          )
+        );
+
         paymentController = new MonriPaymentController(monriApiOptions);
     }
 

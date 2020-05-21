@@ -3,13 +3,13 @@ package com.monri.android;
 import androidx.annotation.NonNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monri.android.http.MonriHttpAsyncTask;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 
 import retrofit2.Call;
@@ -24,10 +24,12 @@ class MonriApiImpl implements MonriApi {
 
     private final MonriRetrofitApi monriRetrofitApi;
     private final ObjectMapper objectMapper;
+    private final MonriHttpAsyncTask monriHttpAsyncTask;
 
-    MonriApiImpl(MonriRetrofitApi monriRetrofitApi, ObjectMapper objectMapper) {
+    MonriApiImpl(MonriRetrofitApi monriRetrofitApi, ObjectMapper objectMapper, MonriHttpAsyncTask monriHttpAsyncTask) {
         this.monriRetrofitApi = monriRetrofitApi;
         this.objectMapper = objectMapper;
+        this.monriHttpAsyncTask = monriHttpAsyncTask;
     }
 
     @Override
@@ -46,6 +48,9 @@ class MonriApiImpl implements MonriApi {
                     callback.onError(t);
                 }
             });
+
+            monriHttpAsyncTask.execute(params.getPaymentId());
+
         } catch (Exception e) {
             callback.onError(e);
         }

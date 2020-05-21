@@ -47,6 +47,25 @@ public class PaymentResult implements Parcelable {
     public PaymentResult() {
     }
 
+    public PaymentResult(final String status,
+                         final String currency,
+                         final Integer amount,
+                         final String orderNumber,
+                         @Nullable final String panToken,
+                         final String createdAt,
+                         final String transactionType,
+                         final SavedPaymentMethod paymentMethod,
+                         final List<String> errors) {
+        this.status = status;
+        this.currency = currency;
+        this.amount = amount;
+        this.orderNumber = orderNumber;
+        this.panToken = panToken;
+        this.createdAt = createdAt;
+        this.transactionType = transactionType;
+        this.paymentMethod = paymentMethod;
+        this.errors = errors;
+    }
 
     public String getStatus() {
         return status;
