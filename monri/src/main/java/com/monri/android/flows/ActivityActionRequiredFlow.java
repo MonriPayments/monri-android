@@ -5,14 +5,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
 import com.monri.android.MonriApi;
@@ -27,7 +25,6 @@ import com.monri.android.three_ds1.auth.PaymentAuthWebView;
 import com.monri.android.three_ds1.auth.PaymentAuthWebViewClient;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 /**
  * Created by jasminsuljic on 2019-12-09.
@@ -114,17 +111,6 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
         executeIfStatus(InvokationState.HANDLE_RESULT, InvokationState.REDIRECTING_TO_ACS, () -> {
             logger.info("redirectingToAcs");
-            executeOnUiThread(() -> {
-                webView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
-            });
-        });
-    }
-
-    @Override
-    public void acsLoadFinished() {
-        executeIfStatus(InvokationState.REDIRECTING_TO_ACS, InvokationState.ACS_LOAD_FINISHED, () -> {
-            logger.info("acsLoadFinished");
             executeOnUiThread(() -> {
                 webView.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
