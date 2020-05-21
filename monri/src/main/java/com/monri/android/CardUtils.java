@@ -103,7 +103,7 @@ public class CardUtils {
      * the card. This function does not perform a Luhn check.
      *
      * @param cardNumber the card number with no spaces or dashes
-     * @param cardBrand  a {@link Card.CardBrand} used to get the correct size
+     * @param cardBrand a {@link Card.CardBrand} used to get the correct size
      * @return {@code true} if the card number is the correct length for the assumed brand
      */
     public static boolean isValidCardLength(
