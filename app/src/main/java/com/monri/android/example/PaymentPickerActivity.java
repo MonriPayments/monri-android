@@ -86,7 +86,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
         setContentView(R.layout.activity_payment_picker);
 
         orderRepository = new OrderRepository(this, this);
-        monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
+        monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), OrderRepository.MONRI_DEBUG_MODE));
 
         Intent intent = getIntent();
         boolean newCardPayment = intent.getBooleanExtra("NEW_CARD_PAYMENT", true);

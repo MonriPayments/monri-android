@@ -8,6 +8,7 @@ import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.Token;
 
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
