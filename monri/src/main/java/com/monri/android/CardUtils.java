@@ -6,6 +6,12 @@ import androidx.annotation.Nullable;
 
 import com.monri.android.model.Card;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static com.monri.android.model.Card.MAESTRO;
+import static com.monri.android.model.Card.VISA;
+
 /**
  * Created by jasminsuljic on 19/03/2019.
  * huhuandroid
@@ -14,6 +20,8 @@ public class CardUtils {
     private static final int LENGTH_COMMON_CARD = 16;
     private static final int LENGTH_AMERICAN_EXPRESS = 15;
     private static final int LENGTH_DINERS_CLUB = 14;
+    private static final List<Integer> MAESTRO_CARD_LENGTH = Arrays.asList(12, 13, 14, 15, 16, 17, 18, 19);
+    private static final List<Integer> VISA_CARD_LENGTH = Arrays.asList(16, 19);
 
     /**
      * Returns a {@link Card.CardBrand} corresponding to a partial card number,
@@ -111,6 +119,10 @@ public class CardUtils {
                 return length == LENGTH_AMERICAN_EXPRESS;
             case Card.DINERS_CLUB:
                 return length == LENGTH_DINERS_CLUB;
+            case MAESTRO:
+                return MAESTRO_CARD_LENGTH.contains(length);
+            case VISA:
+                return VISA_CARD_LENGTH.contains(length);
             default:
                 return length == LENGTH_COMMON_CARD;
         }
@@ -138,7 +150,9 @@ public class CardUtils {
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DINERS_CLUB)) {
             return Card.DINERS_CLUB;
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_VISA)) {
-            return Card.VISA;
+            return VISA;
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_MAESTRO)) {
+            return MAESTRO;
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_MASTERCARD)) {
             return Card.MASTERCARD;
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_UNIONPAY)) {
