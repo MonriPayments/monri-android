@@ -181,10 +181,15 @@ class ViewUtils {
     @NonNull
     static String[] separateCardNumberGroups(@NonNull String spacelessCardNumber,
                                              @NonNull @Card.CardBrand String brand) {
-        if (spacelessCardNumber.length() > 16) {
+        //todo update this for MAESTRO.. just add one more condition
+        if(Card.VISA.equals(brand) && spacelessCardNumber.length() > 19){
+            spacelessCardNumber = spacelessCardNumber.substring(0, 19);
+        }else if (!Card.VISA.equals(brand) && spacelessCardNumber.length() > 16) {
             spacelessCardNumber = spacelessCardNumber.substring(0, 16);
         }
+
         String[] numberGroups;
+
         if (brand.equals(Card.AMERICAN_EXPRESS)) {
             numberGroups = new String[3];
 
@@ -209,7 +214,7 @@ class ViewUtils {
             }
 
         } else {
-            numberGroups = new String[4];
+            numberGroups = new String[5];
             int i = 0;
             int previousStart = 0;
             while ((i + 1) * 4 < spacelessCardNumber.length()) {

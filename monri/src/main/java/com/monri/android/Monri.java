@@ -115,29 +115,28 @@ public final class Monri {
                 .validateEagerly(true)
                 .build();
 
-        this.monriApi = new MonriApiImpl(retrofit.create(MonriRetrofitApi.class), new ObjectMapper(), new MonriHttpAsyncTask(new MonriHttpCallback() {
-            @Override
-            public void onSuccess(final MonriHttpResult result) {
-                Toast.makeText(context, result.toString(), Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onError(final MonriHttpException error) {
-                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        },
-                new MonriHttpApi(
-                        url,
-                        new HashMap<String, String>() {{
-                            put("Authorization", authorizationHeader);
-                            put("Content-Type", "application/json; charset=UTF-8");
-                            put("Accept", "application/json");
-                        }}
-                )
-          )
+        this.monriApi = new MonriApiImpl(retrofit.create(MonriRetrofitApi.class), new ObjectMapper(),
+                getMonriHttpApi(url, getHttpHeaders(authorizationHeader))
         );
 
         paymentController = new MonriPaymentController(monriApiOptions);
+    }
+
+
+    private MonriHttpApi getMonriHttpApi(final String baseUrl, final Map<String, String> headers) {
+        return new MonriHttpApi(
+                baseUrl,
+                headers
+        );
+    }
+
+
+    private Map<String, String> getHttpHeaders(final String auth) {
+        return new HashMap<String, String>() {{
+            put("Authorization", auth);
+            put("Content-Type", "application/json; charset=UTF-8");
+            put("Accept", "application/json");
+        }};
     }
 
     public void createToken(@NonNull TokenRequest tokenRequest, @NonNull PaymentMethod paymentMethod, @NonNull final TokenCallback callback) {
@@ -210,4 +209,6 @@ public final class Monri {
             this.token = null;
         }
     }
+
+
 }

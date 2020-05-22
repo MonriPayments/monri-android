@@ -21,7 +21,7 @@ public class ConfirmPaymentParams implements Parcelable {
     @JsonProperty("transaction") private
     TransactionParams transaction;
 
-    public ConfirmPaymentParams(String paymentId, PaymentMethodParams paymentMethod, TransactionParams transaction) {
+    private ConfirmPaymentParams(String paymentId, PaymentMethodParams paymentMethod, TransactionParams transaction) {
         this.paymentId = paymentId;
         this.paymentMethod = paymentMethod;
         this.transaction = transaction;

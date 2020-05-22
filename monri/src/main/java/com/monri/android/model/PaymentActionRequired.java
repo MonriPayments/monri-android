@@ -23,6 +23,11 @@ public class PaymentActionRequired implements Parcelable {
     public PaymentActionRequired() {
     }
 
+    public PaymentActionRequired(final String redirectTo, final String acsUrl) {
+        this.redirectTo = redirectTo;
+        this.acsUrl = acsUrl;
+    }
+
     public PaymentActionRequired setRedirectTo(String redirectTo) {
         this.redirectTo = redirectTo;
         return this;

@@ -31,6 +31,13 @@ public class ConfirmPaymentResponse implements Parcelable {
     public ConfirmPaymentResponse() {
     }
 
+    public ConfirmPaymentResponse(final PaymentStatus status, final PaymentActionRequired actionRequired, final PaymentResult paymentResult, final String id) {
+        this.status = status;
+        this.actionRequired = actionRequired;
+        this.paymentResult = paymentResult;
+        this.id = id;
+    }
+
     public PaymentStatus getStatus() {
         return status;
     }
