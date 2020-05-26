@@ -159,8 +159,8 @@ public class MonriHttpApi {
 
         String idFromResponse = null;
 
-        if (confirmPaymentResponseJSON.has("id")) {
-            idFromResponse = confirmPaymentResponseJSON.getString("id");
+        if (confirmPaymentResponseJSON.has("client_secret")) {
+            idFromResponse = confirmPaymentResponseJSON.getString("client_secret");
         }
 
        return new ConfirmPaymentResponse(status, paymentActionRequired, paymentResult, idFromResponse);

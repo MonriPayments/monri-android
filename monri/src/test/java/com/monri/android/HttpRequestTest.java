@@ -30,21 +30,17 @@ public class HttpRequestTest{
     }
 
     @Test
-    public void fromJSONToConfirmPaymentResponse(){
-        try {
+    public void fromJSONToConfirmPaymentResponse() throws JSONException {
             final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApi.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONString));
             Assert.assertNull(confirmPaymentResponse.getId());
             Assert.assertNotNull(confirmPaymentResponse.getPaymentResult());
             Assert.assertNotNull(confirmPaymentResponse.getStatus());
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
 
     @Test
-    public void fromConfirmPaymentParamsToJSON(){
+    public void fromConfirmPaymentParamsToJSON() throws JSONException {
         final CustomerParams customerParams = new CustomerParams()
                 .setAddress("Adresa")
                 .setFullName("Tester Testerovic")
@@ -62,14 +58,10 @@ public class HttpRequestTest{
                         .set(customerParams)
                 );
 
-        try {
             final JSONObject jsonObject = MonriHttpApi.confirmPaymentParamsToJSON(confirmPaymentParams);
             Assert.assertTrue(jsonObject.has("payment_method"));
             Assert.assertFalse(jsonObject.has("_payment_method"));
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
 
