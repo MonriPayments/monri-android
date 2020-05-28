@@ -3,9 +3,8 @@ package com.monri.android;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.os.Bundle;
 
-import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -313,7 +312,7 @@ public class MonriHttpTest {
     }
 
     @Test
-    public void createPaymentWithMonriTest() throws InterruptedException, ExecutionException {
+    public void createPaymentSessionAndTestConfirmPaymentActivity() throws InterruptedException, ExecutionException {//run with debug and then normal run to avoid null pointer exception on callback in MonriHttpAsyncTask
         appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         String clientSecretTMP = "";
 
@@ -385,33 +384,44 @@ public class MonriHttpTest {
         clientSecretTMP = createPaymentAsync.execute().get();
 
         //TODO first you have to create payment.. this code above
-       testWithConfirmPaymentActivity(getConfirmPaymentParams(clientSecretTMP));
+       testConfirmPaymentActivity(getConfirmPaymentParams(clientSecretTMP));
 
     }
 
-    private void testWithConfirmPaymentActivity(final ConfirmPaymentParams confirmPaymentParams) throws InterruptedException {
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
+    private void testConfirmPaymentActivity(final ConfirmPaymentParams confirmPaymentParams) throws InterruptedException, ExecutionException {
+
         final AtomicReference<ActivityScenario<Activity>> testConfirmPaymentsActivity = new AtomicReference<ActivityScenario<Activity>>();
 
-        AsyncTask.execute(()->{
-            testConfirmPaymentsActivity.set(ActivityScenario.launch(
-                    ConfirmPaymentActivity.createIntent(appContext, confirmPaymentParams, MonriApiOptions.create(getAuthenticityToken(), true))
-            ));
+        AsyncTask<Void,Void,Void> launchActivity = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(final Void... voids) {
+                testConfirmPaymentsActivity.set(ActivityScenario.launch(
+                        ConfirmPaymentActivity.createIntent(appContext, confirmPaymentParams, MonriApiOptions.create(getAuthenticityToken(), true))
+                ));
 
-        });
+                return null;
+            }
 
-        countDownLatch.await(20,TimeUnit.SECONDS);
+        };
 
-        //Assert.assertTrue(countDownLatch.await(30,TimeUnit.SECONDS));
-        testConfirmPaymentsActivity.get().moveToState(Lifecycle.State.DESTROYED);
+        launchActivity.execute().get();
 
         Assert.assertEquals(Activity.RESULT_OK,testConfirmPaymentsActivity.get().getResult().getResultCode());
-        Assert.assertNull(testConfirmPaymentsActivity.get().getResult().getResultData().getParcelableExtra(PaymentResult.BUNDLE_NAME));
+
+        final Bundle bundle = testConfirmPaymentsActivity.get().getResult().getResultData().getExtras();
+        bundle.setClassLoader(PaymentResult.class.getClassLoader());
+
+        final PaymentResult paymentResult = bundle.getParcelable(PaymentResult.BUNDLE_NAME);
+        Assert.assertNotNull(paymentResult);
+        Assert.assertNotNull(paymentResult.getStatus());
+        Assert.assertNotNull(paymentResult.getCurrency());
+        Assert.assertNotNull(paymentResult.getAmount());
+        Assert.assertNotNull(paymentResult.getOrderNumber());
+        Assert.assertNotNull(paymentResult.getCreatedAt());
 
         testConfirmPaymentsActivity.get().close();
 
     }
-
 
 
 }
