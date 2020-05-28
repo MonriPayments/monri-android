@@ -3,17 +3,13 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
  */
 public class PaymentActionRequired implements Parcelable {
-    @JsonProperty("redirect_to")
     private String redirectTo;
 
-    @JsonProperty("acs_url")
     private String acsUrl;
 
     public PaymentActionRequired(String redirectTo) {

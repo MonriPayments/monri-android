@@ -3,18 +3,14 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Created by jasminsuljic on 2019-12-12.
  * MonriAndroid
  */
 public class SavedCardPaymentMethod extends SavedPaymentMethod {
-    @JsonProperty("type") private
-    String type;
+    private String type;
 
-    @JsonProperty("data") private
-    Data data;
+    private Data data;
 
     public SavedCardPaymentMethod(String type, Data data) {
         this.type = type;

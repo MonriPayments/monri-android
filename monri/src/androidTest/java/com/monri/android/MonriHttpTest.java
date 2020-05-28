@@ -312,7 +312,7 @@ public class MonriHttpTest {
     }
 
     @Test
-    public void createPaymentSessionAndTestConfirmPaymentActivity() throws InterruptedException, ExecutionException {//run with debug and then normal run to avoid null pointer exception on callback in MonriHttpAsyncTask
+    public void createPaymentSessionAndTestConfirmPaymentActivity() throws InterruptedException, ExecutionException {
         appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         String clientSecretTMP = "";
 

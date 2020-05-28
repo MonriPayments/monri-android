@@ -3,23 +3,14 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
  */
 public class ConfirmPaymentResponse implements Parcelable {
-    @JsonProperty("status")
     private PaymentStatus status;
-
-    @JsonProperty("action_required")
     private PaymentActionRequired actionRequired;
-
-    @JsonProperty("payment_result")
     private PaymentResult paymentResult;
-
-    @JsonProperty("id")
     private String id;
 
     public ConfirmPaymentResponse(PaymentStatus status, PaymentActionRequired actionRequired, PaymentResult paymentResult) {

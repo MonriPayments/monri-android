@@ -72,16 +72,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    implementation 'androidx.annotation:annotation:1.1.0'
-
-    //Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
-
-    //Retrofit converters
-    implementation 'com.squareup.retrofit2:converter-jackson:2.6.2'
-
-    //Retrofit interceptors
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.2'
+    implementation "androidx.annotation:annotation:${rootProject.ext.annotationVersion}"
 
     implementation "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"

@@ -3,18 +3,15 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
  */
 public class MonriApiOptions implements Parcelable {
-    @JsonProperty("authenticity_token")
-    String authenticityToken;
+    private String authenticityToken;
 
-    @JsonProperty("development_mode")
-    boolean developmentMode;
+    private boolean developmentMode;
 
     public MonriApiOptions() {
     }

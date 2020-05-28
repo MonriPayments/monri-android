@@ -1,8 +1,5 @@
 package com.monri.android.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +33,7 @@ public enum PaymentStatus {
         return status;
     }
 
-    @JsonCreator
+    //@JsonCreator
     public static PaymentStatus forValue(String value) {
         if (value == null) {
             return null;
@@ -44,7 +41,7 @@ public enum PaymentStatus {
         return namesMap.get(value.toLowerCase());
     }
 
-    @JsonValue
+    //@JsonValue
     public String toValue() {
         for (Map.Entry<String, PaymentStatus> entry : namesMap.entrySet()) {
             if (entry.getValue() == this)

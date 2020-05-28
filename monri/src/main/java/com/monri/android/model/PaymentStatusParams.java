@@ -3,15 +3,12 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Created by jasminsuljic on 2019-12-12.
  * MonriAndroid
  */
 public class PaymentStatusParams implements Parcelable {
-    @JsonProperty("client_secret")
-    String clientSecret;
+    private String clientSecret;
 
     public PaymentStatusParams(String clientSecret) {
         this.clientSecret = clientSecret;
@@ -23,7 +20,6 @@ public class PaymentStatusParams implements Parcelable {
     public String getClientSecret() {
         return clientSecret;
     }
-
 
     @Override
     public int describeContents() {

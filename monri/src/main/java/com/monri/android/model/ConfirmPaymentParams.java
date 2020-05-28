@@ -3,23 +3,17 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
  */
 public class ConfirmPaymentParams implements Parcelable {
 
-    @JsonIgnore private
-    String paymentId;
+    private String paymentId;
 
-    @JsonProperty("payment_method") private
-    PaymentMethodParams paymentMethod;
+    private PaymentMethodParams paymentMethod;
 
-    @JsonProperty("transaction") private
-    TransactionParams transaction;
+    private TransactionParams transaction;
 
     private ConfirmPaymentParams(String paymentId, PaymentMethodParams paymentMethod, TransactionParams transaction) {
         this.paymentId = paymentId;
