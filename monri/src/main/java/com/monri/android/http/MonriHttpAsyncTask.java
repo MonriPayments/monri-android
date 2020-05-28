@@ -2,6 +2,8 @@ package com.monri.android.http;
 
 import android.os.AsyncTask;
 
+import androidx.annotation.NonNull;
+
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.PaymentStatusParams;
@@ -15,7 +17,7 @@ public class MonriHttpAsyncTask extends AsyncTask<MonriHttpRequest, Void, MonriA
     private final MonriHttpApi monriHttpApi;
 
 
-    public MonriHttpAsyncTask(MonriHttpCallback callback, MonriHttpApi monriHttpApi) {
+    public MonriHttpAsyncTask(@NonNull MonriHttpCallback callback, @NonNull MonriHttpApi monriHttpApi) {
         this.callback = new WeakReference<>(callback);
         this.monriHttpApi = monriHttpApi;
     }
@@ -45,7 +47,7 @@ public class MonriHttpAsyncTask extends AsyncTask<MonriHttpRequest, Void, MonriA
                     ConfirmPaymentParams paymentParams = (ConfirmPaymentParams) request.getRequestData();
 
                     final MonriHttpResult<ConfirmPaymentResponse> confirmPaymentResult
-                            = monriHttpApi.confirmPayment(paymentParams.getPaymentId(), paymentParams);
+                            = monriHttpApi.confirmPayment(paymentParams);
                     if (confirmPaymentResult.getCause() != null) {
                         return MonriAsyncTaskResult.failed(confirmPaymentResult.getCause());
                     }

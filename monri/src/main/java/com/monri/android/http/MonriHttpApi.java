@@ -1,7 +1,5 @@
 package com.monri.android.http;
 
-import android.util.Log;
-
 import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.model.ConfirmPaymentParams;
@@ -14,19 +12,18 @@ import com.monri.android.model.PaymentStatusResponse;
 import com.monri.android.model.SavedCardPaymentMethod;
 import com.monri.android.model.TransactionParams;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,32 +32,45 @@ public class MonriHttpApi {
     private final String baseUrl;
     private final Map<String, String> headers;
 
+    private HttpURLConnection createHttpURLConnection(final String endpoint,
+                                                      final MonriHttpMethod monriHttpMethod) throws IOException {
+        URL url = new URL(endpoint);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod(monriHttpMethod.getValue());
+
+        switch (monriHttpMethod) {
+            case GET:
+                break;
+            case POST:
+                urlConnection.setDoInput(true);//Allow Inputs
+                urlConnection.setDoOutput(true);//Allow Outputs
+                urlConnection.setChunkedStreamingMode(0);
+                urlConnection.setUseCaches(false);//Don't use a cached Copy
+                break;
+            default:
+        }
+
+        for (String key : headers.keySet()) {
+            urlConnection.setRequestProperty(key, headers.get(key));
+        }
+
+        return urlConnection;
+
+    }
+
     public MonriHttpApi(final String baseUrl, final Map<String, String> headers) {
         this.baseUrl = baseUrl;
         this.headers = headers;
     }
 
     //post v2/payment/{id}/confirm
-   public MonriHttpResult<ConfirmPaymentResponse> confirmPayment(String id, ConfirmPaymentParams confirmPaymentParams) {
-
+    public MonriHttpResult<ConfirmPaymentResponse> confirmPayment(ConfirmPaymentParams confirmPaymentParams) {
         HttpURLConnection urlConnection = null;
 
         try {
             final JSONObject confirmPaymentParamsJSON = confirmPaymentParamsToJSON(confirmPaymentParams);
 
-            URL url = new URL(baseUrl + "/v2/payment/" + id + "/confirm");
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
-
-            urlConnection.setDoInput(true);//Allow Inputs
-            urlConnection.setDoOutput(true);//Allow Outputs
-            urlConnection.setChunkedStreamingMode(0);
-            urlConnection.setUseCaches(false);//Don't use a cached Copy
-
-            //headers
-            for (String key : headers.keySet()) {
-                urlConnection.setRequestProperty(key, headers.get(key));
-            }
+            urlConnection = createHttpURLConnection(baseUrl + "/v2/payment/" + confirmPaymentParams.getPaymentId() + "/confirm",MonriHttpMethod.POST);
 
             OutputStreamWriter wr = null;
 
@@ -104,16 +114,10 @@ public class MonriHttpApi {
 
     //get v2/payment/{id}/status
     public MonriHttpResult<PaymentStatusResponse> paymentStatus(String id) {
+
         HttpURLConnection urlConnection = null;
         try {
-            // Instantiate the RequestQueue.
-            URL url = new URL(baseUrl + "/v2/payment/" + id + "/status");
-            urlConnection= (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            //headers
-            for (String key : headers.keySet()) {
-                urlConnection.setRequestProperty(key, headers.get(key));
-            }
+            urlConnection = createHttpURLConnection(baseUrl + "/v2/payment/" + id + "/status",MonriHttpMethod.GET);
 
             try {
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
@@ -124,6 +128,7 @@ public class MonriHttpApi {
                 }
 
                 final JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
+
                 return MonriHttpResult.success(paymentStatusResponseJSONToClass(jsonResponse));
 
             } finally {
@@ -139,7 +144,7 @@ public class MonriHttpApi {
     }
 
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    @VisibleForTesting
     public static ConfirmPaymentResponse ConfirmPaymentResponseJSONToClass(final JSONObject confirmPaymentResponseJSON) throws JSONException {
         final PaymentStatus status = PaymentStatus.forValue(confirmPaymentResponseJSON.getString("status"));
 
@@ -163,7 +168,7 @@ public class MonriHttpApi {
             idFromResponse = confirmPaymentResponseJSON.getString("client_secret");
         }
 
-       return new ConfirmPaymentResponse(status, paymentActionRequired, paymentResult, idFromResponse);
+        return new ConfirmPaymentResponse(status, paymentActionRequired, paymentResult, idFromResponse);
     }
 
     @VisibleForTesting
