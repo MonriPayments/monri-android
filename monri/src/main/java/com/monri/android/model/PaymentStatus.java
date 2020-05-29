@@ -33,7 +33,6 @@ public enum PaymentStatus {
         return status;
     }
 
-    //@JsonCreator
     public static PaymentStatus forValue(String value) {
         if (value == null) {
             return null;
@@ -41,7 +40,6 @@ public enum PaymentStatus {
         return namesMap.get(value.toLowerCase());
     }
 
-    //@JsonValue
     public String toValue() {
         for (Map.Entry<String, PaymentStatus> entry : namesMap.entrySet()) {
             if (entry.getValue() == this)

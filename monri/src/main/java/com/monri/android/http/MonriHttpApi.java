@@ -12,6 +12,7 @@ import com.monri.android.model.PaymentStatusResponse;
 import com.monri.android.model.SavedCardPaymentMethod;
 import com.monri.android.model.TransactionParams;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -70,7 +71,7 @@ public class MonriHttpApi {
         try {
             final JSONObject confirmPaymentParamsJSON = confirmPaymentParamsToJSON(confirmPaymentParams);
 
-            urlConnection = createHttpURLConnection(baseUrl + "/v2/payment/" + confirmPaymentParams.getPaymentId() + "/confirm",MonriHttpMethod.POST);
+            urlConnection = createHttpURLConnection(baseUrl + "/v2/payment/" + confirmPaymentParams.getPaymentId() + "/confirm", MonriHttpMethod.POST);
 
             OutputStreamWriter wr = null;
 
@@ -117,7 +118,7 @@ public class MonriHttpApi {
 
         HttpURLConnection urlConnection = null;
         try {
-            urlConnection = createHttpURLConnection(baseUrl + "/v2/payment/" + id + "/status",MonriHttpMethod.GET);
+            urlConnection = createHttpURLConnection(baseUrl + "/v2/payment/" + id + "/status", MonriHttpMethod.GET);
 
             try {
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
@@ -194,11 +195,17 @@ public class MonriHttpApi {
         final String paymentStatusCurrency = paymentResultJSON.getString("currency");
         final Integer paymentStatusAmount = paymentResultJSON.getInt("amount");
         final String paymentStatusOrderNumber = paymentResultJSON.getString("order_number");
-        final String paymentStatusPanToken = paymentResultJSON.getString("pan_token");
+
+        String paymentStatusPanToken = "null";
+
+        if (paymentResultJSON.has("pan_token")) {
+            paymentStatusPanToken = paymentResultJSON.getString("pan_token");
+        }
+
         final String paymentStatusCreatedAt = paymentResultJSON.getString("created_at");
         final String paymentStatusTransactionType = paymentResultJSON.getString("transaction_type");
 
-        SavedCardPaymentMethod savedCardPaymentMethod = new SavedCardPaymentMethod();
+        SavedCardPaymentMethod savedCardPaymentMethod = null;
 
         if (paymentResultJSON.has("payment_method")) {
             final JSONObject paymentStatusPaymentMethodJSON = paymentResultJSON.getJSONObject("payment_method");
@@ -217,12 +224,18 @@ public class MonriHttpApi {
             );
         }
 
-        List<String> paymentStatusErrors = new ArrayList<>();
+        List<String> paymentStatusErrors = null;
 
         if (paymentResultJSON.has("errors")) {
-            paymentStatusErrors = (List<String>) paymentResultJSON.getJSONArray("errors");
+            paymentStatusErrors = new ArrayList<>();
+            JSONArray jsonArray = paymentResultJSON.getJSONArray("errors");
+            if (jsonArray != null) {
+                int len = jsonArray.length();
+                for (int i=0;i<len;i++){
+                    paymentStatusErrors.add(jsonArray.get(i).toString());
+                }
+            }
         }
-
 
         PaymentResult paymentResult = new PaymentResult(
                 paymentStatusResult,
