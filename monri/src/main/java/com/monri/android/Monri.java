@@ -23,7 +23,6 @@ import java.util.concurrent.Executor;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -97,10 +96,6 @@ public final class Monri {
 
             return chain.proceed(request);
         });
-
-//        final HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
-//        httpLoggingInterceptor.level(HttpLoggingInterceptor.Level.BODY);
-//        httpClientBuilder.addInterceptor(httpLoggingInterceptor);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(url)

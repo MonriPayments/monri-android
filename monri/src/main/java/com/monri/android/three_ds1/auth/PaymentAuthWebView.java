@@ -1,6 +1,5 @@
 package com.monri.android.three_ds1.auth;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.webkit.WebView;
@@ -14,10 +13,6 @@ public class PaymentAuthWebView extends WebView {
         super(context);
     }
 
-    public void initialize(Activity activity, String paymentId) {
-
-    }
-
     public PaymentAuthWebView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -26,7 +21,4 @@ public class PaymentAuthWebView extends WebView {
         super(context, attrs, defStyleAttr);
     }
 
-    public void cleanUp() {
-        destroy();
-    }
 }
