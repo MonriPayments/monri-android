@@ -1,5 +1,6 @@
 package com.monri.android.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -56,6 +57,7 @@ public class ExpiryDateEditText extends MonriEditText {
      * @return an {@code int} array of the form {month, year} if the date is valid, or {@code null}
      * if it is not
      */
+    @SuppressLint("Range")
     @Nullable
     @Size(2)
     public int[] getValidDateFields() {
