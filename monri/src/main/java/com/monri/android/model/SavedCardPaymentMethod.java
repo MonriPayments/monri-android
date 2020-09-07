@@ -41,7 +41,7 @@ public class SavedCardPaymentMethod extends SavedPaymentMethod {
         return data;
     }
 
-    static class Data implements Parcelable {
+    public static class Data implements Parcelable {
         String brand;
         String issuer;
         String masked;

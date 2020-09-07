@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * MonriAndroid
  */
 @JsonDeserialize(using = SavedPaymentMethodDeserializer.class)
-public abstract class SavedPaymentMethod implements Parcelable {
+public abstract class SavedPaymentMethod<T extends Parcelable> implements Parcelable {
     public abstract String getType();
 
-    public abstract Parcelable getData();
+    public abstract T getData();
 }
