@@ -42,7 +42,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     private final MonriLogger logger = MonriLoggerFactory.get(ActivityActionRequiredFlow.class);
 
 
-    private InvokationState invokationState = InvokationState.CALLBACK_NOT_INVOKED;
+    private InvocationState invocationState = InvocationState.CALLBACK_NOT_INVOKED;
 
     @SuppressLint("SetJavaScriptEnabled")
     public ActivityActionRequiredFlow(Activity activity, PaymentAuthWebView webView, ProgressBar progressBar, MonriApi monriApi) {
@@ -78,7 +78,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     @Override
     public void handleResult(ConfirmPaymentResponse confirmPaymentResponse) {
 
-        executeIfStatus(InvokationState.CALLBACK_NOT_INVOKED, InvokationState.HANDLE_RESULT, () -> {
+        executeIfStatus(InvocationState.CALLBACK_NOT_INVOKED, InvocationState.HANDLE_RESULT, () -> {
             final String acsUrl = confirmPaymentResponse.getActionRequired().getAcsUrl();
             logger.info("Handle result invoked with acsUrl = [%s]", acsUrl);
             client.setAcsUrl(acsUrl);
@@ -93,11 +93,11 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     @Override
     public void threeDs1Result(String status, String clientSecret) {
 
-        executeIfStatus(InvokationState.ACS_AUTHENTICATION_FINISHED, InvokationState.THREE_DS_RESULT, () -> {
+        executeIfStatus(InvocationState.ACS_AUTHENTICATION_FINISHED, InvocationState.THREE_DS_RESULT, () -> {
             logger.info("ThreeDs1Result, status = %s, clientSecret = %s", status, clientSecret);
             atomicInteger.set(0);
             executeOnUiThread(() -> {
-                progressBar.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
                 webView.setVisibility(View.GONE);
             });
 
@@ -109,7 +109,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     @Override
     public void redirectingToAcs() {
 
-        executeIfStatus(InvokationState.HANDLE_RESULT, InvokationState.REDIRECTING_TO_ACS, () -> {
+        executeIfStatus(InvocationState.HANDLE_RESULT, InvocationState.REDIRECTING_TO_ACS, () -> {
             logger.info("redirectingToAcs");
             executeOnUiThread(() -> {
                 webView.setVisibility(View.VISIBLE);
@@ -120,7 +120,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
     @Override
     public void acsAuthenticationFinished() {
-        executeIfStatus(InvokationState.REDIRECTING_TO_ACS, InvokationState.ACS_AUTHENTICATION_FINISHED, () -> {
+        executeIfStatus(InvocationState.REDIRECTING_TO_ACS, InvocationState.ACS_AUTHENTICATION_FINISHED, () -> {
             logger.info("acsAuthenticationFinished");
             executeOnUiThread(() -> {
                 webView.setVisibility(View.INVISIBLE);
@@ -131,12 +131,12 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     }
 
 
-    private void executeIfStatus(InvokationState state, InvokationState newState, Runnable runnable) {
-        if (invokationState != state) {
-            logger.warn("Tried changing to state = [%s] from state [%s], currentState = [%s]", newState.name(), state.name(), invokationState.name());
+    private void executeIfStatus(InvocationState state, InvocationState newState, Runnable runnable) {
+        if (invocationState != state) {
+            logger.warn("Tried changing to state = [%s] from state [%s], currentState = [%s]", newState.name(), state.name(), invocationState.name());
         } else {
             logger.info("Changing state to state = [%s] from currentState = [%s]", newState.name(), state.name());
-            this.invokationState = newState;
+            this.invocationState = newState;
             runnable.run();
         }
     }
@@ -172,7 +172,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
         }
     }
 
-    enum InvokationState {
+    enum InvocationState {
         CALLBACK_NOT_INVOKED,
         THREE_DS_RESULT,
         REDIRECTING_TO_ACS,
