@@ -21,6 +21,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Converter;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
+
 import static com.monri.android.MonriConfig.PROD_ENV_HOST;
 import static com.monri.android.MonriConfig.TEST_ENV_HOST;
 
