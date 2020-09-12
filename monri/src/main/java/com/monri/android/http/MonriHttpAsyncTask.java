@@ -29,7 +29,7 @@ public class MonriHttpAsyncTask extends AsyncTask<MonriHttpRequest, Void, MonriA
 
             final MonriHttpRequest request = requests[0];
 
-            switch (request.getHttpCallType()){
+            switch (request.getHttpCallType()) {
                 case PAYMENT_STATUS:
 
                     PaymentStatusParams statusParams = (PaymentStatusParams) request.getRequestData();
@@ -55,7 +55,8 @@ public class MonriHttpAsyncTask extends AsyncTask<MonriHttpRequest, Void, MonriA
                     final ConfirmPaymentResponse paymentStatusResponse1 = confirmPaymentResult.getResult();
                     return MonriAsyncTaskResult.success(MonriHttpResult.success(paymentStatusResponse1));
 
-                default: throw new IllegalArgumentException("Call type is not supported");
+                default:
+                    throw new IllegalArgumentException("Call type is not supported");
             }
 
 

@@ -1,16 +1,12 @@
 package com.monri.android;
 
-import android.os.Parcelable;
-
-import com.monri.android.http.MonriHttpApi;
+import com.monri.android.http.MonriHttpApiImpl;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.CustomerParams;
-import com.monri.android.model.PaymentActionRequired;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.model.SavedCardPaymentMethod;
-import com.monri.android.model.SavedPaymentMethod;
 import com.monri.android.model.TransactionParams;
 
 import org.json.JSONException;
@@ -18,8 +14,7 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertNotNull;
 
 
 public class HttpRequestTest {
@@ -39,101 +34,99 @@ public class HttpRequestTest {
                 .setCountry("BA")
                 .setEmail("tester+android_sdk@monri.com");
 
-        ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(
+        return ConfirmPaymentParams.create(
                 "b4a3091dc077eada68bca86fbb5e2f524d5a889d",
                 new Card("4111 1111 1111 1111", 12, 2024, "123").toPaymentMethodParams(),
                 TransactionParams.create()
                         .set("order_info", "Android SDK payment session")
                         .set(customerParams)
         );
-
-        return confirmPaymentParams;
     }
 
 
     @Test
     public void fromJSONToConfirmPaymentResponseWithoutPmAndErrors() throws JSONException {
-        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApi.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutPmAndErrors));
-        Assert.assertNotNull(confirmPaymentResponse.getPaymentResult());
-        Assert.assertNotNull(confirmPaymentResponse.getStatus());
+        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutPmAndErrors));
+        assertNotNull(confirmPaymentResponse.getPaymentResult());
+        assertNotNull(confirmPaymentResponse.getStatus());
         Assert.assertNull(confirmPaymentResponse.getActionRequired());
 
         final PaymentResult paymentResult = confirmPaymentResponse.getPaymentResult();
-        Assert.assertNotNull(paymentResult.getCreatedAt());
-        Assert.assertNotNull(paymentResult.getOrderNumber());
-        Assert.assertNotNull(paymentResult.getAmount());
-        Assert.assertNotNull(paymentResult.getCurrency());
-        Assert.assertNotNull(paymentResult.getStatus());
+        assertNotNull(paymentResult.getCreatedAt());
+        assertNotNull(paymentResult.getOrderNumber());
+        assertNotNull(paymentResult.getAmount());
+        assertNotNull(paymentResult.getCurrency());
+        assertNotNull(paymentResult.getStatus());
 
         Assert.assertNull(paymentResult.getErrors());
 
-        Assert.assertNotNull(paymentResult.getCreatedAt());
-        Assert.assertNotNull(paymentResult.getPanToken());
-        Assert.assertNotNull(paymentResult.getTransactionType());
+        assertNotNull(paymentResult.getCreatedAt());
+        assertNotNull(paymentResult.getPanToken());
+        assertNotNull(paymentResult.getTransactionType());
         Assert.assertNull(paymentResult.getPaymentMethod());
 
     }
 
     @Test
     public void fromJSONToConfirmPaymentResponseWithoutErrors() throws JSONException {
-        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApi.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutErrors));
-        Assert.assertNotNull(confirmPaymentResponse.getPaymentResult());
-        Assert.assertNotNull(confirmPaymentResponse.getStatus());
+        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutErrors));
+        assertNotNull(confirmPaymentResponse.getPaymentResult());
+        assertNotNull(confirmPaymentResponse.getStatus());
 
         Assert.assertNull(confirmPaymentResponse.getActionRequired());
 
         final PaymentResult paymentResult = confirmPaymentResponse.getPaymentResult();
-        Assert.assertNotNull(paymentResult.getCreatedAt());
-        Assert.assertNotNull(paymentResult.getOrderNumber());
-        Assert.assertNotNull(paymentResult.getAmount());
-        Assert.assertNotNull(paymentResult.getCurrency());
-        Assert.assertNotNull(paymentResult.getStatus());
+        assertNotNull(paymentResult.getCreatedAt());
+        assertNotNull(paymentResult.getOrderNumber());
+        assertNotNull(paymentResult.getAmount());
+        assertNotNull(paymentResult.getCurrency());
+        assertNotNull(paymentResult.getStatus());
 
         Assert.assertNull(paymentResult.getErrors());
 
-        Assert.assertNotNull(paymentResult.getCreatedAt());
-        Assert.assertNotNull(paymentResult.getPanToken());
-        Assert.assertNotNull(paymentResult.getTransactionType());
+        assertNotNull(paymentResult.getCreatedAt());
+        assertNotNull(paymentResult.getPanToken());
+        assertNotNull(paymentResult.getTransactionType());
 
         final SavedCardPaymentMethod paymentMethod = (SavedCardPaymentMethod) paymentResult.getPaymentMethod();
-        Assert.assertNotNull(paymentMethod);
+        assertNotNull(paymentMethod);
         final SavedCardPaymentMethod.Data data = paymentMethod.getData();
-        Assert.assertNotNull(data);
+        assertNotNull(data);
         final String brand = data.getBrand();
-        Assert.assertNotNull(brand);
-        Assert.assertEquals("visa",brand);
+        assertNotNull(brand);
+        Assert.assertEquals("visa", brand);
     }
 
     @Test
     public void fromJSONToConfirmPaymentResponse() throws JSONException {
-        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApi.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONString));
-        Assert.assertNotNull(confirmPaymentResponse.getPaymentResult());
-        Assert.assertNotNull(confirmPaymentResponse.getStatus());
+        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONString));
+        assertNotNull(confirmPaymentResponse.getPaymentResult());
+        assertNotNull(confirmPaymentResponse.getStatus());
 
         Assert.assertNull(confirmPaymentResponse.getActionRequired());
 
         final PaymentResult paymentResult = confirmPaymentResponse.getPaymentResult();
-        Assert.assertNotNull(paymentResult.getCreatedAt());
-        Assert.assertNotNull(paymentResult.getOrderNumber());
-        Assert.assertNotNull(paymentResult.getAmount());
-        Assert.assertNotNull(paymentResult.getCurrency());
-        Assert.assertNotNull(paymentResult.getStatus());
+        assertNotNull(paymentResult.getCreatedAt());
+        assertNotNull(paymentResult.getOrderNumber());
+        assertNotNull(paymentResult.getAmount());
+        assertNotNull(paymentResult.getCurrency());
+        assertNotNull(paymentResult.getStatus());
 
-        Assert.assertNotNull(paymentResult.getErrors());
+        assertNotNull(paymentResult.getErrors());
 
-        Assert.assertEquals("error1",paymentResult.getErrors().get(0));
+        Assert.assertEquals("error1", paymentResult.getErrors().get(0));
 
-        Assert.assertNotNull(paymentResult.getCreatedAt());
-        Assert.assertNotNull(paymentResult.getPanToken());
-        Assert.assertNotNull(paymentResult.getTransactionType());
+        assertNotNull(paymentResult.getCreatedAt());
+        assertNotNull(paymentResult.getPanToken());
+        assertNotNull(paymentResult.getTransactionType());
 
         final SavedCardPaymentMethod paymentMethod = (SavedCardPaymentMethod) paymentResult.getPaymentMethod();
-        Assert.assertNotNull(paymentMethod);
+        assertNotNull(paymentMethod);
         final SavedCardPaymentMethod.Data data = paymentMethod.getData();
-        Assert.assertNotNull(data);
+        assertNotNull(data);
         final String brand = data.getBrand();
-        Assert.assertNotNull(brand);
-        Assert.assertEquals("visa",brand);
+        assertNotNull(brand);
+        Assert.assertEquals("visa", brand);
     }
 
     @Test
@@ -141,7 +134,7 @@ public class HttpRequestTest {
 
         final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams();
 
-        final JSONObject jsonObject = MonriHttpApi.confirmPaymentParamsToJSON(confirmPaymentParams);
+        final JSONObject jsonObject = MonriHttpApiImpl.confirmPaymentParamsToJSON(confirmPaymentParams);
         Assert.assertTrue(jsonObject.has("payment_method"));
         Assert.assertFalse(jsonObject.has("_payment_method"));
 

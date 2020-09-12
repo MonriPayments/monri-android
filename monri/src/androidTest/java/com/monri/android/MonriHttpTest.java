@@ -10,7 +10,7 @@ import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.monri.android.activity.ConfirmPaymentActivity;
-import com.monri.android.http.MonriHttpApi;
+import com.monri.android.http.MonriHttpApiImpl;
 import com.monri.android.http.MonriHttpMethod;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
@@ -203,7 +203,7 @@ public class MonriHttpTest {
 
                 try {
 
-                    final JSONObject confirmPaymentParamsJSON = MonriHttpApi.confirmPaymentParamsToJSON(getConfirmPaymentParams());
+                    final JSONObject confirmPaymentParamsJSON = MonriHttpApiImpl.confirmPaymentParamsToJSON(getConfirmPaymentParams());
 
                     final HttpURLConnection httpURLConnection = createHttpURLConnection(
                             baseUrl + "/v2/payment/" + clientSecretId + "/confirm",

@@ -11,6 +11,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.exception.MonriException;
 import com.monri.android.http.MonriHttpApi;
+import com.monri.android.http.MonriHttpApiImpl;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;
@@ -20,12 +21,6 @@ import com.monri.android.model.Token;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import retrofit2.Converter;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import static com.monri.android.MonriConfig.PROD_ENV_HOST;
 import static com.monri.android.MonriConfig.TEST_ENV_HOST;
@@ -87,9 +82,8 @@ public final class Monri {
         paymentController = new MonriPaymentController(monriApiOptions);
     }
 
-
     private MonriHttpApi getMonriHttpApi(final String baseUrl, final Map<String, String> headers) {
-        return new MonriHttpApi(
+        return new MonriHttpApiImpl(
                 baseUrl,
                 headers
         );
