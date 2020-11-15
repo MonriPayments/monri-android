@@ -34,7 +34,7 @@ public class PaymentAuthWebViewClient extends WebViewClient {
 
     private String acsHost;
 
-    private static final MonriLogger logger = MonriLoggerFactory.get(PaymentAuthWebViewClient.class);
+    private static final MonriLogger logger = MonriLoggerFactory.get("PaymentAuthWebViewClient");
 
     public PaymentAuthWebViewClient(Delegate delegate) {
         this.delegate = delegate;
