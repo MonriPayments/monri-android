@@ -39,7 +39,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
     private final AtomicInteger atomicInteger = new AtomicInteger();
     private final PaymentAuthWebViewClient client;
-    private final MonriLogger logger = MonriLoggerFactory.get("ActivityActionRequiredFlow");
+    private final MonriLogger logger = MonriLoggerFactory.get("ActivityActReqFlow");
 
 
     private InvokationState invokationState = InvokationState.CALLBACK_NOT_INVOKED;

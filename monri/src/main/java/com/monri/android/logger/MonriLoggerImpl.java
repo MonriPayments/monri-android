@@ -11,7 +11,7 @@ class MonriLoggerImpl implements MonriLogger {
     private final String tag;
 
     MonriLoggerImpl(String targetClass) {
-        this.tag = targetClass.length() > 24 ? targetClass.substring(0, 24) : targetClass;
+        this.tag = targetClass.length() > 20 ? targetClass.substring(0, 20) : targetClass;
     }
 
     @Override
