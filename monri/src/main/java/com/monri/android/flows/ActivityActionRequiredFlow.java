@@ -80,7 +80,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
         executeIfStatus(InvokationState.CALLBACK_NOT_INVOKED, InvokationState.HANDLE_RESULT, () -> {
             final String acsUrl = confirmPaymentResponse.getActionRequired().getAcsUrl();
-            logger.info("Handle result invoked with acsUrl = [%s]", acsUrl);
+            logger.info(String.format("Handle result invoked with acsUrl = [%s]", acsUrl));
             client.setAcsUrl(acsUrl);
             executeOnUiThread(() -> {
                 webView.setVisibility(View.INVISIBLE);
@@ -94,7 +94,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     public void threeDs1Result(String status, String clientSecret) {
 
         executeIfStatus(InvokationState.ACS_AUTHENTICATION_FINISHED, InvokationState.THREE_DS_RESULT, () -> {
-            logger.info("ThreeDs1Result, status = %s, clientSecret = %s", status, clientSecret);
+            logger.info(String.format("ThreeDs1Result, status = %s, clientSecret = %s", status, clientSecret));
             atomicInteger.set(0);
             executeOnUiThread(() -> {
                 progressBar.setVisibility(View.INVISIBLE);
@@ -133,9 +133,9 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
     private void executeIfStatus(InvokationState state, InvokationState newState, Runnable runnable) {
         if (invokationState != state) {
-            logger.warn("Tried changing to state = [%s] from state [%s], currentState = [%s]", newState.name(), state.name(), invokationState.name());
+            logger.warn(String.format("Tried changing to state = [%s] from state [%s], currentState = [%s]", newState.name(), state.name(), invokationState.name()));
         } else {
-            logger.info("Changing state to state = [%s] from currentState = [%s]", newState.name(), state.name());
+            logger.info(String.format("Changing state to state = [%s] from currentState = [%s]", newState.name(), state.name()));
             this.invokationState = newState;
             runnable.run();
         }

@@ -6,13 +6,13 @@ package com.monri.android.logger;
  */
 public interface MonriLogger {
 
-    void info(String message, Object... args);
+    void info(String message);
 
-    void trace(String message, Object... args);
+    void trace(String message);
 
-    void warn(String message, Object... args);
+    void warn(String message);
 
-    void error(String message, Object... args);
+    void error(String message);
 
-    void fatal(String message, Object... args);
+    void fatal(String message);
 }

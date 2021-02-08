@@ -15,27 +15,35 @@ class MonriLoggerImpl implements MonriLogger {
     }
 
     @Override
-    public void info(String message, Object... args) {
-        Log.i(tag, String.format(message, args));
+    public void info(String message) {
+        tryLogAndContinue(() -> Log.i(tag, message));
     }
 
     @Override
-    public void trace(String message, Object... args) {
-        Log.i(tag, String.format(message, args));
+    public void trace(String message) {
+        tryLogAndContinue(() -> Log.i(tag, message));
+    }
+
+    private void tryLogAndContinue(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            Log.w("Logger", String.format("Logging message failed %s", e.getMessage()));
+        }
     }
 
     @Override
-    public void warn(String message, Object... args) {
-        Log.w(tag, String.format(message, args));
+    public void warn(String message) {
+        tryLogAndContinue(() -> Log.w(tag, message));
     }
 
     @Override
-    public void error(String message, Object... args) {
-        Log.e(tag, String.format(message, args));
+    public void error(String message) {
+        tryLogAndContinue(() -> Log.e(tag, message));
     }
 
     @Override
-    public void fatal(String message, Object... args) {
-        Log.wtf(tag, String.format(message, args));
+    public void fatal(String message) {
+        tryLogAndContinue(() -> Log.wtf(tag, message));
     }
 }

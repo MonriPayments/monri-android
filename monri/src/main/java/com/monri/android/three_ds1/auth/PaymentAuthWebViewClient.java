@@ -43,7 +43,7 @@ public class PaymentAuthWebViewClient extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
 
-        logger.trace("onPageFinished url [%s]", url);
+        logger.trace(String.format("onPageFinished url [%s]", url));
         if (url.contains(acsHost)) {
 //            delegate.acsLoadFinished();
         }
@@ -96,14 +96,14 @@ public class PaymentAuthWebViewClient extends WebViewClient {
         }
 
         if (interceptedRequest) {
-            logger.trace("intercepted url [%s]", url);
+            logger.trace(String.format("intercepted url [%s]", url));
             if (url.contains("/client_redirect")) {
                 delegate.redirectingToAcs();
             } else if (url.contains("/client_return")) {
                 delegate.acsAuthenticationFinished();
             }
         } else {
-            logger.trace("shouldOverrideUrlLoading url = [%s]", url);
+            logger.trace(String.format("shouldOverrideUrlLoading url = [%s]",  url));
             if (url.contains("v2/payment/hooks/3ds1")) {
                 delegate.threeDs1Result(uri.getQueryParameter("status"), uri.getQueryParameter("client_secret"));
             }
