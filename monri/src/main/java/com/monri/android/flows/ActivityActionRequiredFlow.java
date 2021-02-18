@@ -42,7 +42,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     private final MonriLogger logger = MonriLoggerFactory.get("ActivityActReqFlow");
 
 
-    private InvocationState invocationState = InvocationState.CALLBACK_NOT_INVOKED;
+    private InvokationState invokationState = InvokationState.CALLBACK_NOT_INVOKED;
 
     @SuppressLint("SetJavaScriptEnabled")
     public ActivityActionRequiredFlow(Activity activity, PaymentAuthWebView webView, ProgressBar progressBar, MonriApi monriApi) {
@@ -78,7 +78,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     @Override
     public void handleResult(ConfirmPaymentResponse confirmPaymentResponse) {
 
-        executeIfStatus(InvocationState.CALLBACK_NOT_INVOKED, InvocationState.HANDLE_RESULT, () -> {
+        executeIfStatus(InvokationState.CALLBACK_NOT_INVOKED, InvokationState.HANDLE_RESULT, () -> {
             final String acsUrl = confirmPaymentResponse.getActionRequired().getAcsUrl();
             logger.info(String.format("Handle result invoked with acsUrl = [%s]", acsUrl));
             client.setAcsUrl(acsUrl);
@@ -97,7 +97,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
             logger.info(String.format("ThreeDs1Result, status = %s, clientSecret = %s", status, clientSecret));
             atomicInteger.set(0);
             executeOnUiThread(() -> {
-                progressBar.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.INVISIBLE);
                 webView.setVisibility(View.GONE);
             });
 
@@ -109,7 +109,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     @Override
     public void redirectingToAcs() {
 
-        executeIfStatus(InvocationState.HANDLE_RESULT, InvocationState.REDIRECTING_TO_ACS, () -> {
+        executeIfStatus(InvokationState.HANDLE_RESULT, InvokationState.REDIRECTING_TO_ACS, () -> {
             logger.info("redirectingToAcs");
             executeOnUiThread(() -> {
                 webView.setVisibility(View.VISIBLE);
@@ -120,7 +120,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
     @Override
     public void acsAuthenticationFinished() {
-        executeIfStatus(InvocationState.REDIRECTING_TO_ACS, InvocationState.ACS_AUTHENTICATION_FINISHED, () -> {
+        executeIfStatus(InvokationState.REDIRECTING_TO_ACS, InvokationState.ACS_AUTHENTICATION_FINISHED, () -> {
             logger.info("acsAuthenticationFinished");
             executeOnUiThread(() -> {
                 webView.setVisibility(View.INVISIBLE);
@@ -172,7 +172,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
         }
     }
 
-    enum InvocationState {
+    enum InvokationState {
         CALLBACK_NOT_INVOKED,
         THREE_DS_RESULT,
         REDIRECTING_TO_ACS,

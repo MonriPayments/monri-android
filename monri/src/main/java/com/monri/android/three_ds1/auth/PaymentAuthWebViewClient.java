@@ -52,31 +52,32 @@ public class PaymentAuthWebViewClient extends WebViewClient {
     }
 
 
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        loadingUrlChange(request.getUrl(), true, "shouldInterceptRequest");
+        loadingUrlChange(request.getUrl(), true);
         return super.shouldInterceptRequest(view, request);
     }
 
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        loadingUrlChange(Uri.parse(url), true, "shouldInterceptRequest");
+        loadingUrlChange(Uri.parse(url), true);
         return super.shouldInterceptRequest(view, url);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        loadingUrlChange(request.getUrl(), false, "shouldOverrideUrlLoading");
+        loadingUrlChange(request.getUrl(), false);
         return super.shouldOverrideUrlLoading(view, request);
     }
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        loadingUrlChange(Uri.parse(url), false, "shouldOverrideUrlLoading");
+        loadingUrlChange(Uri.parse(url), false);
         return super.shouldOverrideUrlLoading(view, url);
     }
 
@@ -85,11 +86,12 @@ public class PaymentAuthWebViewClient extends WebViewClient {
     }
 
 
-    private void loadingUrlChange(Uri uri, boolean interceptedRequest, String method) {
+    private void loadingUrlChange(Uri uri, boolean interceptedRequest) {
         final String url = uri.toString();
 
+
         if (!validateHost(url)) {
-            Log.d("PaymentAuthWebClient", "Host validation failed, invoked for " + method);
+            Log.d("PaymentAuthWebClient", "Host validation failed");
             return;
         }
 
@@ -103,12 +105,7 @@ public class PaymentAuthWebViewClient extends WebViewClient {
         } else {
             logger.trace(String.format("shouldOverrideUrlLoading url = [%s]",  url));
             if (url.contains("v2/payment/hooks/3ds1")) {
-                if (!threeDs1ResultInvoked) {
-                    threeDs1ResultInvoked = true;
-                    delegate.threeDs1Result(uri.getQueryParameter("status"), uri.getQueryParameter("client_secret"));
-                } else {
-                    logger.trace("attempted invoking threeDs1Result again for url = [%s] from method = [%s]", url, method);
-                }
+                delegate.threeDs1Result(uri.getQueryParameter("status"), uri.getQueryParameter("client_secret"));
             }
         }
     }
