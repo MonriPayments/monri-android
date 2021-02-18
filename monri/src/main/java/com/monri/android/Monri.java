@@ -95,13 +95,6 @@ public final class Monri {
         );
     }
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(monriApiOptions.url())
-                .addConverterFactory(converterFactory)
-                .client(httpClientBuilder.build())
-                .validateEagerly(true)
-                .build();
-
     private Map<String, String> getHttpHeaders(final String auth) {
         return new HashMap<String, String>() {{
             put("Authorization", auth);
