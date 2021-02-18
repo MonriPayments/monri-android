@@ -72,11 +72,6 @@ public class Card extends PaymentMethod {
     public static final int CVC_LENGTH_AMERICAN_EXPRESS = 4;
     public static final int CVC_LENGTH_COMMON = 3;
 
-    public static final String FUNDING_CREDIT = "credit";
-    public static final String FUNDING_DEBIT = "debit";
-    public static final String FUNDING_PREPAID = "prepaid";
-    public static final String FUNDING_UNKNOWN = "unknown";
-
     public static final Map<String, Integer> BRAND_RESOURCE_MAP =
             new HashMap<String, Integer>() {{
                 put(Card.AMERICAN_EXPRESS, R.drawable.ic_amex);
@@ -117,40 +112,6 @@ public class Card extends PaymentMethod {
     private String last4;
     @CardBrand
     private String brand;
-
-    /**
-     * Converts an unchecked String value to a {@link CardBrand} or {@code null}.
-     *
-     * @param possibleCardType a String that might match a {@link CardBrand} or be empty.
-     * @return {@code null} if the input is blank, else the appropriate {@link CardBrand}.
-     */
-    @Nullable
-    @CardBrand
-    public static String asCardBrand(@Nullable String possibleCardType) {
-        if (possibleCardType == null || TextUtils.isEmpty(possibleCardType.trim())) {
-            return null;
-        }
-
-        if (Card.AMERICAN_EXPRESS.equalsIgnoreCase(possibleCardType)) {
-            return Card.AMERICAN_EXPRESS;
-        } else if (Card.MASTERCARD.equalsIgnoreCase(possibleCardType)) {
-            return Card.MASTERCARD;
-        } else if (Card.MAESTRO.equalsIgnoreCase(possibleCardType)) {
-            return Card.MAESTRO;
-        } else if (Card.DINERS_CLUB.equalsIgnoreCase(possibleCardType)) {
-            return Card.DINERS_CLUB;
-        } else if (Card.DISCOVER.equalsIgnoreCase(possibleCardType)) {
-            return Card.DISCOVER;
-        } else if (Card.JCB.equalsIgnoreCase(possibleCardType)) {
-            return Card.JCB;
-        } else if (Card.VISA.equalsIgnoreCase(possibleCardType)) {
-            return Card.VISA;
-        } else if (Card.UNIONPAY.equalsIgnoreCase(possibleCardType)) {
-            return Card.UNIONPAY;
-        } else {
-            return Card.UNKNOWN;
-        }
-    }
 
     /**
      * Convenience constructor for a Card object with a minimum number of inputs.

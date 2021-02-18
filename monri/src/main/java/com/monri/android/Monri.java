@@ -24,6 +24,11 @@ import java.util.concurrent.Executor;
 
 import static com.monri.android.MonriConfig.PROD_ENV_HOST;
 import static com.monri.android.MonriConfig.TEST_ENV_HOST;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Converter;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by jasminsuljic on 2019-08-21.
@@ -38,14 +43,14 @@ public final class Monri {
     private final PaymentController paymentController;
     @VisibleForTesting
     private
-    TokenCreator mTokenCreator = (tokenParams, executor, callback) -> {
+    TokenCreator mTokenCreator = (apiOptions, tokenParams, executor, callback) -> {
         @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, ResponseWrapper> task =
                 new AsyncTask<Void, Void, ResponseWrapper>() {
                     @Override
                     protected ResponseWrapper doInBackground(Void... params) {
                         try {
                             Token token = MonriApiHandler.createToken(
-                                    tokenParams
+                                    apiOptions,tokenParams
                             );
                             return new ResponseWrapper(token);
                         } catch (MonriException e) {
@@ -65,7 +70,7 @@ public final class Monri {
 
     @Deprecated
     public Monri(Context context, String authenticityToken) {
-        this(context, MonriApiOptions.create(authenticityToken, true));
+        this(context, MonriApiOptions.create(authenticityToken, false));
     }
 
     public Monri(Context context, MonriApiOptions monriApiOptions) {
@@ -74,6 +79,7 @@ public final class Monri {
         this.apiOptions = monriApiOptions;
 
         String url = monriApiOptions.isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
+        final OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
 
         final String authorizationHeader = String.format("WP3-v2-Client %s", apiOptions.getAuthenticityToken());
 
@@ -89,6 +95,12 @@ public final class Monri {
         );
     }
 
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(monriApiOptions.url())
+                .addConverterFactory(converterFactory)
+                .client(httpClientBuilder.build())
+                .validateEagerly(true)
+                .build();
 
     private Map<String, String> getHttpHeaders(final String auth) {
         return new HashMap<String, String>() {{
@@ -102,7 +114,7 @@ public final class Monri {
 
         try {
             final CreateTokenRequest createTokenRequest = CreateTokenRequest.create(paymentMethod, tokenRequest, authenticityToken);
-            mTokenCreator.create(createTokenRequest.toJson(), null, callback);
+            mTokenCreator.create(apiOptions,createTokenRequest.toJson(), null, callback);
         } catch (Exception e) {
             callback.onError(e);
         }
@@ -149,7 +161,7 @@ public final class Monri {
 
     @VisibleForTesting
     interface TokenCreator {
-        void create(Map<String, Object> params,
+        void create(MonriApiOptions apiOptions, Map<String, Object> params,
                     Executor executor,
                     TokenCallback callback);
     }

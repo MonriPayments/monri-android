@@ -11,6 +11,7 @@ import com.monri.android.exception.CardException;
 import com.monri.android.exception.InvalidRequestException;
 import com.monri.android.exception.PermissionException;
 import com.monri.android.exception.RateLimitException;
+import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.Token;
 
 import org.json.JSONArray;
@@ -50,6 +51,8 @@ public class MonriApiHandler {
     /**
      * Create a {@link Token} using the input token parameters.
      *
+     *
+     * @param apiOptions
      * @param tokenParams a mapped set of parameters representing the object for which this token
      *                    is being created
      * @return a {@link Token} that can be used to perform other operations with this card
@@ -62,20 +65,19 @@ public class MonriApiHandler {
     @Nullable
     @SuppressWarnings("unchecked")
     static Token createToken(
-            @NonNull Map<String, Object> tokenParams)
+            MonriApiOptions apiOptions, @NonNull Map<String, Object> tokenParams)
             throws AuthenticationException,
             InvalidRequestException,
             APIConnectionException,
             CardException,
             APIException {
 
-        return requestToken(getApiUrl(), tokenParams);
+        return requestToken(getApiUrl(apiOptions), tokenParams);
     }
 
 
-    @VisibleForTesting
-    static String getApiUrl() {
-        return String.format(Locale.ENGLISH, "%s/v2/%s", API_BASE, TOKENS);
+    static String getApiUrl(MonriApiOptions options) {
+        return String.format(Locale.ENGLISH, "%s/v2/%s", options.url(), TOKENS);
     }
 
     /**
@@ -255,7 +257,7 @@ public class MonriApiHandler {
                                     + "If this problem persists, you should check Monri's "
                                     + "service status at https://twitter.com/monristatus, "
                                     + "or let us know at support@monri.com.",
-                            getApiUrl(), e.getMessage()), e);
+                            url, e.getMessage()), e);
         } finally {
             if (conn != null) {
                 conn.disconnect();

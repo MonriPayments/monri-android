@@ -11,6 +11,12 @@ import android.os.Parcelable;
 public class MonriApiOptions implements Parcelable {
     private String authenticityToken;
 
+    private static final String TEST_ENV_HOST = "https://ipgtest.monri.com";
+    private static final String PROD_ENV_HOST = "https://ipg.monri.com";
+
+    @JsonProperty("authenticity_token")
+    String authenticityToken;
+
     private boolean developmentMode;
 
     public MonriApiOptions() {
@@ -31,6 +37,10 @@ public class MonriApiOptions implements Parcelable {
 
     public static MonriApiOptions create(String authenticityToken, boolean developmentMode) {
         return new MonriApiOptions(authenticityToken, developmentMode);
+    }
+
+    public String url() {
+        return isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
     }
 
     @Override

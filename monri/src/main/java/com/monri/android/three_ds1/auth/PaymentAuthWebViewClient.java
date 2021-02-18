@@ -34,7 +34,7 @@ public class PaymentAuthWebViewClient extends WebViewClient {
 
     private String acsHost;
 
-    private static final MonriLogger logger = MonriLoggerFactory.get(PaymentAuthWebViewClient.class);
+    private static final MonriLogger logger = MonriLoggerFactory.get("PaymentAuthWebViewClient");
 
     public PaymentAuthWebViewClient(Delegate delegate) {
         this.delegate = delegate;
@@ -43,7 +43,7 @@ public class PaymentAuthWebViewClient extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
 
-        logger.trace("onPageFinished url [%s]", url);
+        logger.trace(String.format("onPageFinished url [%s]", url));
         if (url.contains(acsHost)) {
 //            delegate.acsLoadFinished();
         }
@@ -52,32 +52,31 @@ public class PaymentAuthWebViewClient extends WebViewClient {
     }
 
 
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        loadingUrlChange(request.getUrl(), true);
+        loadingUrlChange(request.getUrl(), true, "shouldInterceptRequest");
         return super.shouldInterceptRequest(view, request);
     }
 
     @Nullable
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-        loadingUrlChange(Uri.parse(url), true);
+        loadingUrlChange(Uri.parse(url), true, "shouldInterceptRequest");
         return super.shouldInterceptRequest(view, url);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        loadingUrlChange(request.getUrl(), false);
+        loadingUrlChange(request.getUrl(), false, "shouldOverrideUrlLoading");
         return super.shouldOverrideUrlLoading(view, request);
     }
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        loadingUrlChange(Uri.parse(url), false);
+        loadingUrlChange(Uri.parse(url), false, "shouldOverrideUrlLoading");
         return super.shouldOverrideUrlLoading(view, url);
     }
 
@@ -86,26 +85,30 @@ public class PaymentAuthWebViewClient extends WebViewClient {
     }
 
 
-    private void loadingUrlChange(Uri uri, boolean interceptedRequest) {
+    private void loadingUrlChange(Uri uri, boolean interceptedRequest, String method) {
         final String url = uri.toString();
 
-
         if (!validateHost(url)) {
-            Log.d("PaymentAuthWebClient", "Host validation failed");
+            Log.d("PaymentAuthWebClient", "Host validation failed, invoked for " + method);
             return;
         }
 
         if (interceptedRequest) {
-            logger.trace("intercepted url [%s]", url);
+            logger.trace(String.format("intercepted url [%s]", url));
             if (url.contains("/client_redirect")) {
                 delegate.redirectingToAcs();
             } else if (url.contains("/client_return")) {
                 delegate.acsAuthenticationFinished();
             }
         } else {
-            logger.trace("shouldOverrideUrlLoading url = [%s]", url);
+            logger.trace(String.format("shouldOverrideUrlLoading url = [%s]",  url));
             if (url.contains("v2/payment/hooks/3ds1")) {
-                delegate.threeDs1Result(uri.getQueryParameter("status"), uri.getQueryParameter("client_secret"));
+                if (!threeDs1ResultInvoked) {
+                    threeDs1ResultInvoked = true;
+                    delegate.threeDs1Result(uri.getQueryParameter("status"), uri.getQueryParameter("client_secret"));
+                } else {
+                    logger.trace("attempted invoking threeDs1Result again for url = [%s] from method = [%s]", url, method);
+                }
             }
         }
     }
