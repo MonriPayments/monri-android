@@ -5,7 +5,7 @@ package com.monri.android.logger;
  * MonriAndroid
  */
 public class MonriLoggerFactory {
-    public static MonriLogger get(Class targetClass) {
+    public static MonriLogger get(String targetClass) {
         return new MonriLoggerImpl(targetClass);
     }
 }

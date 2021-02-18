@@ -8,6 +8,9 @@ import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.model.PaymentStatus;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +36,11 @@ public class PaymentErrorFlowImpl implements PaymentErrorFlow {
             messages.addAll(((ApiException) throwable).getErrors());
         } else {
             // TODO: improve errors api
-            messages.add("Uncaught exception occurred");
+            messages.add(String.format("Unknown exception occurred, class = [%s]", throwable.getClass().getName()));
+            messages.add(String.format("Message = [%s]", throwable.getMessage()));
+            Writer writer = new StringWriter();
+            throwable.printStackTrace(new PrintWriter(writer));
+            messages.add(String.format("Stack trace = [%s]", writer.toString()));
         }
 
         PaymentResult paymentResult = new PaymentResult(PaymentStatus.DECLINED.getStatus(), messages);

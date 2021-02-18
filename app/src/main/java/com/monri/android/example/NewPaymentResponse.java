@@ -17,6 +17,11 @@ class NewPaymentResponse {
         this.clientSecret = clientSecret;
     }
 
+    public NewPaymentResponse(String clientSecret, String status) {
+        this.clientSecret = clientSecret;
+        this.status = status;
+    }
+
     public NewPaymentResponse() {
     }
 

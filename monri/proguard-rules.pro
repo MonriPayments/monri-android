@@ -19,6 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keep public enum com.monri.** {
+  *;
+}
 -keep public class com.monri.** {
   public protected private *;
 }

@@ -34,8 +34,7 @@ public class PaymentAuthWebViewClient extends WebViewClient {
 
     private String acsHost;
 
-    private static final MonriLogger logger = MonriLoggerFactory.get(PaymentAuthWebViewClient.class);
-    private boolean threeDs1ResultInvoked;
+    private static final MonriLogger logger = MonriLoggerFactory.get("PaymentAuthWebViewClient");
 
     public PaymentAuthWebViewClient(Delegate delegate) {
         this.delegate = delegate;
@@ -44,8 +43,10 @@ public class PaymentAuthWebViewClient extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
 
-        logger.trace("onPageFinished url [%s]", url);
-        loadingUrlChange(Uri.parse(url), false, "onPageFinished");
+        logger.trace(String.format("onPageFinished url [%s]", url));
+        if (url.contains(acsHost)) {
+//            delegate.acsLoadFinished();
+        }
 
         super.onPageFinished(view, url);
     }
@@ -93,14 +94,14 @@ public class PaymentAuthWebViewClient extends WebViewClient {
         }
 
         if (interceptedRequest) {
-            logger.trace("loadingUrlChange, intercepted = TRUE for url = [%s] from method [%s]", url, method);
+            logger.trace(String.format("intercepted url [%s]", url));
             if (url.contains("/client_redirect")) {
                 delegate.redirectingToAcs();
             } else if (url.contains("/client_return")) {
                 delegate.acsAuthenticationFinished();
             }
         } else {
-            logger.trace("loadingUrlChange, intercepted = FALSE for url = [%s] from method [%s]", url, method);
+            logger.trace(String.format("shouldOverrideUrlLoading url = [%s]",  url));
             if (url.contains("v2/payment/hooks/3ds1")) {
                 if (!threeDs1ResultInvoked) {
                     threeDs1ResultInvoked = true;

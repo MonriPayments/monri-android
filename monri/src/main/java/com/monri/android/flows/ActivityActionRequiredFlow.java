@@ -39,7 +39,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
     private final AtomicInteger atomicInteger = new AtomicInteger();
     private final PaymentAuthWebViewClient client;
-    private final MonriLogger logger = MonriLoggerFactory.get(ActivityActionRequiredFlow.class);
+    private final MonriLogger logger = MonriLoggerFactory.get("ActivityActReqFlow");
 
 
     private InvocationState invocationState = InvocationState.CALLBACK_NOT_INVOKED;
@@ -80,7 +80,7 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
         executeIfStatus(InvocationState.CALLBACK_NOT_INVOKED, InvocationState.HANDLE_RESULT, () -> {
             final String acsUrl = confirmPaymentResponse.getActionRequired().getAcsUrl();
-            logger.info("Handle result invoked with acsUrl = [%s]", acsUrl);
+            logger.info(String.format("Handle result invoked with acsUrl = [%s]", acsUrl));
             client.setAcsUrl(acsUrl);
             executeOnUiThread(() -> {
                 webView.setVisibility(View.INVISIBLE);
@@ -93,8 +93,8 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     @Override
     public void threeDs1Result(String status, String clientSecret) {
 
-        executeIfStatus(InvocationState.ACS_AUTHENTICATION_FINISHED, InvocationState.THREE_DS_RESULT, () -> {
-            logger.info("ThreeDs1Result, status = %s, clientSecret = %s", status, clientSecret);
+        executeIfStatus(InvokationState.ACS_AUTHENTICATION_FINISHED, InvokationState.THREE_DS_RESULT, () -> {
+            logger.info(String.format("ThreeDs1Result, status = %s, clientSecret = %s", status, clientSecret));
             atomicInteger.set(0);
             executeOnUiThread(() -> {
                 progressBar.setVisibility(View.VISIBLE);
@@ -131,12 +131,12 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     }
 
 
-    private void executeIfStatus(InvocationState state, InvocationState newState, Runnable runnable) {
-        if (invocationState != state) {
-            logger.warn("Tried changing to state = [%s] from state [%s], currentState = [%s]", newState.name(), state.name(), invocationState.name());
+    private void executeIfStatus(InvokationState state, InvokationState newState, Runnable runnable) {
+        if (invokationState != state) {
+            logger.warn(String.format("Tried changing to state = [%s] from state [%s], currentState = [%s]", newState.name(), state.name(), invokationState.name()));
         } else {
-            logger.info("Changing state to state = [%s] from currentState = [%s]", newState.name(), state.name());
-            this.invocationState = newState;
+            logger.info(String.format("Changing state to state = [%s] from currentState = [%s]", newState.name(), state.name()));
+            this.invokationState = newState;
             runnable.run();
         }
     }
