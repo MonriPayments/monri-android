@@ -11,14 +11,19 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.http.MonriHttpApiImpl;
+import com.monri.android.http.MonriHttpException;
+import com.monri.android.http.MonriHttpExceptionCode;
 import com.monri.android.http.MonriHttpMethod;
+import com.monri.android.http.MonriHttpResult;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentResult;
+import com.monri.android.model.Token;
 import com.monri.android.model.TransactionParams;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +38,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -96,7 +102,7 @@ public class MonriHttpTest {
 
     }
 
-    private String getAuthenticityToken(){
+    private String getAuthenticityToken() {
         return "6a13d79bde8da9320e88923cb3472fb638619ccb";
     }
 
@@ -193,7 +199,7 @@ public class MonriHttpTest {
 
     }
 
-    public void confirmPaymentTest(final String clientSecretId)  {
+    public void confirmPaymentTest(final String clientSecretId) {
 
         AsyncTask<Void, Void, Void> confirmPaymentAsync = new AsyncTask<Void, Void, Void>() {
             @Override
@@ -242,7 +248,7 @@ public class MonriHttpTest {
                     } finally {
                         httpURLConnection.disconnect();
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     System.out.println("Confirm payment POST error");
                 }
 
@@ -366,7 +372,7 @@ public class MonriHttpTest {
                             clientSecret = jsonResponse.getString("client_secret");
                         }
 
-                       return clientSecret;
+                        return clientSecret;
 
                     } finally {
                         urlConnection.disconnect();
@@ -384,7 +390,7 @@ public class MonriHttpTest {
         clientSecretTMP = createPaymentAsync.execute().get();
 
         //TODO first you have to create payment.. this code above
-       testConfirmPaymentActivity(getConfirmPaymentParams(clientSecretTMP));
+        testConfirmPaymentActivity(getConfirmPaymentParams(clientSecretTMP));
 
     }
 
@@ -392,7 +398,7 @@ public class MonriHttpTest {
 
         final AtomicReference<ActivityScenario<Activity>> testConfirmPaymentsActivity = new AtomicReference<ActivityScenario<Activity>>();
 
-        AsyncTask<Void,Void,Void> launchActivity = new AsyncTask<Void, Void, Void>() {
+        AsyncTask<Void, Void, Void> launchActivity = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(final Void... voids) {
                 testConfirmPaymentsActivity.set(ActivityScenario.launch(
@@ -406,7 +412,7 @@ public class MonriHttpTest {
 
         launchActivity.execute().get();
 
-        Assert.assertEquals(Activity.RESULT_OK,testConfirmPaymentsActivity.get().getResult().getResultCode());
+        Assert.assertEquals(Activity.RESULT_OK, testConfirmPaymentsActivity.get().getResult().getResultCode());
 
         final Bundle bundle = testConfirmPaymentsActivity.get().getResult().getResultData().getExtras();
         bundle.setClassLoader(PaymentResult.class.getClassLoader());
@@ -423,5 +429,141 @@ public class MonriHttpTest {
 
     }
 
+    CountDownLatch countDownLatch;
+    @Test
+    public void prepareTransactionTempTokenizeAndOrder() throws JSONException, ExecutionException, InterruptedException {
+        appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        countDownLatch = new CountDownLatch(2);
+
+        MonriHttpResult<JSONObject> monriHttpResult = makeHttpCall(
+                "https://mobile.webteh.hr/example/prepare-transaction",
+                MonriHttpMethod.POST,
+                new HashMap<>(),
+                new JSONObject()
+        );
+
+        if (monriHttpResult.getResult() == null) {
+            Assert.fail("Failed to make POST: https://mobile.webteh.hr/example/prepare-transaction");
+        }
+
+        JSONObject response = monriHttpResult.getResult();
+
+        TokenRequest tokenRequest = new TokenRequest(
+                response.getString("token"),
+                response.getString("digest"),
+                response.getString("timestamp")
+        );
+
+        Monri monri = new Monri(appContext, new MonriApiOptions(getAuthenticityToken(), true));
+        monri.createToken(
+                tokenRequest,
+                new Card("4111 1111 1111 1111", 12, 2026, "123"),
+                new TokenCallback() {
+                    @Override
+                    public void onSuccess(final Token token) {
+                        JSONObject body = new JSONObject();
+                        HashMap<String,String> headers = new HashMap<>();
+                        headers.put("Content-Type", "application/json; charset=UTF-8");
+                        headers.put("Accept", "application/json");
+
+                        try {
+                            body.put("monriToken", token.getId());
+                            body.put("order_number", UUID.randomUUID().toString());
+
+                            MonriHttpResult<JSONObject> monriHttpResult = makeHttpCall(
+                                    "https://mobile.webteh.hr/example/order",
+                                    MonriHttpMethod.POST,
+                                    headers,
+                                    body
+                            );
+                            final JSONObject result = monriHttpResult.getResult();
+
+                            Assert.assertNotNull(monriHttpResult);
+                            Assert.assertEquals("approved",result.getString("status"));
+                        } catch (JSONException | InterruptedException | ExecutionException e) {
+                            Assert.fail("monri.createToken(...)::onSuccess catch exception");
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(final Exception exception) {
+                        Assert.fail("monri.createToken(...)::onError");
+                    }
+                }
+
+        );
+
+        Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
+
+    }
+
+    private MonriHttpResult<JSONObject> makeHttpCall(
+            final String endpoint,
+            final MonriHttpMethod monriHttpMethod,
+            final Map<String, String> headers,
+            JSONObject postBody
+    ) throws ExecutionException, InterruptedException {
+
+        AsyncTask<Void, Void, MonriHttpResult<JSONObject>> httpCall = new AsyncTask<Void, Void, MonriHttpResult<JSONObject>>() {
+            @Override
+            protected MonriHttpResult<JSONObject> doInBackground(final Void... voids) {
+                HttpURLConnection urlConnection = null;
+
+                try {
+
+                    urlConnection = createHttpURLConnection(endpoint, monriHttpMethod, headers);
+
+                    if (MonriHttpMethod.POST.equals(monriHttpMethod)) {
+                        OutputStreamWriter wr = null;
+
+                        try {
+                            wr = new OutputStreamWriter(urlConnection.getOutputStream());
+                            wr.write(postBody.toString());
+                            wr.flush();
+
+                        } finally {
+                            if (wr != null) {
+                                wr.close();
+                            }
+                        }
+                    }
+
+                    //now read response
+                    try {
+                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                        BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                        StringBuilder jsonStringResponse = new StringBuilder();
+                        for (String line; (line = r.readLine()) != null; ) {
+                            jsonStringResponse.append(line).append('\n');
+                        }
+
+                        JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
+
+                        return MonriHttpResult.success(jsonResponse);
+
+                    } finally {
+                        urlConnection.disconnect();
+                    }
+
+
+                } catch (Exception e) {
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
+                    }
+                    return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+                }
+            }
+
+            @Override
+            protected void onPostExecute(final MonriHttpResult<JSONObject> jsonObjectMonriHttpResult) {
+                super.onPostExecute(jsonObjectMonriHttpResult);
+                countDownLatch.countDown();
+            }
+        };
+
+        return httpCall.execute().get();
+
+    }
 
 }

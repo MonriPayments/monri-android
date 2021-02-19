@@ -74,12 +74,6 @@ dependencies {
 
     implementation 'androidx.annotation:annotation:1.1.0'
 
-    //Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-
-    //Retrofit converters
-    implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
-
     implementation "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     // Api for this import because we use reflection to alter TextInputLayout

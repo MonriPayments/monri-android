@@ -25,7 +25,7 @@ public class MonriHttpException extends RuntimeException {
         return new MonriHttpException(message, code);
     }
 
-    static MonriHttpException create(Throwable cause, MonriHttpExceptionCode code) {
+    public static MonriHttpException create(Throwable cause, MonriHttpExceptionCode code) {
         return new MonriHttpException(cause, code);
     }
 }

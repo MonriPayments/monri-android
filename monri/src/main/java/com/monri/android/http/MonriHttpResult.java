@@ -9,11 +9,11 @@ public class MonriHttpResult<T> {
         this.cause = cause;
     }
 
-    static <T> MonriHttpResult<T> failed(MonriHttpException e) {
+    public static <T> MonriHttpResult<T> failed(MonriHttpException e) {
         return new MonriHttpResult<>(null, e);
     }
 
-    static <T> MonriHttpResult<T> success(T data) {
+    public static <T> MonriHttpResult<T> success(T data) {
         return new MonriHttpResult<>(data, null);
     }
 

@@ -24,11 +24,6 @@ import java.util.concurrent.Executor;
 
 import static com.monri.android.MonriConfig.PROD_ENV_HOST;
 import static com.monri.android.MonriConfig.TEST_ENV_HOST;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import retrofit2.Converter;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by jasminsuljic on 2019-08-21.
@@ -79,7 +74,6 @@ public final class Monri {
         this.apiOptions = monriApiOptions;
 
         String url = monriApiOptions.isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
-        final OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
 
         final String authorizationHeader = String.format("WP3-v2-Client %s", apiOptions.getAuthenticityToken());
 
