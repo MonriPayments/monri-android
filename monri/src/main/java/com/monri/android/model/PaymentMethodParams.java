@@ -3,7 +3,6 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,11 +12,9 @@ import java.util.Map;
  * MonriAndroid
  */
 public class PaymentMethodParams implements Parcelable {
-    @JsonProperty("type")
-    String type;
+    private String type;
 
-    @JsonProperty("data")
-    Map<String, String> data;
+    private Map<String, String> data;
 
     PaymentMethodParams(String type, Map<String, String> data) {
         this.type = type;

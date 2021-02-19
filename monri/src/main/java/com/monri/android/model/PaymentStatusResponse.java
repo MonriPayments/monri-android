@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by jasminsuljic on 2019-12-12.
@@ -13,19 +12,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class PaymentStatusResponse implements Parcelable {
 
-
-    @JsonProperty("payment_status")
-    PaymentStatus paymentStatus;
-
-    @JsonProperty("status")
-    String status;
-
+    private PaymentStatus paymentStatus;
+    private String status;
     @Nullable
-    @JsonProperty("payment_result")
-    PaymentResult paymentResult;
+    private PaymentResult paymentResult;
 
 
     public PaymentStatusResponse() {
+    }
+
+    public PaymentStatusResponse(final PaymentStatus paymentStatus, final String status, @Nullable final PaymentResult paymentResult) {
+        this.paymentStatus = paymentStatus;
+        this.status = status;
+        this.paymentResult = paymentResult;
     }
 
     @Nullable

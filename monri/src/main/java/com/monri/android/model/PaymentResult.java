@@ -5,8 +5,6 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 /**
@@ -16,37 +14,47 @@ import java.util.List;
 public class PaymentResult implements Parcelable {
 
     public static final String BUNDLE_NAME = "BNLD_PaymentResult";
-    @JsonProperty("status")
-    String status;
+    private String status;
 
-    @JsonProperty("currency")
-    String currency;
+    private String currency;
 
-    @JsonProperty("amount")
-    Integer amount;
+    private Integer amount;
 
-    @JsonProperty("order_number")
-    String orderNumber;
+    private String orderNumber;
 
     @Nullable
-    @JsonProperty("pan_token")
-    String panToken;
+    private String panToken;
 
-    @JsonProperty("created_at")
-    String createdAt;
+    private String createdAt;
 
-    @JsonProperty("transaction_type")
-    String transactionType;
+    private String transactionType;
 
-    @JsonProperty("payment_method")
-    SavedPaymentMethod paymentMethod;
+    private SavedPaymentMethod paymentMethod;
 
-    @JsonProperty("errors")
-    List<String> errors;
+    private List<String> errors;
 
     public PaymentResult() {
     }
 
+    public PaymentResult(final String status,
+                         final String currency,
+                         final Integer amount,
+                         final String orderNumber,
+                         @Nullable final String panToken,
+                         final String createdAt,
+                         final String transactionType,
+                         final SavedPaymentMethod paymentMethod,
+                         final List<String> errors) {
+        this.status = status;
+        this.currency = currency;
+        this.amount = amount;
+        this.orderNumber = orderNumber;
+        this.panToken = panToken;
+        this.createdAt = createdAt;
+        this.transactionType = transactionType;
+        this.paymentMethod = paymentMethod;
+        this.errors = errors;
+    }
 
     public String getStatus() {
         return status;

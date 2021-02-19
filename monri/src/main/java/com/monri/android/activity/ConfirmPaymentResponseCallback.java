@@ -23,7 +23,7 @@ import com.monri.android.three_ds1.auth.PaymentAuthWebView;
  * Created by jasminsuljic on 2019-12-09.
  * MonriAndroid
  */
-final class ConfirmPaymentResponseCallback implements ResultCallback<ConfirmPaymentResponse> {
+ final class ConfirmPaymentResponseCallback implements ResultCallback<ConfirmPaymentResponse> {
 
     private final ActionRequiredFlow actionRequiredFlow;
     private final PaymentApprovedFlow paymentApprovedFlow;

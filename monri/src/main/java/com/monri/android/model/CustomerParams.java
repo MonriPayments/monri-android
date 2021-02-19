@@ -3,38 +3,35 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Created by jasminsuljic on 2019-12-09.
  * MonriAndroid
  */
 public class CustomerParams implements Parcelable {
-    @JsonProperty("email")
-    String email;
+    private String email;
 
-    @JsonProperty("ch_full_name")
-    String fullName;
+    private String fullName;
 
-    @JsonProperty("ch_address")
-    String address;
+    private String address;
 
-    @JsonProperty("ch_city")
-    String city;
+    private String city;
 
-    @JsonProperty("ch_zip")
-    String zip;
+    private String zip;
 
-    @JsonProperty("ch_phone")
-    String phone;
+    private String phone;
 
-    @JsonProperty("ch_country")
-    String country;
+    private String country;
 
     public CustomerParams() {
     }
 
-    public CustomerParams(String email, String fullName, String address, String city, String zip, String phone, String country) {
+    public CustomerParams(String email,
+                          String fullName,
+                          String address,
+                          String city,
+                          String zip,
+                          String phone,
+                          String country) {
         this.email = email;
         this.fullName = fullName;
         this.address = address;
