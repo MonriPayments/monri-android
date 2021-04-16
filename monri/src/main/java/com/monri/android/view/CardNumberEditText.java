@@ -33,6 +33,7 @@ public class CardNumberEditText extends MonriEditText {
     // Note that AmEx and Diners Club have the same length
     // because Diners Club has one more space, but one less digit.
     private static final int MAX_LENGTH_AMEX_DINERS = 17;
+    private static final int MAX_LENGTH_MASTERCARD = 19;
 
     private static final Integer[] SPACES_ARRAY_COMMON = {4, 9, 14, 19};
     private static final Set<Integer> SPACE_SET_COMMON =
@@ -43,7 +44,8 @@ public class CardNumberEditText extends MonriEditText {
             new HashSet<>(Arrays.asList(SPACES_ARRAY_AMEX));
 
     @VisibleForTesting
-    @Card.CardBrand String mCardBrand = Card.UNKNOWN;
+    @Card.CardBrand
+    String mCardBrand = Card.UNKNOWN;
     private CardBrandChangeListener mCardBrandChangeListener;
     private CardNumberCompleteListener mCardNumberCompleteListener;
     private int mLengthMax = 23;
@@ -110,15 +112,15 @@ public class CardNumberEditText extends MonriEditText {
     }
 
     void updateLengthFilter() {
-        setFilters(new InputFilter[] {new InputFilter.LengthFilter(mLengthMax)});
+        setFilters(new InputFilter[]{new InputFilter.LengthFilter(mLengthMax)});
     }
 
     /**
      * Updates the selection index based on the current (pre-edit) index, and
      * the size change of the number being input.
      *
-     * @param newLength the post-edit length of the string
-     * @param editActionStart the position in the string at which the edit action starts
+     * @param newLength          the post-edit length of the string
+     * @param editActionStart    the position in the string at which the edit action starts
      * @param editActionAddition the number of new characters going into the string (zero for
      *                           delete)
      * @return an index within the string at which to put the cursor
@@ -258,6 +260,8 @@ public class CardNumberEditText extends MonriEditText {
     private static int getLengthForBrand(@Card.CardBrand String cardBrand) {
         if (Card.AMERICAN_EXPRESS.equals(cardBrand) || Card.DINERS_CLUB.equals(cardBrand)) {
             return MAX_LENGTH_AMEX_DINERS;
+        } else if (Card.MASTERCARD.equals(cardBrand)) {
+            return MAX_LENGTH_MASTERCARD;
         } else {
             return MAX_LENGTH_COMMON;
         }
