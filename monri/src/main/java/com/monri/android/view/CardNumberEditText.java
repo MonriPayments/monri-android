@@ -29,12 +29,12 @@ import java.util.Set;
  */
 public class CardNumberEditText extends MonriEditText {
 
-    private static final int MAX_LENGTH_COMMON = 19;
+    private static final int MAX_LENGTH_COMMON = 23;
     // Note that AmEx and Diners Club have the same length
     // because Diners Club has one more space, but one less digit.
     private static final int MAX_LENGTH_AMEX_DINERS = 17;
 
-    private static final Integer[] SPACES_ARRAY_COMMON = {4, 9, 14};
+    private static final Integer[] SPACES_ARRAY_COMMON = {4, 9, 14, 19};
     private static final Set<Integer> SPACE_SET_COMMON =
             new HashSet<>(Arrays.asList(SPACES_ARRAY_COMMON));
 
@@ -46,7 +46,7 @@ public class CardNumberEditText extends MonriEditText {
     @Card.CardBrand String mCardBrand = Card.UNKNOWN;
     private CardBrandChangeListener mCardBrandChangeListener;
     private CardNumberCompleteListener mCardNumberCompleteListener;
-    private int mLengthMax = 19;
+    private int mLengthMax = 23;
     private boolean mIgnoreChanges = false;
     private boolean mIsCardNumberValid = false;
 
@@ -176,7 +176,7 @@ public class CardNumberEditText extends MonriEditText {
                     updateCardBrandFromNumber(s.toString());
                 }
 
-                if (start > 16) {
+                if (start > 19) {
                     // no need to do formatting if we're past all of the spaces.
                     return;
                 }
