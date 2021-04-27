@@ -59,24 +59,23 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    api 'androidx.appcompat:appcompat:1.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    implementation 'androidx.annotation:annotation:1.1.0'
+    api 'androidx.annotation:annotation:1.1.0'
 
     //Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    api 'com.squareup.retrofit2:retrofit:2.9.0'
 
     //Retrofit converters
-    implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
+    api 'com.squareup.retrofit2:converter-jackson:2.9.0'
 
-    implementation "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    api "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
+    api "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     // Api for this import because we use reflection to alter TextInputLayout
     api "com.android.support:design:${rootProject.ext.supportLibVersion}"
 
