@@ -217,10 +217,9 @@ public class CardNumberEditText extends MonriEditText {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() == mLengthMax) {
-                    boolean before = mIsCardNumberValid;
                     mIsCardNumberValid = CardUtils.isValidCardNumber(s.toString());
                     setShouldShowError(!mIsCardNumberValid);
-                    if (!before && mIsCardNumberValid && mCardNumberCompleteListener != null) {
+                    if (mIsCardNumberValid && mCardNumberCompleteListener != null) {
                         mCardNumberCompleteListener.onCardNumberComplete();
                     }
                 } else {
