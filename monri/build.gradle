@@ -1,36 +1,10 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.github.dcendents.android-maven'
-
-ext {
-
-    bintrayRepo = "MonriAndroid"
-    bintrayName = "com.monri"
-
-    publishedGroupId = 'com.monri'
-    libraryName = 'Monri'
-    artifact = 'monri-android'
-
-    libraryDescription = 'Monri Android SDK'
-
-    siteUrl = 'https://github.com/MonriPayments/monri-android'
-    gitUrl = 'https://github.com/MonriPayments/monri-android.git'
-
-    libraryVersion = rootProject.ext.monriSdkVersion
-
-    developerId = 'jasminsuljic'
-    developerName = 'Jasmin Suljic'
-    developerEmail = 'jasmin.suljich@gmail.com'
-
-    licenseName = 'MIT License'
-    licenseUrl = 'https://github.com/jasminsuljic/monri-android/blob/master/LICENSE'
-    allLicenses = ["MIT License"]
-}
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion "29.0.2"
-
 
     defaultConfig {
         minSdkVersion 19
@@ -87,9 +61,59 @@ dependencies {
 
 }
 
-//Add these lines to publish library to bintray. This is the readymade scripts made by github user nuuneoi to make uploading to bintray easy.
-//Place it at the end of the file
-if (project.rootProject.file('local.properties').exists()) {
-    apply from: 'https://raw.githubusercontent.com/jasminsuljic/JCenter-Gradle-Scripts/master/install.gradle'
-    apply from: 'https://raw.githubusercontent.com/jasminsuljic/JCenter-Gradle-Scripts/master/bintray.gradle'
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.monri'
+                artifactId = 'monri-android'
+                version = rootProject.ext.monriSdkVersion
+                pom {
+                    name = 'Monri'
+                    description = 'Monri Android SDK'
+                    url = 'https://github.com/MonriPayments/monri-android'
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://github.com/MonriPayments/monri-android/blob/master/LICENSE'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'jasminsuljic'
+                            name = 'Jasmin Suljic'
+                            email = 'jasmin.suljic@monri.com'
+                        }
+                        developer {
+                            id = 'adnanomerovic'
+                            name = 'Adnan Omerovic'
+                            email = 'adnan.omerovic@monri.com'
+                        }
+                    }
+                    scm {
+                        connection = 'https://github.com/MonriPayments/monri-android'
+                        developerConnection = 'git@github.com:MonriPayments/monri-android.git'
+                        url = 'https://github.com/MonriPayments/monri-android'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = 'SonaType'
+                def releasesRepoUrlStaging = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+                def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+                def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/' //without close and release on nexus
+                url = rootProject.ext.monriSdkVersion.endsWith('SNAPSHOT') || System.getProperty("snapshot") ? snapshotsRepoUrl : releasesRepoUrlStaging
+                credentials {
+                    username project.property("mavenCentralRepositoryUsername")
+                    password project.property("mavenCentralRepositoryPassword")
+                }
+            }
+        }
+    }
+    signing {
+        sign publishing.publications.release
+    }
 }
