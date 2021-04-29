@@ -107,8 +107,8 @@ afterEvaluate {
                 def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/' //without close and release on nexus
                 url = rootProject.ext.monriSdkVersion.endsWith('SNAPSHOT') || System.getProperty("snapshot") ? snapshotsRepoUrl : releasesRepoUrlStaging
                 credentials {
-                    username project.property("mavenCentralRepositoryUsername")
-                    password project.property("mavenCentralRepositoryPassword")
+                    username project.findProperty("mavenCentralRepositoryUsername") ?: System.getenv('mavenCentralRepositoryUsername') ?: ''
+                    password project.findProperty("mavenCentralRepositoryPassword") ?: System.getenv('mavenCentralRepositoryPassword') ?: ''
                 }
             }
         }
