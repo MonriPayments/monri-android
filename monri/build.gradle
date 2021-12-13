@@ -18,11 +18,13 @@ android {
 
     buildTypes {
         release {
+            buildConfigField "String", 'MONRI_SDK_VERSION', "\"${rootProject.ext.monriSdkVersion}\""
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-
+            buildConfigField "String", 'MONRI_SDK_VERSION', "\"${rootProject.ext.monriSdkVersion}\""
         }
     }
     compileOptions {

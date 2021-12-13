@@ -74,6 +74,7 @@ public final class Monri {
         this.context = context;
         this.authenticityToken = monriApiOptions.getAuthenticityToken();
         this.apiOptions = monriApiOptions;
+        MetaUtility.updateMetaData(context);
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         Converter.Factory converterFactory = JacksonConverterFactory.create(mapper);
