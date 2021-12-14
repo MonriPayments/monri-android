@@ -17,7 +17,9 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".PaymentActivity" />
         <activity android:name=".SavedCardPaymentActivity" />
-        <activity android:name=".ExamplesActivity">
+        <activity
+            android:exported="true"
+            android:name=".ExamplesActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,6 +33,7 @@
             android:launchMode="singleTask"
             android:screenOrientation="fullSensor"
             android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
