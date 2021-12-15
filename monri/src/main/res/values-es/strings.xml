@@ -7,6 +7,7 @@
     <string name="expiry_label_short">Venc.</string>
     <string name="invalid_card_number">El número de tarjeta no es válido.</string>
     <string name="invalid_expiry_year">El año de vencimiento de la tarjeta no es válido.</string>
+    <string name="invalid_expiration_date">La fecha de vencimiento de su tarjeta no es válida.</string>
     <string name="invalid_cvc">El código de seguridad de la tarjeta no es válido.</string>
     <string name="invalid_zip">Código postal incompleto.</string>
     <!-- Error text indicating that city is required, used for all locations -->

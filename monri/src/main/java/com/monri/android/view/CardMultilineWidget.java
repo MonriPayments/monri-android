@@ -1,11 +1,11 @@
 package com.monri.android.view;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -20,7 +20,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.core.view.ViewCompat;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.monri.android.CardUtils;
@@ -35,7 +34,6 @@ import static com.monri.android.model.Card.BRAND_RESOURCE_MAP;
 import static com.monri.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.monri.android.view.CardInputListener.FocusField.FOCUS_CVC;
 import static com.monri.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
-import static com.monri.android.view.CardInputListener.FocusField.FOCUS_POSTAL;
 
 /**
  * Created by jasminsuljic on 2019-08-21.
@@ -353,7 +351,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
 
     private void initErrorMessages() {
         mCardNumberEditText.setErrorMessage(getContext().getString(R.string.invalid_card_number));
-        mExpiryDateEditText.setErrorMessage(getContext().getString(R.string.invalid_expiry_year));
+        mExpiryDateEditText.setErrorMessage(getContext().getString(R.string.invalid_expiration_date));
         mCvcEditText.setErrorMessage(getContext().getString(R.string.invalid_cvc));
     }
 
@@ -369,6 +367,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
                     }
                 } else {
                     mCardNumberEditText.setHint("");
+                    mCardNumberEditText.setShouldShowError(!mCardNumberEditText.isCardNumberValid());
                 }
             }
         });
@@ -384,6 +383,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
                     }
                 } else {
                     mExpiryDateEditText.setHint("");
+                    mExpiryDateEditText.setShouldShowError(!mExpiryDateEditText.isDateValid());
                 }
             }
         });
@@ -401,6 +401,10 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
                 } else {
                     updateBrand(mCardBrand);
                     mCvcEditText.setHint("");
+                    Editable cvc = mCvcEditText.getText();
+                    String cvcValue = cvc == null ? "" : cvc.toString();
+                    boolean isCvcValid = CardUtils.validateCVC(cvcValue, mCardBrand);
+                    mCvcEditText.setShouldShowError(!isCvcValid);
                 }
             }
         });

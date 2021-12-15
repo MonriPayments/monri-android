@@ -158,11 +158,15 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
         cardMultilineWidget = findViewById(R.id.payment_picker_card);
 
         findViewById(R.id.payment_picker_pay).setOnClickListener(v -> {
+            final Card card = cardMultilineWidget.getCard();
+            if (card == null) {
+                Toast.makeText(getApplicationContext(), "Card is not valid", Toast.LENGTH_SHORT).show();
+            } else {
+                final Disposable subscribe = orderRepository.createPayment(addPaymentMethodScenario)
+                        .subscribe(handlePaymentSessionResponse(() -> card.setTokenizePan(saveCardForFuturePayments).toPaymentMethodParams()));
 
-            final Disposable subscribe = orderRepository.createPayment(addPaymentMethodScenario)
-                    .subscribe(handlePaymentSessionResponse(() -> cardMultilineWidget.getCard().setTokenizePan(saveCardForFuturePayments).toPaymentMethodParams()));
-
-            compositeDisposable.add(subscribe);
+                compositeDisposable.add(subscribe);
+            }
         });
     }
 

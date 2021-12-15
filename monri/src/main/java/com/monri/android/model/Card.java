@@ -168,17 +168,7 @@ public class Card extends PaymentMethod {
      * @return {@code true} if valid, {@code false} otherwise
      */
     public boolean validateCVC() {
-        if (MonriTextUtils.isBlank(cvc)) {
-            return false;
-        }
-        String cvcValue = cvc.trim();
-        String updatedType = getBrand();
-        boolean validLength =
-                (updatedType == null && cvcValue.length() >= 3 && cvcValue.length() <= 4)
-                        || (AMERICAN_EXPRESS.equals(updatedType) && cvcValue.length() == 4)
-                        || cvcValue.length() == 3;
-
-        return ModelUtils.isWholePositiveNumber(cvcValue) && validLength;
+        return CardUtils.validateCVC(cvc, getBrand());
     }
 
     /**

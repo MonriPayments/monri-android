@@ -7,6 +7,7 @@
     <string name="expiry_label_short">Gültig bis</string>
     <string name="invalid_card_number">Die Kartennummer ist ungültig.</string>
     <string name="invalid_expiry_year">Die Jahresangabe Ihrer Karte ist ungültig.</string>
+    <string name="invalid_expiration_date">Das Ablaufdatum Ihrer Karte ist ungültig.</string>
     <string name="invalid_cvc">Der Sicherheitscode Ihrer Karte ist ungültig.</string>
     <string name="invalid_zip">Ihre Postleitzahl ist unvollständig.</string>
     <!-- Error text indicating that city is required, used for all locations -->

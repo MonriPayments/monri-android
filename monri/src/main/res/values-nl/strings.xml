@@ -7,6 +7,7 @@
     <string name="expiry_label_short">Verval</string>
     <string name="invalid_card_number">Uw kaartnummer is ongeldig.</string>
     <string name="invalid_expiry_year">Het vervaljaar van uw kaart is ongeldig.</string>
+    <string name="invalid_expiration_date">De vervaldatum van uw kaart is ongeldig.</string>
     <string name="invalid_cvc">De beveiligingscode van uw kaart is ongeldig.</string>
     <string name="invalid_zip">Uw postcode is onvolledig.</string>
     <!-- Error text indicating that city is required, used for all locations -->

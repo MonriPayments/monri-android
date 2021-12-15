@@ -52,6 +52,7 @@
     <string name="expiry_label_short">Expiry</string>
     <string name="invalid_card_number">Your card\'s number is invalid.</string>
     <string name="invalid_expiry_year">Your card\'s expiration year is invalid.</string>
+    <string name="invalid_expiration_date">Your card\'s expiration date is invalid.</string>
     <string name="invalid_cvc">Your card\'s security code is invalid.</string>
     <string name="invalid_zip">Your postal code is incomplete.</string>
     <!--Human-friendly label for something with $0 price-->

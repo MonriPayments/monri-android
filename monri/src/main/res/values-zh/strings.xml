@@ -7,6 +7,7 @@
     <string name="expiry_label_short">有效期</string>
     <string name="invalid_card_number">您的卡号无效。</string>
     <string name="invalid_expiry_year">您的银行卡有效日期的年份无效。</string>
+    <string name="invalid_expiration_date">您的卡的有效期无效。</string>
     <string name="invalid_cvc">您的银行卡安全码无效。</string>
     <string name="invalid_zip">您的邮政编码不完整。</string>
     <!-- Error text indicating that city is required, used for all locations -->
