@@ -32,8 +32,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  * MonriAndroidSDK
  */
 public final class Monri {
-    @SuppressWarnings("FieldCanBeLocal")
-    private final Context context;
+
     private final String authenticityToken;
     private final MonriApiOptions apiOptions;
     private final MonriApi monriApi;
@@ -47,7 +46,7 @@ public final class Monri {
                     protected ResponseWrapper doInBackground(Void... params) {
                         try {
                             Token token = MonriApiHandler.createToken(
-                                    apiOptions,tokenParams
+                                    apiOptions, tokenParams
                             );
                             return new ResponseWrapper(token);
                         } catch (MonriException e) {
@@ -70,11 +69,10 @@ public final class Monri {
         this(context, MonriApiOptions.create(authenticityToken, false));
     }
 
-    public Monri(Context context, MonriApiOptions monriApiOptions) {
-        this.context = context;
+    public Monri(@SuppressWarnings("unused") Context context, MonriApiOptions monriApiOptions) {
         this.authenticityToken = monriApiOptions.getAuthenticityToken();
         this.apiOptions = monriApiOptions;
-        MetaUtility.updateMetaData(context);
+
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         Converter.Factory converterFactory = JacksonConverterFactory.create(mapper);
@@ -108,7 +106,7 @@ public final class Monri {
 
         try {
             final CreateTokenRequest createTokenRequest = CreateTokenRequest.create(paymentMethod, tokenRequest, authenticityToken);
-            mTokenCreator.create(apiOptions,createTokenRequest.toJson(), null, callback);
+            mTokenCreator.create(apiOptions, createTokenRequest.toJson(), null, callback);
         } catch (Exception e) {
             callback.onError(e);
         }

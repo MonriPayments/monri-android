@@ -8,8 +8,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Created by jasminsuljic on 19/03/2019.
- * huhuandroid
+ .
+ * monri-android
  */
 public class MonriTextUtils {
     /**

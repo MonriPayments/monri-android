@@ -9,7 +9,9 @@ import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.monri.android.BuildConfig;
 import com.monri.android.Monri;
+import com.monri.android.MonriUtil;
 import com.monri.android.R;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
@@ -42,11 +44,11 @@ public class ConfirmPaymentActivity extends AppCompatActivity {
         final ConfirmPaymentParams confirmPaymentParams = getIntent().getParcelableExtra(CONFIRM_PAYMENT_PARAMS_BUNDLE);
         final MonriApiOptions apiOptions = getIntent().getParcelableExtra(MONRI_API_OPTIONS);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String metaInfo = preferences.getString("monri_cross_platform_meta_key", null);
-        if(metaInfo != null){
-            confirmPaymentParams.getTransaction().set("meta",metaInfo);
-        }
+        confirmPaymentParams
+                .getTransaction()
+                .set("meta.integration_type", "android-sdk")
+                .set("meta.library", MonriUtil.library(getApplicationContext()))
+                .set("meta.library_version", BuildConfig.MONRI_SDK_VERSION);
 
         monri = new Monri(this, apiOptions);
 

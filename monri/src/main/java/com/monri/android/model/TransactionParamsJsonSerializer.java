@@ -8,7 +8,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -16,7 +18,13 @@ import java.util.Objects;
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
  */
-public class TransactionParamsJsonSerializer extends JsonSerializer<TransactionParams> {
+class TransactionParamsJsonSerializer extends JsonSerializer<TransactionParams> {
+
+    private static final List<String> metaKeys = Arrays.asList(
+            "integration_type",
+            "library",
+            "library_version"
+    );
 
     public TransactionParamsJsonSerializer() {
     }
@@ -27,21 +35,32 @@ public class TransactionParamsJsonSerializer extends JsonSerializer<TransactionP
         if (value == null) {
             gen.writeNull();
         } else {
-            gen.writeObject(transformParams(value.getData()));
+            try {
+                gen.writeObject(transformParams(value.getData()));
+            } catch (JSONException ignored) {
+
+            }
         }
     }
 
-    private Map<String, Object> transformParams(Map<String, String> transactionParamsData) {
-        Map<String, Object> map = new HashMap<>(transactionParamsData);
-        String metaAsString = transactionParamsData.get("meta");
+    private Map<String, Object> transformParams(Map<String, String> data) throws JSONException {
+        Map<String, Object> returnValue = new HashMap<>(data);
+        JSONObject meta = new JSONObject();
 
-        try {
-            JSONObject meta = new JSONObject(metaAsString);
-            map.put("meta", Objects.requireNonNull(MonriJsonUtils.jsonObjectToMap(meta)));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        for (String metaKey : metaKeys) {
+// integration_type
+            // meta.integration_type
+            String key = String.format("meta.%s", metaKey);
+            if (data.containsKey(key)) {
+                meta.put(metaKey, data.get(key));
+                data.remove(key);
+            }
         }
 
-        return map;
+        if (meta.length() > 0) {
+            returnValue.put("meta", Objects.requireNonNull(MonriJsonUtils.jsonObjectToMap(meta)));
+        }
+
+        return returnValue;
     }
 }

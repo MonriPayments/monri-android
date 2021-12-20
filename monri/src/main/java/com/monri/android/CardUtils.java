@@ -14,8 +14,7 @@ import static com.monri.android.model.Card.MAESTRO;
 import static com.monri.android.model.Card.VISA;
 
 /**
- * Created by jasminsuljic on 19/03/2019.
- * huhuandroid
+ * monri-android
  */
 public class CardUtils {
     private static final int LENGTH_COMMON_CARD = 16;

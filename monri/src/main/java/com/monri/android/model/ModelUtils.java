@@ -10,8 +10,8 @@ import java.util.Calendar;
 import java.util.Locale;
 
 /**
- * Created by jasminsuljic on 19/03/2019.
- * huhuandroid
+ .
+ * monri-android
  */
 public class ModelUtils {
     /**
