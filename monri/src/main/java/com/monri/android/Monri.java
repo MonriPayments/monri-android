@@ -10,8 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.exception.MonriException;
-import com.monri.android.http.MonriHttpApi;
-import com.monri.android.http.MonriHttpApiImpl;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;
@@ -30,8 +28,6 @@ import static com.monri.android.MonriConfig.TEST_ENV_HOST;
  * MonriAndroidSDK
  */
 public final class Monri {
-    @SuppressWarnings("FieldCanBeLocal")
-    private final Context context;
     private final String authenticityToken;
     private final MonriApiOptions apiOptions;
     private final MonriApi monriApi;
@@ -69,7 +65,6 @@ public final class Monri {
     }
 
     public Monri(Context context, MonriApiOptions monriApiOptions) {
-        this.context = context;
         this.authenticityToken = monriApiOptions.getAuthenticityToken();
         this.apiOptions = monriApiOptions;
 

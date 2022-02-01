@@ -1,6 +1,5 @@
 package com.monri.android;
 
-import com.monri.android.http.MonriHttpApiImpl;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;

@@ -1,4 +1,4 @@
-package com.monri.android.http;
+package com.monri.android;
 
 public class MonriHttpException extends RuntimeException {
     private final MonriHttpExceptionCode code;

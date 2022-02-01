@@ -1,12 +1,7 @@
-package com.monri.android.http;
+package com.monri.android;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.monri.android.http.MonriHttpApi;
-import com.monri.android.http.MonriHttpException;
-import com.monri.android.http.MonriHttpExceptionCode;
-import com.monri.android.http.MonriHttpMethod;
-import com.monri.android.http.MonriHttpResult;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.PaymentActionRequired;
@@ -33,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MonriHttpApiImpl implements MonriHttpApi {
+class MonriHttpApiImpl implements MonriHttpApi {
 
     private final String baseUrl;
     private final Map<String, String> headers;
@@ -103,7 +98,7 @@ public class MonriHttpApiImpl implements MonriHttpApi {
 
                 JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-                return MonriHttpResult.success(ConfirmPaymentResponseJSONToClass(jsonResponse));
+                return MonriHttpResult.success(ConfirmPaymentResponseJSONToClass(jsonResponse), urlConnection.getResponseCode());
 
             } finally {
                 urlConnection.disconnect();
@@ -137,7 +132,7 @@ public class MonriHttpApiImpl implements MonriHttpApi {
 
                 final JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-                return MonriHttpResult.success(paymentStatusResponseJSONToClass(jsonResponse));
+                return MonriHttpResult.success(paymentStatusResponseJSONToClass(jsonResponse), urlConnection.getResponseCode());
 
             } finally {
                 urlConnection.disconnect();
@@ -238,7 +233,7 @@ public class MonriHttpApiImpl implements MonriHttpApi {
             JSONArray jsonArray = paymentResultJSON.getJSONArray("errors");
             if (jsonArray != null) {
                 int len = jsonArray.length();
-                for (int i=0;i<len;i++){
+                for (int i = 0; i < len; i++) {
                     paymentStatusErrors.add(jsonArray.get(i).toString());
                 }
             }

@@ -1,4 +1,4 @@
-package com.monri.android.http;
+package com.monri.android;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
@@ -6,7 +6,7 @@ import com.monri.android.model.PaymentStatusResponse;
 
 import java.util.Map;
 
-public interface MonriHttpApi {
+interface MonriHttpApi {
 
     static MonriHttpApi create(final String baseUrl, final Map<String, String> headers) {
         return new MonriHttpApiImpl(

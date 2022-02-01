@@ -1,4 +1,4 @@
-package com.monri.android.http;
+package com.monri.android;
 
 public enum MonriHttpExceptionCode {
     REQUEST_FAILED,

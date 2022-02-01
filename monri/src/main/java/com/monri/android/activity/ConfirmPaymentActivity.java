@@ -46,4 +46,10 @@ public class ConfirmPaymentActivity extends AppCompatActivity {
 
         monri.getMonriApi().confirmPayment(confirmPaymentParams, responseCallback);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        monri = null;
+    }
 }

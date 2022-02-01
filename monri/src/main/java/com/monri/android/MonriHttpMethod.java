@@ -1,12 +1,13 @@
 package com.monri.android;
 
-public enum MonriHttpMethod {
-    POST("POST"), GET("GET");
-
+enum MonriHttpMethod {
+    GET("GET"),
+    POST("POST");
 
     private final String value;
 
-    MonriHttpMethod(String value) {
+
+    MonriHttpMethod(final String value) {
         this.value = value;
     }
 

@@ -10,11 +10,6 @@ import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.monri.android.activity.ConfirmPaymentActivity;
-import com.monri.android.http.MonriHttpApiImpl;
-import com.monri.android.http.MonriHttpException;
-import com.monri.android.http.MonriHttpExceptionCode;
-import com.monri.android.http.MonriHttpMethod;
-import com.monri.android.http.MonriHttpResult;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
@@ -540,7 +535,7 @@ public class MonriHttpTest {
 
                         JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-                        return MonriHttpResult.success(jsonResponse);
+                        return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
 
                     } finally {
                         urlConnection.disconnect();

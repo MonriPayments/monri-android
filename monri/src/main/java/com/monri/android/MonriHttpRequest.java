@@ -1,4 +1,4 @@
-package com.monri.android.http;
+package com.monri.android;
 
 public class MonriHttpRequest<T> {
     private final HttpCallType httpCallType;
