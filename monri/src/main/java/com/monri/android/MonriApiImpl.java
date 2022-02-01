@@ -22,18 +22,29 @@ class MonriApiImpl implements MonriApi {
     @Override
     public void confirmPayment(ConfirmPaymentParams params, ResultCallback<ConfirmPaymentResponse> callback) {
         taskRunner.executeAsync(
-                () -> monriHttpApi.confirmPayment(params),
-                result -> callback.onSuccess(result.getResult()),
-                result -> callback.onError(result.getCause())
-        );
+                () -> {
+                    MonriHttpResult<ConfirmPaymentResponse> result = monriHttpApi.confirmPayment(params);
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback);
     }
 
     @Override
     public void paymentStatus(PaymentStatusParams params, ResultCallback<PaymentStatusResponse> callback) {
         taskRunner.executeAsync(
-                () -> monriHttpApi.paymentStatus(params.getClientSecret()),
-                result -> callback.onSuccess(result.getResult()),
-                result -> callback.onError(result.getCause())
+                () -> {
+                    MonriHttpResult<PaymentStatusResponse> result = monriHttpApi.paymentStatus(params.getClientSecret());
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback
         );
     }
 

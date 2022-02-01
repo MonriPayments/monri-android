@@ -12,10 +12,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertNotNull;
 
 
+@RunWith(RobolectricTestRunner.class)
 public class HttpRequestTest {
 
     private String requestConfirmPaymentJSONString = "{\"payment_method\":{\"type\":\"card\",\"data\":{\"cvv\":\"123\",\"pan\":\"4111111111111111\",\"expiration_date\":\"2112\",\"tokenize_pan\":\"false\"}},\"transaction\":{\"ch_phone\":\"+38761000111\",\"ch_address\":\"Adresa\",\"ch_zip\":\"71000\",\"ch_full_name\":\"Tester Testerovic\",\"ch_country\":\"BA\",\"ch_email\":\"tester+android_sdk@monri.com\",\"order_info\":\"Android SDK payment session\",\"ch_city\":\"Sarajevo\"}}";
@@ -45,7 +48,7 @@ public class HttpRequestTest {
 
     @Test
     public void fromJSONToConfirmPaymentResponseWithoutPmAndErrors() throws JSONException {
-        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutPmAndErrors));
+        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.confirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutPmAndErrors));
         assertNotNull(confirmPaymentResponse.getPaymentResult());
         assertNotNull(confirmPaymentResponse.getStatus());
         Assert.assertNull(confirmPaymentResponse.getActionRequired());
@@ -68,7 +71,7 @@ public class HttpRequestTest {
 
     @Test
     public void fromJSONToConfirmPaymentResponseWithoutErrors() throws JSONException {
-        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutErrors));
+        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.confirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutErrors));
         assertNotNull(confirmPaymentResponse.getPaymentResult());
         assertNotNull(confirmPaymentResponse.getStatus());
 
@@ -98,7 +101,7 @@ public class HttpRequestTest {
 
     @Test
     public void fromJSONToConfirmPaymentResponse() throws JSONException {
-        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.ConfirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONString));
+        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.confirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONString));
         assertNotNull(confirmPaymentResponse.getPaymentResult());
         assertNotNull(confirmPaymentResponse.getStatus());
 

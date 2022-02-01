@@ -98,7 +98,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
                 JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-                return MonriHttpResult.success(ConfirmPaymentResponseJSONToClass(jsonResponse), urlConnection.getResponseCode());
+                return MonriHttpResult.success(confirmPaymentResponseJSONToClass(jsonResponse), urlConnection.getResponseCode());
 
             } finally {
                 urlConnection.disconnect();
@@ -148,13 +148,12 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
 
     @VisibleForTesting
-    public static ConfirmPaymentResponse ConfirmPaymentResponseJSONToClass(final JSONObject confirmPaymentResponseJSON) throws JSONException {
+    public static ConfirmPaymentResponse confirmPaymentResponseJSONToClass(final JSONObject confirmPaymentResponseJSON) throws JSONException {
         final PaymentStatus status = PaymentStatus.forValue(confirmPaymentResponseJSON.getString("status"));
 
         PaymentActionRequired paymentActionRequired = null;
 
         if (confirmPaymentResponseJSON.has("action_required")) {
-
             final JSONObject actionRequiredJSON = confirmPaymentResponseJSON.getJSONObject("action_required");
             final String redirectTo = actionRequiredJSON.getString("redirect_to");
             final String acsUrl = actionRequiredJSON.getString("acs_url");
