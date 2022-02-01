@@ -93,17 +93,14 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
     @Override
     public void threeDs1Result(String status, String clientSecret) {
 
-        executeIfStatus(InvokationState.ACS_AUTHENTICATION_FINISHED, InvokationState.THREE_DS_RESULT, () -> {
-            logger.info(String.format("ThreeDs1Result, status = %s, clientSecret = %s", status, clientSecret));
-            atomicInteger.set(0);
-            executeOnUiThread(() -> {
-                progressBar.setVisibility(View.INVISIBLE);
-                webView.setVisibility(View.GONE);
-            });
-
-            checkPaymentStatus(clientSecret, atomicInteger.incrementAndGet());
+        logger.info(String.format("ThreeDs1Result, status = %s, clientSecret = %s", status, clientSecret));
+        atomicInteger.set(0);
+        executeOnUiThread(() -> {
+            progressBar.setVisibility(View.INVISIBLE);
+            webView.setVisibility(View.GONE);
         });
 
+        checkPaymentStatus(clientSecret, atomicInteger.incrementAndGet());
     }
 
     @Override
@@ -120,14 +117,11 @@ public class ActivityActionRequiredFlow implements ActionRequiredFlow, PaymentAu
 
     @Override
     public void acsAuthenticationFinished() {
-        executeIfStatus(InvokationState.REDIRECTING_TO_ACS, InvokationState.ACS_AUTHENTICATION_FINISHED, () -> {
-            logger.info("acsAuthenticationFinished");
-            executeOnUiThread(() -> {
-                webView.setVisibility(View.INVISIBLE);
-                progressBar.setVisibility(View.VISIBLE);
-            });
+        logger.info("acsAuthenticationFinished");
+        executeOnUiThread(() -> {
+            webView.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
         });
-
     }
 
 

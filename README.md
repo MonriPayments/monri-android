@@ -12,8 +12,23 @@ We support Android 4.4 (API level 19) and above.
 Installing the Monri Android library is simple using  [Android Studio](https://developer.android.com/studio/intro)  and  [IntelliJ](https://www.jetbrains.com/help/idea/getting-started-with-android-development.html). You don’t need to clone a repo or download any files. Just add the following to your project’s  `build.gradle`  file, inside the dependencies section.
 
 ```gradle
-implementation 'com.monri:monri-android:1.1.4'
+implementation 'com.monri:monri-android:1.2.+'
 ```
+
+## Proguard rules
+
+Add:
+```
+-keep public class com.monri.** {
+  public protected private *;
+}
+
+-keep public enum com.monri.** {
+  *;
+}
+```
+to `proguard-rules.pro`
+
 # Payment API Integration
 
 At some point in the flow of your app you'll obtain payment details from the user. After that you could:

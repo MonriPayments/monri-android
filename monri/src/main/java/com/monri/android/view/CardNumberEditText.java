@@ -29,11 +29,11 @@ import java.util.Set;
  */
 public class CardNumberEditText extends MonriEditText {
 
-    private static final int MAX_LENGTH_VISA = 23;
-    private static final int MAX_LENGTH_COMMON = 19;
+    private static final int MAX_LENGTH_COMMON = 23;
     // Note that AmEx and Diners Club have the same length
     // because Diners Club has one more space, but one less digit.
     private static final int MAX_LENGTH_AMEX_DINERS = 17;
+    private static final int MAX_LENGTH_MASTERCARD = 19;
 
     private static final Integer[] SPACES_ARRAY_COMMON = {4, 9, 14, 19};
     private static final Set<Integer> SPACE_SET_COMMON =
@@ -48,7 +48,7 @@ public class CardNumberEditText extends MonriEditText {
     String mCardBrand = Card.UNKNOWN;
     private CardBrandChangeListener mCardBrandChangeListener;
     private CardNumberCompleteListener mCardNumberCompleteListener;
-    private int mLengthMax = 19;
+    private int mLengthMax = 23;
     private boolean mIgnoreChanges = false;
     private boolean mIsCardNumberValid = false;
 
@@ -178,7 +178,7 @@ public class CardNumberEditText extends MonriEditText {
                     updateCardBrandFromNumber(s.toString());
                 }
 
-                if (start > 21) {
+                if (start > 19) {
                     // no need to do formatting if we're past all of the spaces.
                     return;
                 }
@@ -217,10 +217,9 @@ public class CardNumberEditText extends MonriEditText {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() == mLengthMax) {
-                    boolean before = mIsCardNumberValid;
                     mIsCardNumberValid = CardUtils.isValidCardNumber(s.toString());
                     setShouldShowError(!mIsCardNumberValid);
-                    if (!before && mIsCardNumberValid && mCardNumberCompleteListener != null) {
+                    if (mIsCardNumberValid && mCardNumberCompleteListener != null) {
                         mCardNumberCompleteListener.onCardNumberComplete();
                     }
                 } else {
@@ -260,8 +259,8 @@ public class CardNumberEditText extends MonriEditText {
     private static int getLengthForBrand(@Card.CardBrand String cardBrand) {
         if (Card.AMERICAN_EXPRESS.equals(cardBrand) || Card.DINERS_CLUB.equals(cardBrand)) {
             return MAX_LENGTH_AMEX_DINERS;
-        } else if (Card.VISA.equals(cardBrand)) {
-            return MAX_LENGTH_VISA;
+        } else if (Card.MASTERCARD.equals(cardBrand)) {
+            return MAX_LENGTH_MASTERCARD;
         } else {
             return MAX_LENGTH_COMMON;
         }
