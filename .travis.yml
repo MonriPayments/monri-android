@@ -11,7 +11,7 @@ cache:
 android:
   components:
     - build-tools-30.0.2
-    - android-28
+    - android-31
     - add-on
     - extra
   licenses:
