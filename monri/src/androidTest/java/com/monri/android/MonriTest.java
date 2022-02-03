@@ -227,7 +227,7 @@ public class MonriTest {
                 }
         );
 
-        Assert.assertTrue(signal.await(920, TimeUnit.SECONDS)); //todo sometime duration for creating payment session and confirming payment is between 15 or 25 seconds...
+        Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
 
     }
 
@@ -257,7 +257,7 @@ public class MonriTest {
                 }
         );
 
-        Assert.assertTrue(signal.await(920, TimeUnit.SECONDS)); //todo sometime duration for creating payment session and confirming payment is between 15 or 25 seconds...
+        Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
 
     }
 
