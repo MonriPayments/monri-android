@@ -21,7 +21,9 @@ class TaskRunner {
                     callback.onSuccess(result);
                 });
             } catch (Exception e) {
-                callback.onError(e);
+                handler.post(() -> {
+                    callback.onError(e);
+                });
             }
         });
     }

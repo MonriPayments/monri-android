@@ -3,6 +3,8 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
 /**
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
@@ -22,7 +24,12 @@ public class ConfirmPaymentResponse implements Parcelable {
     public ConfirmPaymentResponse() {
     }
 
-    public ConfirmPaymentResponse(final PaymentStatus status, final PaymentActionRequired actionRequired, final PaymentResult paymentResult, final String id) {
+    public ConfirmPaymentResponse(
+            final PaymentStatus status,
+            final @Nullable PaymentActionRequired actionRequired,
+            final @Nullable PaymentResult paymentResult,
+            final String id
+    ) {
         this.status = status;
         this.actionRequired = actionRequired;
         this.paymentResult = paymentResult;

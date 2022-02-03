@@ -152,17 +152,19 @@ class MonriHttpApiImpl implements MonriHttpApi {
         final PaymentStatus status = PaymentStatus.forValue(confirmPaymentResponseJSON.getString("status"));
 
         PaymentActionRequired paymentActionRequired = null;
+        PaymentResult paymentResult = null;
 
         if (confirmPaymentResponseJSON.has("action_required")) {
             final JSONObject actionRequiredJSON = confirmPaymentResponseJSON.getJSONObject("action_required");
             final String redirectTo = actionRequiredJSON.getString("redirect_to");
             final String acsUrl = actionRequiredJSON.getString("acs_url");
             paymentActionRequired = new PaymentActionRequired(redirectTo, acsUrl);
+        } else if (confirmPaymentResponseJSON.has("payment_result")) {
+            final JSONObject paymentResultJSON = confirmPaymentResponseJSON.getJSONObject("payment_result");
+            paymentResult = paymentResultJSONToClass(paymentResultJSON);
+        } else {
+            throw new IllegalArgumentException("both action_required and payment_result are null in confirmPaymentResponseJSON");
         }
-
-
-        final JSONObject paymentResultJSON = confirmPaymentResponseJSON.getJSONObject("payment_result");
-        final PaymentResult paymentResult = paymentResultJSONToClass(paymentResultJSON);
 
         String idFromResponse = null;
 
