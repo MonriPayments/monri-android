@@ -9,8 +9,6 @@ import android.os.AsyncTask;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monri.android.exception.MonriException;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
@@ -18,21 +16,18 @@ import com.monri.android.model.PaymentMethod;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.model.Token;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import retrofit2.Converter;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
+import static com.monri.android.MonriConfig.PROD_ENV_HOST;
+import static com.monri.android.MonriConfig.TEST_ENV_HOST;
 
 /**
  * Created by jasminsuljic on 2019-08-21.
  * MonriAndroidSDK
  */
 public final class Monri {
-
     private final String authenticityToken;
     private final MonriApiOptions apiOptions;
     private final MonriApi monriApi;
@@ -69,37 +64,32 @@ public final class Monri {
         this(context, MonriApiOptions.create(authenticityToken, false));
     }
 
-    public Monri(@SuppressWarnings("unused") Context context, MonriApiOptions monriApiOptions) {
+    public Monri(Context context, MonriApiOptions monriApiOptions) {
         this.authenticityToken = monriApiOptions.getAuthenticityToken();
         this.apiOptions = monriApiOptions;
 
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        Converter.Factory converterFactory = JacksonConverterFactory.create(mapper);
-
-        final OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
+        String url = monriApiOptions.isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
 
         final String authorizationHeader = String.format("WP3-v2-Client %s", apiOptions.getAuthenticityToken());
 
-        httpClientBuilder.addInterceptor(chain -> {
-            Request original = chain.request();
+        this.monriApi = new MonriApiImpl(getMonriHttpApi(url, getHttpHeaders(authorizationHeader)));
 
-            Request request = original.newBuilder()
-                    .header("Authorization", authorizationHeader)
-                    .build();
-
-            return chain.proceed(request);
-        });
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(monriApiOptions.url())
-                .addConverterFactory(converterFactory)
-                .client(httpClientBuilder.build())
-                .validateEagerly(true)
-                .build();
-
-        this.monriApi = new MonriApiImpl(retrofit.create(MonriRetrofitApi.class), new ObjectMapper());
         paymentController = new MonriPaymentController(monriApiOptions);
+    }
+
+    private MonriHttpApi getMonriHttpApi(final String baseUrl, final Map<String, String> headers) {
+        return new MonriHttpApiImpl(
+                baseUrl,
+                headers
+        );
+    }
+
+    private Map<String, String> getHttpHeaders(final String auth) {
+        return new HashMap<String, String>() {{
+            put("Authorization", auth);
+            put("Content-Type", "application/json; charset=UTF-8");
+            put("Accept", "application/json");
+        }};
     }
 
     public void createToken(@NonNull TokenRequest tokenRequest, @NonNull PaymentMethod paymentMethod, @NonNull final TokenCallback callback) {
@@ -172,4 +162,5 @@ public final class Monri {
             this.token = null;
         }
     }
+
 }

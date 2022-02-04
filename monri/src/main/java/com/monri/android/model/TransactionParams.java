@@ -6,7 +6,6 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +14,7 @@ import java.util.Map;
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
  */
-@JsonSerialize(using = TransactionParamsJsonSerializer.class)
+//@JsonSerialize(using = TransactionParamsJsonSerializer.class)
 public class TransactionParams implements Parcelable {
 
     private Map<String, String> data;
@@ -32,7 +31,7 @@ public class TransactionParams implements Parcelable {
         return new TransactionParams();
     }
 
-    Map<String, String> getData() {
+    public Map<String, String> getData() {
         if (data == null) {
             data = new HashMap<>();
         }

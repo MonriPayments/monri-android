@@ -35,13 +35,9 @@ import javax.net.ssl.SSLSocketFactory;
 /**
  * Handler for calls to the Monri API.
  */
-public class MonriApiHandler {
+class MonriApiHandler {
 
     private static final String POST = "POST";
-
-    //    TODO: fix live vs test issue
-    // Add somekind of api gateway?
-    private static final String API_BASE = "https://ipgtest.monri.com";
 
     private static final String CHARSET = "UTF-8";
     private static final String TOKENS = "temp-tokenize";
@@ -50,7 +46,6 @@ public class MonriApiHandler {
 
     /**
      * Create a {@link Token} using the input token parameters.
-     *
      *
      * @param apiOptions
      * @param tokenParams a mapped set of parameters representing the object for which this token
@@ -206,15 +201,15 @@ public class MonriApiHandler {
             JSONObject jsonData = mapToJsonObject(params);
             if (jsonData == null) {
                 throw new InvalidRequestException("Unable to create JSON data from parameters. "
-                                                          + "Please contact support@monri.com for assistance.",
-                                                  null, null, 0, null);
+                        + "Please contact support@monri.com for assistance.",
+                        null, null, 0, null);
             }
             return jsonData.toString().getBytes(CHARSET);
         } catch (UnsupportedEncodingException e) {
             throw new InvalidRequestException("Unable to encode parameters to "
-                                                      + CHARSET
-                                                      + ". Please contact support@monri.com for assistance.",
-                                              null, null, 0, e);
+                    + CHARSET
+                    + ". Please contact support@monri.com for assistance.",
+                    null, null, 0, e);
         }
     }
 
@@ -301,7 +296,7 @@ public class MonriApiHandler {
                 throw new PermissionException(monriError.message, requestId, rCode);
             case 429:
                 throw new RateLimitException(monriError.message, monriError.param, requestId,
-                                             rCode, null);
+                        rCode, null);
             default:
                 throw new APIException(monriError.message, requestId, rCode, null);
         }

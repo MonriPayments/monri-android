@@ -1,5 +1,6 @@
 package com.monri.android.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,7 +18,7 @@ import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.three_ds1.auth.PaymentAuthWebView;
 
-public class ConfirmPaymentActivity extends AppCompatActivity {
+public class ConfirmPaymentActivity extends Activity {
 
     private static final String CONFIRM_PAYMENT_PARAMS_BUNDLE = "CONFIRM_PAYMENT_PARAMS_BUNDLE";
     private static final String MONRI_API_OPTIONS = "MONRI_API_OPTIONS";
@@ -55,5 +56,11 @@ public class ConfirmPaymentActivity extends AppCompatActivity {
         ConfirmPaymentResponseCallback responseCallback = ConfirmPaymentResponseCallback.create(this, webView, progressBar, confirmPaymentParams, monri.getMonriApi());
 
         monri.getMonriApi().confirmPayment(confirmPaymentParams, responseCallback);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        monri = null;
     }
 }
