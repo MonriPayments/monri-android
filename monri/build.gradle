@@ -4,11 +4,11 @@ apply plugin: 'signing'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "30.0.2"
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 31
         versionCode 1
         versionName rootProject.ext.monriSdkVersion
 
@@ -26,8 +26,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
 }
@@ -35,18 +35,14 @@ android {
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'androidx.appcompat:appcompat:1.1.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    api 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.test:core:1.4.0'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+    androidTestImplementation 'androidx.test:rules:1.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-web:3.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-    api 'androidx.annotation:annotation:1.1.0'
-
-    //Retrofit
-    api 'com.squareup.retrofit2:retrofit:2.9.0'
-
-    //Retrofit converters
-    api 'com.squareup.retrofit2:converter-jackson:2.9.0'
+    api 'androidx.annotation:annotation:1.3.0'
 
     api "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
     api "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
@@ -104,7 +100,8 @@ afterEvaluate {
                 name = 'SonaType'
                 def releasesRepoUrlStaging = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
                 def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-                def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/' //without close and release on nexus
+                def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/'
+                //without close and release on nexus
                 url = rootProject.ext.monriSdkVersion.endsWith('SNAPSHOT') || System.getProperty("snapshot") ? snapshotsRepoUrl : releasesRepoUrlStaging
                 credentials {
                     username project.findProperty("mavenCentralRepositoryUsername") ?: System.getenv('mavenCentralRepositoryUsername') ?: ''

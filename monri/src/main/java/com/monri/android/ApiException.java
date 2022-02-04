@@ -1,6 +1,5 @@
 package com.monri.android;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -10,8 +9,7 @@ import java.util.List;
  */
 public class ApiException extends Exception {
 
-    @JsonProperty("errors")
-    List<String> errors;
+    private List<String> errors;
 
     public ApiException() {
     }

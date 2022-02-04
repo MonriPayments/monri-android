@@ -71,7 +71,7 @@ public class SavedCardPaymentActivity extends AppCompatActivity implements ViewD
         tvMaskedPan.setText(maskedPan);
 
 //        Step one - instantiate monri
-        final Monri monri = new Monri(this.getApplicationContext(), orderRepository.authenticityToken());
+        final Monri monri = new Monri(this.getApplicationContext(), orderRepository.monriApiOptions());
 
         btnPay.setOnClickListener(v -> {
             SavedCard savedCard = new SavedCard(panToken, etCvv.getText().toString());
