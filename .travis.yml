@@ -12,14 +12,10 @@ cache:
     - $HOME/.android/build-cache
 android:
   components:
-    - build-tools-29.0.2
-    - android-28
+    - build-tools-30.0.2
+    - android-31
     - add-on
     - extra
-  licenses:
-    - 'android-sdk-preview-license-52d11cd2'
-    - 'android-sdk-license-.+'
-    - 'google-gdk-license-.+'
 before_script:
 #  - echo "y" | android update sdk -a --no-ui --filter sys-img-x86_64-android-28
 #  - android list targets
