@@ -12,12 +12,15 @@ cache:
     - $HOME/.android/build-cache
 android:
   components:
+    - tools
+    - tools
+    - platform-tools
     - build-tools-30.0.2
     - android-31
     - add-on
     - extra
 before_install:
-- yes | sdkmanager "platforms;android-30"
+- yes | sdkmanager --licenses
 before_script:
 #  - echo "y" | android update sdk -a --no-ui --filter sys-img-x86_64-android-28
 #  - android list targets
