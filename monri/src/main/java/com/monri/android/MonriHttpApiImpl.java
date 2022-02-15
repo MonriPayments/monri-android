@@ -25,6 +25,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -274,8 +275,9 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
         //converting transactionParams to JSON
         final TransactionParams transaction = confirmPaymentParams.getTransaction();
-        final Map<String, String> transactionData = transaction.getData();
+        final Map<String, Object> transactionData = pruneTransactionDataSetMetaData(transaction.getData());
         JSONObject dataTransactionMapJSON = new JSONObject();
+
 
         for (String key : transactionData.keySet()) {
             dataTransactionMapJSON.put(key, transactionData.get(key));
@@ -283,8 +285,29 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
         JSONObject confirmPaymentParamsJSON = new JSONObject();
         confirmPaymentParamsJSON.put("payment_method", paymentMethodJSON);
-        confirmPaymentParamsJSON.put("transaction", dataTransactionMapJSON);//check maybe this should not be map, maybe it should be TransactionParams object..
+        confirmPaymentParamsJSON.put("transaction", dataTransactionMapJSON);
         return confirmPaymentParamsJSON;
+    }
+
+    private static Map<String, Object> pruneTransactionDataSetMetaData(Map<String, String> transactionData) throws JSONException {
+        Map<String, Object> returnValue = new HashMap<>(transactionData);
+        JSONObject meta = new JSONObject();
+
+        for (String metaKey : MetaUtility.META_KEYS) {
+            // integration_type
+            // meta.integration_type
+            String key = String.format("meta.%s", metaKey);
+            if (transactionData.containsKey(key)) {
+                meta.put(metaKey, transactionData.get(key));
+                returnValue.remove(key);
+            }
+        }
+
+        if (meta.length() > 0) {
+            returnValue.put("meta", meta);
+        }
+
+        return returnValue;
     }
 
 }

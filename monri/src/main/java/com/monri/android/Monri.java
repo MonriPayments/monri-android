@@ -41,7 +41,7 @@ public final class Monri {
                     protected ResponseWrapper doInBackground(Void... params) {
                         try {
                             Token token = MonriApiHandler.createToken(
-                                    apiOptions,tokenParams
+                                    apiOptions, tokenParams
                             );
                             return new ResponseWrapper(token);
                         } catch (MonriException e) {
@@ -96,7 +96,7 @@ public final class Monri {
 
         try {
             final CreateTokenRequest createTokenRequest = CreateTokenRequest.create(paymentMethod, tokenRequest, authenticityToken);
-            mTokenCreator.create(apiOptions,createTokenRequest.toJson(), null, callback);
+            mTokenCreator.create(apiOptions, createTokenRequest.toJson(), null, callback);
         } catch (Exception e) {
             callback.onError(e);
         }

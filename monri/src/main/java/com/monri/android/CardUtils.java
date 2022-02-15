@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.monri.android.model.Card;
+import com.monri.android.model.ModelUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,8 +14,7 @@ import static com.monri.android.model.Card.MAESTRO;
 import static com.monri.android.model.Card.VISA;
 
 /**
- * Created by jasminsuljic on 19/03/2019.
- * huhuandroid
+ * monri-android
  */
 public class CardUtils {
     private static final int LENGTH_COMMON_CARD = 16;
@@ -160,5 +160,20 @@ public class CardUtils {
         } else {
             return Card.UNKNOWN;
         }
+    }
+
+    /**
+     * Checks whether or not the {@param cvc} is valid for {@param cardNumber}.
+     *
+     * @return {@code true} if valid, {@code false} otherwise
+     */
+    public static boolean validateCVC(@Nullable String cvc, @NonNull @Card.CardBrand String cardBrand) {
+        if (MonriTextUtils.isBlank(cvc)) {
+            return false;
+        }
+        String cvcValue = cvc.trim();
+        boolean validLength = (Card.AMERICAN_EXPRESS.equals(cardBrand) && cvcValue.length() == 4) || cvcValue.length() == 3;
+
+        return ModelUtils.isWholePositiveNumber(cvcValue) && validLength;
     }
 }

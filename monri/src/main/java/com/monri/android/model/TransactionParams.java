@@ -14,7 +14,6 @@ import java.util.Map;
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
  */
-//@JsonSerialize(using = TransactionParamsJsonSerializer.class)
 public class TransactionParams implements Parcelable {
 
     private Map<String, String> data;

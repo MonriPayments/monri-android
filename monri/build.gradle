@@ -4,7 +4,11 @@ apply plugin: 'signing'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion "30.0.2"
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    
+    repositories {
+        maven { url 'https://repo1.maven.org/maven2' }
+    }
 
     defaultConfig {
         minSdkVersion 19
@@ -18,11 +22,13 @@ android {
 
     buildTypes {
         release {
+            buildConfigField "String", 'MONRI_SDK_VERSION', "\"${rootProject.ext.monriSdkVersion}\""
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-
+            buildConfigField "String", 'MONRI_SDK_VERSION', "\"${rootProject.ext.monriSdkVersion}\""
         }
     }
     compileOptions {
