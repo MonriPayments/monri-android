@@ -12,7 +12,7 @@ We support Android 4.4 (API level 19) and above.
 Installing the Monri Android library is simple using  [Android Studio](https://developer.android.com/studio/intro)  and  [IntelliJ](https://www.jetbrains.com/help/idea/getting-started-with-android-development.html). You don’t need to clone a repo or download any files. Just add the following to your project’s  `build.gradle`  file, inside the dependencies section.
 
 ```gradle
-implementation 'com.monri:monri-android:1.2.+'
+implementation 'com.monri:monri-android:1.3.+'
 ```
 
 ## Proguard rules
