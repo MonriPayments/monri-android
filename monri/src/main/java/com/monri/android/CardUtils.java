@@ -155,6 +155,8 @@ public class CardUtils {
             return MAESTRO;
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_MASTERCARD)) {
             return Card.MASTERCARD;
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DINACARD)) {
+            return Card.DINACARD;
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_UNIONPAY)) {
             return Card.UNIONPAY;
         } else {
