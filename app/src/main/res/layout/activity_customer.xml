@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CustomerActivity"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_create_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_create_customer" />
+
+    <Button
+        android:id="@+id/btn_retrieve_saved_cards_from_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_retrieve_saved_cards_from_customer" />
+
+    <Button
+        android:id="@+id/btn_remove_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_remove_customer" />
+
+    <TextView
+        android:id="@+id/customer_api_result"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:text="customer API result"/>
+
+</LinearLayout>

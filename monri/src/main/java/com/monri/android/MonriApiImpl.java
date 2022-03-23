@@ -2,6 +2,8 @@ package com.monri.android;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
+import com.monri.android.model.CustomerRequest;
+import com.monri.android.model.CustomerResponse;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
 
@@ -48,4 +50,18 @@ class MonriApiImpl implements MonriApi {
         );
     }
 
+    @Override
+    public void createCustomer(final CustomerRequest customerRequest, final ResultCallback<CustomerResponse> callback) {
+        taskRunner.executeAsync(
+                () -> {
+                    MonriHttpResult<CustomerResponse> result = monriHttpApi.createCustomer(customerRequest);
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback
+        );
+    }
 }

@@ -46,6 +46,10 @@ public class ExamplesActivity extends AppCompatActivity implements ViewDelegate 
         this.<Button>findViewById(R.id.btn_payment_session_create).setOnClickListener(v -> {
             this.startActivity(PaymentActivity.createIntent(this));
         });
+
+        findViewById(R.id.btn_customer_activity).setOnClickListener(v -> {
+            startActivity(CustomerActivity.createIntent(this));
+        });
     }
 
     void handleError(Throwable throwable) {

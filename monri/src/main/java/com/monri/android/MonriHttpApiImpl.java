@@ -4,6 +4,8 @@ import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
+import com.monri.android.model.CustomerRequest;
+import com.monri.android.model.CustomerResponse;
 import com.monri.android.model.PaymentActionRequired;
 import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentResult;
@@ -147,6 +149,54 @@ class MonriHttpApiImpl implements MonriHttpApi {
         }
     }
 
+    //post v2/customers
+    @Override
+    public MonriHttpResult<CustomerResponse> createCustomer(final CustomerRequest customerRequest) {
+        HttpURLConnection urlConnection = null;
+
+        try {
+            final JSONObject customerRequestJSON = customerRequest.toJSON();
+
+            urlConnection = createHttpURLConnection(baseUrl + "/v2/customers", MonriHttpMethod.POST);
+
+            OutputStreamWriter wr = null;
+
+            try {
+                wr = new OutputStreamWriter(urlConnection.getOutputStream());
+                wr.write(customerRequestJSON.toString());
+                wr.flush();
+
+            } finally {
+                if (wr != null) {
+                    wr.close();
+                }
+            }
+
+            //now read response
+            try {
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                StringBuilder jsonStringResponse = new StringBuilder();
+                for (String line; (line = r.readLine()) != null; ) {
+                    jsonStringResponse.append(line).append('\n');
+                }
+
+                JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
+
+                return MonriHttpResult.success(CustomerResponse.fromJSON(jsonResponse), urlConnection.getResponseCode());
+
+            } finally {
+                urlConnection.disconnect();
+            }
+
+
+        } catch (Exception e) {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+    }
 
     @VisibleForTesting
     public static ConfirmPaymentResponse confirmPaymentResponseJSONToClass(final JSONObject confirmPaymentResponseJSON) throws JSONException {

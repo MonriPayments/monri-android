@@ -19,4 +19,8 @@
     <string name="btn_payment_example_save_card_for_future_payments">New payment + save card</string>
     <string name="btn_payment_example_saved_card_3ds">Saved Card 3DS - New Payment</string>
     <string name="btn_payment_example_saved_card_non_3ds">Saved Card, No 3DS - New Payment</string>
+    <string name="btn_create_customer">Create customer</string>
+    <string name="btn_customer_activity">Customer activity</string>
+    <string name="btn_retrieve_saved_cards_from_customer">Retrieve saved cards from customer</string>
+    <string name="btn_remove_customer">Remove customer</string>
 </resources>
