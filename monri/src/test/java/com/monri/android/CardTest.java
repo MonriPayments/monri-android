@@ -17,7 +17,8 @@ public class CardTest {
 
     private static final List<String> DINACARD_TEST_CARDS = Arrays.asList(
             "9891 2413 6144 9435",
-            "9891 2473 2497 1415",
+            "9891247324971415",
+            "6556732342675918",
             "9891 3170 2713 5509",
             "9891 0761 6659 0896",
             "9891 0721 4965 7282"
@@ -114,7 +115,8 @@ public class CardTest {
                 Pair.create("3782 822463 10005", Card.AMERICAN_EXPRESS),
                 Pair.create("989100", Card.DINACARD),
                 Pair.create("989101", Card.DINACARD),
-                Pair.create("657371", Card.DISCOVER)
+                Pair.create("655688", Card.DINACARD),
+                Pair.create("657371", Card.DINACARD)
         );
 
         Stream<Pair<String, String>> dinaCardBrand = DINACARD_TEST_CARDS.stream().map(s -> {

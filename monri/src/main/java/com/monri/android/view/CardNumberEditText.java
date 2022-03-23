@@ -174,7 +174,7 @@ public class CardNumberEditText extends MonriEditText {
                     return;
                 }
 
-                if (start < 4) {
+                if (start < 7) {
                     updateCardBrandFromNumber(s.toString());
                 }
 
