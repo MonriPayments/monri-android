@@ -54,6 +54,7 @@ public class Card extends PaymentMethod {
             MASTERCARD,
             MAESTRO,
             UNIONPAY,
+            DINACARD,
             UNKNOWN
     })
     public @interface CardBrand {
@@ -67,6 +68,7 @@ public class Card extends PaymentMethod {
     public static final String MASTERCARD = "MasterCard";
     public static final String MAESTRO = "Maestro";
     public static final String UNIONPAY = "UnionPay";
+    public static final String DINACARD = "DinaCard";
     public static final String UNKNOWN = "Unknown";
 
     public static final int CVC_LENGTH_AMERICAN_EXPRESS = 4;
@@ -82,6 +84,7 @@ public class Card extends PaymentMethod {
                 put(Card.MAESTRO, R.drawable.ic_maestro);
                 put(Card.VISA, R.drawable.ic_visa);
                 put(Card.UNIONPAY, R.drawable.ic_unionpay);
+                put(Card.DINACARD, R.drawable.ic_dinacard);
                 put(Card.UNKNOWN, R.drawable.ic_unknown);
             }};
 
@@ -101,6 +104,16 @@ public class Card extends PaymentMethod {
     };
     public static final String[] PREFIXES_MAESTRO = {"56", "58", "67", "502", "503", "506", "639", "5018", "6020"};
     public static final String[] PREFIXES_UNIONPAY = {"62"};
+    public static final String[] PREFIXES_DINACARD = {
+            "655670", "655671", "655672", "655673", "655674", "655675", "655676", "655677",
+            "655678", "655679", "655680", "655681", "655682", "655683", "655684", "655685",
+            "655686", "655687", "655688", "655689", "655690", "655691", "655692", "655693",
+            "655694", "655695", "655696", "655697", "657371", "657372", "657373", "657374",
+            "657375", "657376", "657377", "657378", "657379", "657380", "657381", "657382",
+            "657383", "657384", "657385", "657386", "657387", "657388", "657389", "657390",
+            "657391", "657392", "657393", "657394", "657395", "657396", "657397", "657398",
+            "9891"
+    };
 
     private String number;
     private String cvc;

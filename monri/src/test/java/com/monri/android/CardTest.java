@@ -15,6 +15,15 @@ import java.util.stream.Stream;
 
 public class CardTest {
 
+    private static final List<String> DINACARD_TEST_CARDS = Arrays.asList(
+            "9891 2413 6144 9435",
+            "9891247324971415",
+            "6556732342675918",
+            "9891 3170 2713 5509",
+            "9891 0761 6659 0896",
+            "9891 0721 4965 7282"
+    );
+
     private static final List<String> MAESTRO_TEST_CARDS = Arrays.asList(
             "6759 6498 2643 8453",
             "6772 5565 4321 31279",
@@ -44,9 +53,11 @@ public class CardTest {
                 Pair.create(new String[]{"55554444 4444 4444", "12"}, false),
                 Pair.create(new String[]{MAESTRO_TEST_CARDS.get(0), "12"}, false),
                 Pair.create(new String[]{MAESTRO_TEST_CARDS.get(0), "123"}, true),
-                Pair.create(new String[]{MAESTRO_TEST_CARDS.get(0), "1234"}, false)
+                Pair.create(new String[]{MAESTRO_TEST_CARDS.get(0), "1234"}, false),
+                Pair.create(new String[]{DINACARD_TEST_CARDS.get(0), "123"}, true),
+                Pair.create(new String[]{DINACARD_TEST_CARDS.get(0), "1234"}, false)
         ).forEach(p -> {
-            Card card = new Card(p.first[0], 12, 2024, p.first[1]);
+            Card card = new Card(p.first[0], 12, 2026, p.first[1]);
             final String cvv = card.getCVC();
             final String pan = card.getNumber();
             if (p.second) {
@@ -77,11 +88,14 @@ public class CardTest {
         Stream<Pair<String, Boolean>> visaPanTest = VISA_TEST_CARDS.stream().map(s -> {
             return Pair.create(s, true);
         });
+        Stream<Pair<String, Boolean>> dinaCardPanTest = DINACARD_TEST_CARDS.stream().map(s -> {
+            return Pair.create(s, true);
+        });
 
-        Stream.of(list, maestroPanTest, visaPanTest)
+        Stream.of(list, maestroPanTest, visaPanTest, dinaCardPanTest)
                 .flatMap(i -> i)
                 .forEach(pair -> {
-                    Card card = new Card(pair.first, 12, 2024, "123");
+                    Card card = new Card(pair.first, 12, 2026, "123");
                     //noinspection ConstantConditions
                     if (pair.second) {
                         Assert.assertTrue(String.format("pan = %s should be valid", card.getNumber()), card.validateNumber());
@@ -99,11 +113,15 @@ public class CardTest {
                 Pair.create("411111", Card.VISA),
                 Pair.create("5168 4412 2363 0339", Card.MASTERCARD),
                 Pair.create("3782 822463 10005", Card.AMERICAN_EXPRESS),
-//TODO: add dina card
-//                Pair.create("989100", Card.DINACARD),
-//                Pair.create("989101", Card.DINACARD),
-                Pair.create("657371", Card.DISCOVER)
+                Pair.create("989100", Card.DINACARD),
+                Pair.create("989101", Card.DINACARD),
+                Pair.create("655688", Card.DINACARD),
+                Pair.create("657371", Card.DINACARD)
         );
+
+        Stream<Pair<String, String>> dinaCardBrand = DINACARD_TEST_CARDS.stream().map(s -> {
+            return Pair.create(s, Card.DINACARD);
+        });
 
         Stream<Pair<String, String>> maestroCardBrand = MAESTRO_TEST_CARDS.stream().map(s -> {
             return Pair.create(s, Card.MAESTRO);
@@ -113,10 +131,10 @@ public class CardTest {
             return Pair.create(s, Card.VISA);
         });
 
-        Stream.of(pairs, maestroCardBrand, visaCardBrand)
+        Stream.of(pairs, maestroCardBrand, visaCardBrand, dinaCardBrand)
                 .flatMap(i -> i)
                 .forEach(pair -> {
-                    Card card = new Card(pair.first, 12, 2024, "123");
+                    Card card = new Card(pair.first, 12, 2026, "123");
                     Assert.assertEquals(String.format("Bin '%s' brand should be %s", card, pair.second),
                             pair.second,
                             card.getBrand()
@@ -147,17 +165,37 @@ public class CardTest {
             testValues.add(Pair.create(new Integer[]{currentYear, currentMonth + 1}, true));
         }
 
-        testValues.forEach(pair -> {
-            final Integer month = pair.first[1];
-            final Integer year = pair.first[0];
-            Card card = new Card(VISA_TEST_CARDS.get(0), month, year, "123");
-
-            if (pair.second) {
-                Assert.assertTrue(String.format("Expiry date = %s/%s should be valid", year, month), card.validateExpiryDate());
-            } else {
-                Assert.assertFalse(String.format("Expiry date = %s/%s should be invalid", year, month), card.validateExpiryDate());
-            }
+        Stream<Pair<String, String>> dinaCardBrand = DINACARD_TEST_CARDS.stream().map(s -> {
+            return Pair.create(s, Card.DINACARD);
         });
+
+        Stream<Pair<String, String>> maestroCardBrand = MAESTRO_TEST_CARDS.stream().map(s -> {
+            return Pair.create(s, Card.MAESTRO);
+        });
+
+        Stream<Pair<String, String>> visaCardBrand = VISA_TEST_CARDS.stream().map(s -> {
+            return Pair.create(s, Card.VISA);
+        });
+
+
+        Stream.of(maestroCardBrand, visaCardBrand, dinaCardBrand)
+                .flatMap(i -> i)
+                .forEach(cardPair -> {
+                    testValues.forEach(pair -> {
+                        final Integer month = pair.first[1];
+                        final Integer year = pair.first[0];
+
+                        Card card = new Card(cardPair.first, month, year, "123");
+
+                        if (pair.second) {
+                            Assert.assertTrue(String.format("Expiry date = %s/%s should be valid", year, month), card.validateExpiryDate());
+                        } else {
+                            Assert.assertFalse(String.format("Expiry date = %s/%s should be invalid", year, month), card.validateExpiryDate());
+                        }
+                    });
+
+                });
+
     }
 
 

@@ -143,8 +143,8 @@ public class CardUtils {
 
         if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_AMERICAN_EXPRESS)) {
             return Card.AMERICAN_EXPRESS;
-        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DISCOVER)) {
-            return Card.DISCOVER;
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DINACARD)) {
+            return Card.DINACARD;
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_JCB)) {
             return Card.JCB;
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DINERS_CLUB)) {
@@ -155,6 +155,8 @@ public class CardUtils {
             return MAESTRO;
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_MASTERCARD)) {
             return Card.MASTERCARD;
+        } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_DISCOVER)) {
+            return Card.DISCOVER;
         } else if (MonriTextUtils.hasAnyPrefix(spacelessCardNumber, Card.PREFIXES_UNIONPAY)) {
             return Card.UNIONPAY;
         } else {
