@@ -25,4 +25,13 @@ interface MonriHttpApi {
 
     //create customer v2/customers
     MonriHttpResult<CustomerResponse> createCustomer(CustomerRequest customerRequest);
+
+    //retrieve customer /v2/customers/:uuid
+    MonriHttpResult<CustomerResponse> retrieveCustomer(String uuid);
+
+    //Retrieve a customer via merchant_customer_id /v2/merchants/customers/:merchant_customer_id
+    MonriHttpResult<CustomerResponse> retrieveCustomerViaMerchantCustomerId(String uuid);
+
+    //update customer v2/customers
+    MonriHttpResult<CustomerResponse> updateCustomer(CustomerRequest customerRequest, String customerUuid);
 }

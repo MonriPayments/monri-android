@@ -48,7 +48,7 @@ public class HttpRequestTest {
 
     @Test
     public void fromJSONToConfirmPaymentResponseWithoutPmAndErrors() throws JSONException {
-        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.confirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutPmAndErrors));
+        final ConfirmPaymentResponse confirmPaymentResponse = ConfirmPaymentResponse.fromJSON(new JSONObject(responseConfirmPaymentJSONStringWithoutPmAndErrors));
         assertNotNull(confirmPaymentResponse.getPaymentResult());
         assertNotNull(confirmPaymentResponse.getStatus());
         Assert.assertNull(confirmPaymentResponse.getActionRequired());
@@ -71,7 +71,7 @@ public class HttpRequestTest {
 
     @Test
     public void fromJSONToConfirmPaymentResponseWithoutErrors() throws JSONException {
-        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.confirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONStringWithoutErrors));
+        final ConfirmPaymentResponse confirmPaymentResponse = ConfirmPaymentResponse.fromJSON(new JSONObject(responseConfirmPaymentJSONStringWithoutErrors));
         assertNotNull(confirmPaymentResponse.getPaymentResult());
         assertNotNull(confirmPaymentResponse.getStatus());
 
@@ -101,7 +101,7 @@ public class HttpRequestTest {
 
     @Test
     public void fromJSONToConfirmPaymentResponse() throws JSONException {
-        final ConfirmPaymentResponse confirmPaymentResponse = MonriHttpApiImpl.confirmPaymentResponseJSONToClass(new JSONObject(responseConfirmPaymentJSONString));
+        final ConfirmPaymentResponse confirmPaymentResponse = ConfirmPaymentResponse.fromJSON(new JSONObject(responseConfirmPaymentJSONString));
         assertNotNull(confirmPaymentResponse.getPaymentResult());
         assertNotNull(confirmPaymentResponse.getStatus());
 

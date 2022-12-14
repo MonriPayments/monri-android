@@ -1,20 +1,16 @@
 package com.monri.android;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.CustomerRequest;
 import com.monri.android.model.CustomerResponse;
-import com.monri.android.model.PaymentActionRequired;
 import com.monri.android.model.PaymentMethodParams;
-import com.monri.android.model.PaymentResult;
-import com.monri.android.model.PaymentStatus;
 import com.monri.android.model.PaymentStatusResponse;
-import com.monri.android.model.SavedCardPaymentMethod;
 import com.monri.android.model.TransactionParams;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,9 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 class MonriHttpApiImpl implements MonriHttpApi {
@@ -62,26 +56,20 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     }
 
-    public MonriHttpApiImpl(final String baseUrl, final Map<String, String> headers) {
-        this.baseUrl = baseUrl;
-        this.headers = headers;
-    }
-
-    //post v2/payment/{id}/confirm
-    @Override
-    public MonriHttpResult<ConfirmPaymentResponse> confirmPayment(ConfirmPaymentParams confirmPaymentParams) {
+    private MonriHttpResult<JSONObject> httpsPOST(
+            final String endpoint,
+            final JSONObject body
+    ) {
         HttpURLConnection urlConnection = null;
 
         try {
-            final JSONObject confirmPaymentParamsJSON = confirmPaymentParamsToJSON(confirmPaymentParams);
-
-            urlConnection = createHttpURLConnection(baseUrl + "/v2/payment/" + confirmPaymentParams.getPaymentId() + "/confirm", MonriHttpMethod.POST);
+            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.POST);
 
             OutputStreamWriter wr = null;
 
             try {
                 wr = new OutputStreamWriter(urlConnection.getOutputStream());
-                wr.write(confirmPaymentParamsJSON.toString());
+                wr.write(body.toString());
                 wr.flush();
 
             } finally {
@@ -101,7 +89,8 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
                 JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-                return MonriHttpResult.success(confirmPaymentResponseJSONToClass(jsonResponse), urlConnection.getResponseCode());
+                //todo what if backend return response without data e.g. 401, 403, 404 etc.
+                return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
 
             } finally {
                 urlConnection.disconnect();
@@ -117,13 +106,10 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     }
 
-    //get v2/payment/{id}/status
-    @Override
-    public MonriHttpResult<PaymentStatusResponse> paymentStatus(String id) {
-
+    private MonriHttpResult<JSONObject> httpsGET(final String endpoint) {
         HttpURLConnection urlConnection = null;
         try {
-            urlConnection = createHttpURLConnection(baseUrl + "/v2/payment/" + id + "/status", MonriHttpMethod.GET);
+            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.GET);
 
             try {
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
@@ -135,7 +121,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
                 final JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-                return MonriHttpResult.success(paymentStatusResponseJSONToClass(jsonResponse), urlConnection.getResponseCode());
+                return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
 
             } finally {
                 urlConnection.disconnect();
@@ -145,169 +131,106 @@ class MonriHttpApiImpl implements MonriHttpApi {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+
+    }
+
+    public MonriHttpApiImpl(final String baseUrl, final Map<String, String> headers) {
+        this.baseUrl = baseUrl;
+        this.headers = headers;
+    }
+
+    //post v2/payment/{id}/confirm
+    @Override
+    public MonriHttpResult<ConfirmPaymentResponse> confirmPayment(@NonNull ConfirmPaymentParams confirmPaymentParams) {
+        try {
+            final MonriHttpResult<JSONObject> response = httpsPOST(
+                    baseUrl + "/v2/payment/" + confirmPaymentParams.getPaymentId() + "/confirm",
+                    confirmPaymentParamsToJSON(confirmPaymentParams)
+            );
+            return MonriHttpResult.success(ConfirmPaymentResponse.fromJSON(response.getResult()), response.getResponseCode());
+        } catch (JSONException e) {
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+    }
+
+    //get v2/payment/{id}/status
+    @Override
+    public MonriHttpResult<PaymentStatusResponse> paymentStatus(String id) {
+        final MonriHttpResult<JSONObject> response = httpsGET(baseUrl + "/v2/payment/" + id + "/status");
+
+        try {
+            if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+                return MonriHttpResult.success(PaymentStatusResponse.fromJSON(response.getResult()), response.getResponseCode());
+            } else {
+                return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
+            }
+        } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
     }
 
     //post v2/customers
     @Override
-    public MonriHttpResult<CustomerResponse> createCustomer(final CustomerRequest customerRequest) {
-        HttpURLConnection urlConnection = null;
-
+    public MonriHttpResult<CustomerResponse> createCustomer(@NonNull final CustomerRequest customerRequest) {
         try {
-            final JSONObject customerRequestJSON = customerRequest.toJSON();
-
-            urlConnection = createHttpURLConnection(baseUrl + "/v2/customers", MonriHttpMethod.POST);
-
-            OutputStreamWriter wr = null;
-
-            try {
-                wr = new OutputStreamWriter(urlConnection.getOutputStream());
-                wr.write(customerRequestJSON.toString());
-                wr.flush();
-
-            } finally {
-                if (wr != null) {
-                    wr.close();
-                }
-            }
-
-            //now read response
-            try {
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                StringBuilder jsonStringResponse = new StringBuilder();
-                for (String line; (line = r.readLine()) != null; ) {
-                    jsonStringResponse.append(line).append('\n');
-                }
-
-                JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
-
-                return MonriHttpResult.success(CustomerResponse.fromJSON(jsonResponse), urlConnection.getResponseCode());
-
-            } finally {
-                urlConnection.disconnect();
-            }
-
-
-        } catch (Exception e) {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
+            final MonriHttpResult<JSONObject> response = httpsPOST(
+                    baseUrl + "/v2/customers",
+                    customerRequest.toJSON()
+            );
+            return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
+        } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
     }
 
-    @VisibleForTesting
-    public static ConfirmPaymentResponse confirmPaymentResponseJSONToClass(final JSONObject confirmPaymentResponseJSON) throws JSONException {
-        final PaymentStatus status = PaymentStatus.forValue(confirmPaymentResponseJSON.getString("status"));
+    @Override
+    public MonriHttpResult<CustomerResponse> retrieveCustomer(final String customerUuid) {
+        final MonriHttpResult<JSONObject> response = httpsGET(baseUrl + "/v2/customers/" + customerUuid);
 
-        PaymentActionRequired paymentActionRequired = null;
-        PaymentResult paymentResult = null;
-
-        if (confirmPaymentResponseJSON.has("action_required")) {
-            final JSONObject actionRequiredJSON = confirmPaymentResponseJSON.getJSONObject("action_required");
-            final String redirectTo = actionRequiredJSON.getString("redirect_to");
-            final String acsUrl = actionRequiredJSON.getString("acs_url");
-            paymentActionRequired = new PaymentActionRequired(redirectTo, acsUrl);
-        } else if (confirmPaymentResponseJSON.has("payment_result")) {
-            final JSONObject paymentResultJSON = confirmPaymentResponseJSON.getJSONObject("payment_result");
-            paymentResult = paymentResultJSONToClass(paymentResultJSON);
-        } else {
-            throw new IllegalArgumentException("both action_required and payment_result are null in confirmPaymentResponseJSON");
-        }
-
-        String idFromResponse = null;
-
-        if (confirmPaymentResponseJSON.has("client_secret")) {
-            idFromResponse = confirmPaymentResponseJSON.getString("client_secret");
-        }
-
-        return new ConfirmPaymentResponse(status, paymentActionRequired, paymentResult, idFromResponse);
-    }
-
-    @VisibleForTesting
-    public static PaymentStatusResponse paymentStatusResponseJSONToClass(final JSONObject paymentStatusResponseJSON) throws JSONException {
-        final String status = paymentStatusResponseJSON.getString("status");
-        final PaymentStatus paymentStatus = PaymentStatus.forValue(paymentStatusResponseJSON.getString("payment_status"));
-
-        final JSONObject paymentResultJSON = paymentStatusResponseJSON.getJSONObject("payment_result");
-        final PaymentResult paymentResult = paymentResultJSONToClass(paymentResultJSON);
-
-        return new PaymentStatusResponse(
-                paymentStatus,
-                status,
-                paymentResult
-        );
-
-    }
-
-    @VisibleForTesting
-    public static PaymentResult paymentResultJSONToClass(JSONObject paymentResultJSON) throws JSONException {
-
-        final String paymentStatusResult = paymentResultJSON.getString("status");
-        final String paymentStatusCurrency = paymentResultJSON.getString("currency");
-        final Integer paymentStatusAmount = paymentResultJSON.getInt("amount");
-        final String paymentStatusOrderNumber = paymentResultJSON.getString("order_number");
-
-        String paymentStatusPanToken = "null";
-
-        if (paymentResultJSON.has("pan_token")) {
-            paymentStatusPanToken = paymentResultJSON.getString("pan_token");
-        }
-
-        final String paymentStatusCreatedAt = paymentResultJSON.getString("created_at");
-        final String paymentStatusTransactionType = paymentResultJSON.getString("transaction_type");
-
-        SavedCardPaymentMethod savedCardPaymentMethod = null;
-
-        if (paymentResultJSON.has("payment_method")) {
-            final JSONObject paymentStatusPaymentMethodJSON = paymentResultJSON.getJSONObject("payment_method");
-            final String paymentStatusPaymentMethodType = paymentStatusPaymentMethodJSON.getString("type");
-            final JSONObject pmData = paymentStatusPaymentMethodJSON.getJSONObject("data");
-            final String brand = pmData.getString("brand");
-            final String issuer = pmData.getString("issuer");
-            final String masked = pmData.getString("masked");
-            final String expiration_date = pmData.getString("expiration_date");
-            final String token = pmData.getString("token");
-            final SavedCardPaymentMethod.Data data = new SavedCardPaymentMethod.Data(brand, issuer, masked, expiration_date, token);
-
-            savedCardPaymentMethod = new SavedCardPaymentMethod(
-                    paymentStatusPaymentMethodType,
-                    data
-            );
-        }
-
-        List<String> paymentStatusErrors = null;
-
-        if (paymentResultJSON.has("errors")) {
-            paymentStatusErrors = new ArrayList<>();
-            JSONArray jsonArray = paymentResultJSON.getJSONArray("errors");
-            if (jsonArray != null) {
-                int len = jsonArray.length();
-                for (int i = 0; i < len; i++) {
-                    paymentStatusErrors.add(jsonArray.get(i).toString());
-                }
+        try {
+            if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+                return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
+            } else {
+                return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
             }
+        } catch (JSONException e) {
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
-
-        PaymentResult paymentResult = new PaymentResult(
-                paymentStatusResult,
-                paymentStatusCurrency,
-                paymentStatusAmount,
-                paymentStatusOrderNumber,
-                paymentStatusPanToken,
-                paymentStatusCreatedAt,
-                paymentStatusTransactionType,
-                savedCardPaymentMethod,
-                paymentStatusErrors
-        );
-
-        return paymentResult;
     }
 
+    @Override
+    public MonriHttpResult<CustomerResponse> retrieveCustomerViaMerchantCustomerId(final String merchantCustomerId) {
+        final MonriHttpResult<JSONObject> response = httpsGET(baseUrl + "/v2/merchants/customers/" + merchantCustomerId);
+
+        try {
+            if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+                return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
+            } else {
+                return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
+            }
+        } catch (JSONException e) {
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+    }
+
+    @Override
+    public MonriHttpResult<CustomerResponse> updateCustomer(@NonNull final CustomerRequest customerRequest, final String customerUuid) {
+        try {
+            final MonriHttpResult<JSONObject> response = httpsPOST(
+                    baseUrl + "/v2/customers/" + customerUuid,
+                    customerRequest.toJSON()
+            );
+            return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
+        } catch (JSONException e) {
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+    }
+
+    @NonNull
     @VisibleForTesting
-    public static JSONObject confirmPaymentParamsToJSON(ConfirmPaymentParams confirmPaymentParams) throws JSONException {
+    public static JSONObject confirmPaymentParamsToJSON(@NonNull ConfirmPaymentParams confirmPaymentParams) throws JSONException {
         final PaymentMethodParams paymentMethodParams = confirmPaymentParams.getPaymentMethod();
         final String type = paymentMethodParams.getType();
         final Map<String, String> data = paymentMethodParams.getData();

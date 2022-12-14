@@ -3,6 +3,7 @@ package com.monri.android.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class CustomerRequest {
@@ -40,6 +41,11 @@ public class CustomerRequest {
         this.address = address;
         this.country = country;
     }
+
+//    public CustomerRequest merchantCustomerId (final String merchantCustomerId){
+//        this.merchantCustomerId = merchantCustomerId;
+//        return this;
+//    }
 
     public String getMerchantCustomerId() {
         return merchantCustomerId;
@@ -137,5 +143,59 @@ public class CustomerRequest {
         customerJSON.put("address", address);
 
         return customerJSON;
+    }
+
+    public static class CustomerRequestBuilder {
+        private String merchantCustomerId;
+        private String description;
+        private String email;
+        private String name;
+        private String phone;
+        private Map<String, String> metadata;
+        private String zipCode;
+        private String city;
+        private String address;
+        private String country;
+
+        public CustomerRequestBuilder merchantCustomerId(String merchantCustomerId) {
+            this.merchantCustomerId = merchantCustomerId;
+            return this;
+        }
+
+        public CustomerRequestBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+        public CustomerRequestBuilder email(String email) {
+            this.email = email;
+            return this;
+        }
+        public CustomerRequestBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+        public CustomerRequestBuilder phone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+        public CustomerRequestBuilder metadata(final Map<String, String> metadata) {
+            this.metadata = new HashMap<>(metadata);
+            return this;
+        }
+
+        public CustomerRequest build() {
+            return new CustomerRequest(
+                    this.merchantCustomerId,
+                    this.description,
+                    this.email,
+                    this.name,
+                    this.phone,
+                    this.metadata,
+                    this.zipCode,
+                    this.city,
+                    this.address,
+                    this.country
+            );
+        }
     }
 }

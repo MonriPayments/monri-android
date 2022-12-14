@@ -4,6 +4,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by jasminsuljic on 2019-12-05.
@@ -84,4 +88,32 @@ public class ConfirmPaymentResponse implements Parcelable {
             return new ConfirmPaymentResponse[size];
         }
     };
+
+    @VisibleForTesting
+    public static ConfirmPaymentResponse fromJSON(JSONObject jsonObject) throws JSONException {
+        final PaymentStatus status = PaymentStatus.forValue(jsonObject.getString("status"));
+
+        PaymentActionRequired paymentActionRequired = null;
+        PaymentResult paymentResult = null;
+
+        if (jsonObject.has("action_required")) {
+            final JSONObject actionRequiredJSON = jsonObject.getJSONObject("action_required");
+            final String redirectTo = actionRequiredJSON.getString("redirect_to");
+            final String acsUrl = actionRequiredJSON.getString("acs_url");
+            paymentActionRequired = new PaymentActionRequired(redirectTo, acsUrl);
+        } else if (jsonObject.has("payment_result")) {
+            final JSONObject paymentResultJSON = jsonObject.getJSONObject("payment_result");
+            paymentResult = PaymentResult.fromJSON(paymentResultJSON);
+        } else {
+            throw new IllegalArgumentException("both action_required and payment_result are null in jsonObject");
+        }
+
+        String idFromResponse = null;
+
+        if (jsonObject.has("client_secret")) {
+            idFromResponse = jsonObject.getString("client_secret");
+        }
+
+        return new ConfirmPaymentResponse(status, paymentActionRequired, paymentResult, idFromResponse);
+    }
 }
