@@ -17,6 +17,8 @@ public interface MonriApi {
 
     void paymentStatus(PaymentStatusParams params, ResultCallback<PaymentStatusResponse> callback);
 
-    void createCustomer(CustomerRequest customerRequest, ResultCallback<CustomerResponse> callback);
+    void createCustomer(final CustomerRequest customerRequest, ResultCallback<CustomerResponse> callback);
+
+    void getAllCustomers(final String accessToken, ResultCallback<Object> callback);
 
 }

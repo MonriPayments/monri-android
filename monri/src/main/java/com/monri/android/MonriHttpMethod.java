@@ -2,7 +2,8 @@ package com.monri.android;
 
 enum MonriHttpMethod {
     GET("GET"),
-    POST("POST");
+    POST("POST"),
+    DELETE("DELETE");
 
     private final String value;
 

@@ -2,6 +2,8 @@ package com.monri.android;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
+import com.monri.android.model.CustomerDeleteResponse;
+import com.monri.android.model.Customer;
 import com.monri.android.model.CustomerRequest;
 import com.monri.android.model.CustomerResponse;
 import com.monri.android.model.PaymentStatusResponse;
@@ -33,5 +35,14 @@ interface MonriHttpApi {
     MonriHttpResult<CustomerResponse> retrieveCustomerViaMerchantCustomerId(String uuid);
 
     //update customer v2/customers
-    MonriHttpResult<CustomerResponse> updateCustomer(CustomerRequest customerRequest, String customerUuid);
+    MonriHttpResult<CustomerResponse> updateCustomer(Customer customer, String customerUuid);
+
+    //delete customer v2/customers
+    MonriHttpResult<CustomerDeleteResponse> deleteCustomer(String uuid);
+
+    //get customers
+    MonriHttpResult<Object> getAllCustomers(final String accessToken);
+
+    //get all paymentMethods
+    MonriHttpResult<Object> getPaymentMethodsForCustomer(String uuid, long limit, long offset);
 }

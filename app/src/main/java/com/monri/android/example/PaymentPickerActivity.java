@@ -28,6 +28,7 @@ import com.monri.android.model.TransactionParams;
 import com.monri.android.view.CardMultilineWidget;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -177,6 +178,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
             } else {
 
                 final CustomerParams customerParams = new CustomerParams()
+                        .setCustomerId("38400000-8cf0-11bd-b23e-10b96e4ef00d")
                         .setAddress("Adresa")
                         .setFullName("Tester Testerovic")
                         .setCity("Sarajevo")

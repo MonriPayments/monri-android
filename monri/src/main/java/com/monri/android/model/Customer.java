@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CustomerRequest {
+public class Customer {
     private String merchantCustomerId;
     private String description;
     private String email;
@@ -18,7 +18,7 @@ public class CustomerRequest {
     private String address;
     private String country;
 
-    public CustomerRequest(
+    public Customer(
             final String merchantCustomerId,
             final String description,
             final String email,
@@ -41,11 +41,6 @@ public class CustomerRequest {
         this.address = address;
         this.country = country;
     }
-
-//    public CustomerRequest merchantCustomerId (final String merchantCustomerId){
-//        this.merchantCustomerId = merchantCustomerId;
-//        return this;
-//    }
 
     public String getMerchantCustomerId() {
         return merchantCustomerId;
@@ -130,15 +125,18 @@ public class CustomerRequest {
     public JSONObject toJSON() throws JSONException {
         JSONObject customerJSON = new JSONObject();
 
-        JSONObject metaDataJSON = new JSONObject(this.metadata);
-        customerJSON.put("meta_data", metaDataJSON);
-        customerJSON.put("merchantCustomerId", merchantCustomerId);
+        JSONObject metaDataJSON = new JSONObject();
+        for (Map.Entry<String,String> entry : metadata.entrySet()){
+            metaDataJSON.put(entry.getKey(),entry.getValue());
+        }
+
+        customerJSON.put("metadata", metaDataJSON);
+        customerJSON.put("merchant_customer_id", merchantCustomerId);
         customerJSON.put("description", description);
         customerJSON.put("email", email);
         customerJSON.put("name", name);
         customerJSON.put("phone", phone);
-        customerJSON.put("metadata", metadata);
-        customerJSON.put("zipCode", zipCode);
+        customerJSON.put("zip_code", zipCode);
         customerJSON.put("city", city);
         customerJSON.put("address", address);
 
@@ -183,8 +181,8 @@ public class CustomerRequest {
             return this;
         }
 
-        public CustomerRequest build() {
-            return new CustomerRequest(
+        public Customer build() {
+            return new Customer(
                     this.merchantCustomerId,
                     this.description,
                     this.email,

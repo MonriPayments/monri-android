@@ -14,6 +14,12 @@
         android:text="@string/btn_create_customer" />
 
     <Button
+        android:id="@+id/btn_get_all_customers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_get_all_customers" />
+
+    <Button
         android:id="@+id/btn_retrieve_saved_cards_from_customer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

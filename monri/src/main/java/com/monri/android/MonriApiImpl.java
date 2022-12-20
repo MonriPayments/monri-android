@@ -51,10 +51,28 @@ class MonriApiImpl implements MonriApi {
     }
 
     @Override
-    public void createCustomer(final CustomerRequest customerRequest, final ResultCallback<CustomerResponse> callback) {
+    public void createCustomer(
+            final CustomerRequest customerRequest,
+            final ResultCallback<CustomerResponse> callback
+    ) {
         taskRunner.executeAsync(
                 () -> {
                     MonriHttpResult<CustomerResponse> result = monriHttpApi.createCustomer(customerRequest);
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback
+        );
+    }
+
+    @Override
+    public void getAllCustomers(final String accessToken, ResultCallback<Object> callback) {
+        taskRunner.executeAsync(
+                () -> {
+                    MonriHttpResult<Object> result = monriHttpApi.getAllCustomers(accessToken);
                     if (result.getCause() != null) {
                         throw result.getCause();
                     } else {

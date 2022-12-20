@@ -190,7 +190,9 @@ public class CustomerResponse {
 
     public static CustomerResponse fromJSON(JSONObject jsonObject) throws JSONException {
         Map<String, String> metadata = new HashMap<>();
-        JSONObject metaJSONObject = jsonObject.getJSONObject("metadata");
+        if(jsonObject.has("metadata")){
+            Object metaJSONObject = jsonObject.get("metadata");
+        }
 
         return new CustomerResponse(
                 jsonObject.getString("status"),

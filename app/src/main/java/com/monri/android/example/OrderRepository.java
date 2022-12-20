@@ -59,7 +59,7 @@ public class OrderRepository {
 
     //        TODO: replace with your merchant's authenticity token
     String authenticityToken() {
-        return "6a13d79bde8da9320e88923cb3472fb638619ccb";
+        return "7db11ea5d4a1af32421b564c79b946d1ead3daf0";
     }
 
     MonriApiOptions monriApiOptions() {

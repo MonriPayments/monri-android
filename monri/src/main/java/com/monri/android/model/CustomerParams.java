@@ -8,6 +8,8 @@ import android.os.Parcelable;
  * MonriAndroid
  */
 public class CustomerParams implements Parcelable {
+    private String customerId;
+
     private String email;
 
     private String fullName;
@@ -41,6 +43,10 @@ public class CustomerParams implements Parcelable {
         this.country = country;
     }
 
+    public String getCustomerId() {
+        return customerId;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -67,6 +73,11 @@ public class CustomerParams implements Parcelable {
 
     public String getCountry() {
         return country;
+    }
+
+    public CustomerParams setCustomerId(String customerId) {
+        this.customerId = customerId;
+        return this;
     }
 
     public CustomerParams setEmail(String email) {
@@ -111,6 +122,7 @@ public class CustomerParams implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.customerId);
         dest.writeString(this.email);
         dest.writeString(this.fullName);
         dest.writeString(this.address);
@@ -121,6 +133,7 @@ public class CustomerParams implements Parcelable {
     }
 
     protected CustomerParams(Parcel in) {
+        this.customerId = in.readString();
         this.email = in.readString();
         this.fullName = in.readString();
         this.address = in.readString();
