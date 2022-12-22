@@ -5,10 +5,14 @@ import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
+import com.monri.android.model.CustomerDeleteRequest;
 import com.monri.android.model.CustomerDeleteResponse;
-import com.monri.android.model.Customer;
-import com.monri.android.model.CustomerRequest;
+import com.monri.android.model.CustomerCreateRequest;
+import com.monri.android.model.CustomerPaymentMethodRequest;
 import com.monri.android.model.CustomerResponse;
+import com.monri.android.model.CustomerRetrieveMerchantIdRequest;
+import com.monri.android.model.CustomerRetrieveRequest;
+import com.monri.android.model.CustomerUpdateRequest;
 import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentStatusResponse;
 import com.monri.android.model.TransactionParams;
@@ -223,13 +227,13 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     //post v2/customers
     @Override
-    public MonriHttpResult<CustomerResponse> createCustomer(@NonNull final CustomerRequest customerRequest) {
+    public MonriHttpResult<CustomerResponse> createCustomer(@NonNull final CustomerCreateRequest customerCreateRequest) {
         try {
             final MonriHttpResult<JSONObject> response = httpsPOST(
                     baseUrl + "/v2/customers",
-                    customerRequest.getCustomer().toJSON(),
+                    customerCreateRequest.getCustomer().toJSON(),
                     new HashMap<>(){{
-                        put("authorization", customerRequest.getAccessToken());
+                        put("authorization", customerCreateRequest.getAccessToken());
                     }}
             );
             return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
@@ -239,10 +243,12 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<CustomerResponse> retrieveCustomer(final String customerUuid) {
+    public MonriHttpResult<CustomerResponse> retrieveCustomer(final CustomerRetrieveRequest customerRetrieveRequest) {
         final MonriHttpResult<JSONObject> response = httpsGET(
-                baseUrl + "/v2/customers/" + customerUuid,
-                new HashMap<>()
+                baseUrl + "/v2/customers/" + customerRetrieveRequest.getCustomerUuid(),
+                new HashMap<>(){{
+                    put("authorization", customerRetrieveRequest.getAccessToken());
+                }}
         );
 
         try {
@@ -257,10 +263,12 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<CustomerResponse> retrieveCustomerViaMerchantCustomerId(final String merchantCustomerId) {
+    public MonriHttpResult<CustomerResponse> retrieveCustomerViaMerchantCustomerId(final CustomerRetrieveMerchantIdRequest customerRetrieveMerchantIdRequest) {
         final MonriHttpResult<JSONObject> response = httpsGET(
-                baseUrl + "/v2/merchants/customers/" + merchantCustomerId,
-                new HashMap<>()
+                baseUrl + "/v2/merchants/customers/" + customerRetrieveMerchantIdRequest.getMerchantCustomerUuid(),
+                new HashMap<>(){{
+                    put("authorization", customerRetrieveMerchantIdRequest.getAccessToken());
+                }}
         );
 
         try {
@@ -275,12 +283,14 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<CustomerResponse> updateCustomer(@NonNull final Customer customer, final String customerUuid) {
+    public MonriHttpResult<CustomerResponse> updateCustomer(@NonNull final CustomerUpdateRequest customerUpdateRequest) {
         try {
             final MonriHttpResult<JSONObject> response = httpsPOST(
-                    baseUrl + "/v2/customers/" + customerUuid,
-                    customer.toJSON(),
-                    new HashMap<>()
+                    baseUrl + "/v2/customers/" + customerUpdateRequest.getCustomerUuid(),
+                    customerUpdateRequest.getCustomer().toJSON(),
+                    new HashMap<>(){{
+                        put("authorization", customerUpdateRequest.getAccessToken());
+                    }}
             );
             return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
         } catch (JSONException e) {
@@ -289,10 +299,12 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<CustomerDeleteResponse> deleteCustomer(final String uuid) {
+    public MonriHttpResult<CustomerDeleteResponse> deleteCustomer(final CustomerDeleteRequest customerDeleteRequest) {
         final MonriHttpResult<JSONObject> response = httpsDELETE(
-                baseUrl + "/v2/customers/" + uuid,
-                new HashMap<>()
+                baseUrl + "/v2/customers/" + customerDeleteRequest.getCustomerUuid(),
+                new HashMap<>(){{
+                    put("authorization", customerDeleteRequest.getAccessToken());
+                }}
         );
 
         try {
@@ -333,10 +345,18 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<Object> getPaymentMethodsForCustomer(final String uuid, long limit, long offset) {
+    public MonriHttpResult<Object> getPaymentMethodsForCustomer(final CustomerPaymentMethodRequest customerPaymentMethodRequest) {
         final MonriHttpResult<JSONObject> response = httpsGET(
-                baseUrl + "/v2/customers" + uuid + "/payment-methods?limit=" + limit + "&offset=" + offset,
-                new HashMap<>()
+                baseUrl +
+                        "/v2/customers" +
+                        customerPaymentMethodRequest.getMonriCustomerUuid() +
+                        "/payment-methods?limit=" +
+                        customerPaymentMethodRequest.getLimit() +
+                        "&offset="
+                        + customerPaymentMethodRequest.getOffset(),
+                new HashMap<>(){{
+                    put("authorization", customerPaymentMethodRequest.getAccessToken());
+                }}
         );
 
         try {

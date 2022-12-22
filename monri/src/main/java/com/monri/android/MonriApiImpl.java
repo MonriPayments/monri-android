@@ -2,8 +2,15 @@ package com.monri.android;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
-import com.monri.android.model.CustomerRequest;
+import com.monri.android.model.CustomerCreateRequest;
+import com.monri.android.model.CustomerDeleteRequest;
+import com.monri.android.model.CustomerDeleteResponse;
+import com.monri.android.model.CustomerPaymentMethodRequest;
+import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.CustomerResponse;
+import com.monri.android.model.CustomerRetrieveMerchantIdRequest;
+import com.monri.android.model.CustomerRetrieveRequest;
+import com.monri.android.model.CustomerUpdateRequest;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
 
@@ -52,12 +59,12 @@ class MonriApiImpl implements MonriApi {
 
     @Override
     public void createCustomer(
-            final CustomerRequest customerRequest,
+            final CustomerCreateRequest customerCreateRequest,
             final ResultCallback<CustomerResponse> callback
     ) {
         taskRunner.executeAsync(
                 () -> {
-                    MonriHttpResult<CustomerResponse> result = monriHttpApi.createCustomer(customerRequest);
+                    MonriHttpResult<CustomerResponse> result = monriHttpApi.createCustomer(customerCreateRequest);
                     if (result.getCause() != null) {
                         throw result.getCause();
                     } else {
@@ -66,6 +73,57 @@ class MonriApiImpl implements MonriApi {
                 },
                 callback
         );
+    }
+
+    @Override
+    public void updateCustomer(
+            final CustomerUpdateRequest customerUpdateRequest,
+            final ResultCallback<CustomerResponse> callback
+    ) {
+        taskRunner.executeAsync(
+                () -> {
+                    MonriHttpResult<CustomerResponse> result = monriHttpApi.updateCustomer(customerUpdateRequest);
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback
+        );
+    }
+
+    @Override
+    public void deleteCustomer(
+            final CustomerDeleteRequest customerDeleteRequest,
+            final ResultCallback<CustomerDeleteResponse> callback
+    ) {
+        taskRunner.executeAsync(
+                () -> {
+                    final MonriHttpResult<CustomerDeleteResponse> result = monriHttpApi.deleteCustomer(customerDeleteRequest);
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback
+        );
+    }
+
+    @Override
+    public void retrieveCustomer(final CustomerRetrieveRequest customerRetrieveRequest, final ResultCallback<CustomerResponse> callback) {
+
+    }
+
+    @Override
+    public void retrieveCustomerViaMerchantCustomerId(final CustomerRetrieveMerchantIdRequest customerRetrieveMerchantIdRequest, final ResultCallback<CustomerResponse> callback) {
+
+    }
+
+    @Override
+    public void retrieveCustomerPaymentMethods(final CustomerPaymentMethodRequest customerPaymentMethodRequest, final ResultCallback<CustomerPaymentMethodResponse> callback) {
+
     }
 
     @Override

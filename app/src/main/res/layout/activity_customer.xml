@@ -7,11 +7,41 @@
     tools:context=".CustomerActivity"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/customer_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="For update, delete, retrieve you have to create customer."/>
+
     <Button
         android:id="@+id/btn_create_customer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/btn_create_customer" />
+
+    <Button
+        android:id="@+id/btn_update_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_update_customer" />
+
+    <Button
+        android:id="@+id/btn_delete_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_delete_customer" />
+
+    <Button
+        android:id="@+id/btn_retrieve_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_retrieve_customer" />
+
+    <Button
+        android:id="@+id/btn_retrieve_customer_via_merchant_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_retrieve_customer_via_merchant_id" />
 
     <Button
         android:id="@+id/btn_get_all_customers"
@@ -24,12 +54,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/btn_retrieve_saved_cards_from_customer" />
-
-    <Button
-        android:id="@+id/btn_remove_customer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_remove_customer" />
 
     <TextView
         android:id="@+id/customer_api_result"

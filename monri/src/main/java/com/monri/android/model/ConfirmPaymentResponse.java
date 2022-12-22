@@ -89,7 +89,6 @@ public class ConfirmPaymentResponse implements Parcelable {
         }
     };
 
-    @VisibleForTesting
     public static ConfirmPaymentResponse fromJSON(JSONObject jsonObject) throws JSONException {
         final PaymentStatus status = PaymentStatus.forValue(jsonObject.getString("status"));
 

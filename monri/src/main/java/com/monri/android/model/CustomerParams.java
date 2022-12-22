@@ -9,19 +9,12 @@ import android.os.Parcelable;
  */
 public class CustomerParams implements Parcelable {
     private String customerId;
-
     private String email;
-
     private String fullName;
-
     private String address;
-
     private String city;
-
     private String zip;
-
     private String phone;
-
     private String country;
 
     public CustomerParams() {

@@ -52,7 +52,7 @@ public class TransactionParams implements Parcelable {
         }
 
         return set("ch_full_name", customerParams.getFullName())
-                .set("id", customerParams.getCustomerId())
+                .set("customer_id", customerParams.getCustomerId())
                 .set("ch_address", customerParams.getAddress())
                 .set("ch_city", customerParams.getCity())
                 .set("ch_zip", customerParams.getZip())

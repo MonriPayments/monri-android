@@ -6,8 +6,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Customer {
-    private String merchantCustomerId;
+public class CustomerRequestBody {
+    private String merchantCustomerId;//can not be updated...
     private String description;
     private String email;
     private String name;
@@ -18,7 +18,9 @@ public class Customer {
     private String address;
     private String country;
 
-    public Customer(
+    public CustomerRequestBody(){}
+
+    public CustomerRequestBody(
             final String merchantCustomerId,
             final String description,
             final String email,
@@ -46,80 +48,90 @@ public class Customer {
         return merchantCustomerId;
     }
 
-    public void setMerchantCustomerId(final String merchantCustomerId) {
+    public CustomerRequestBody setMerchantCustomerId(final String merchantCustomerId) {
         this.merchantCustomerId = merchantCustomerId;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public CustomerRequestBody setDescription(final String description) {
         this.description = description;
+        return this;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(final String email) {
+    public CustomerRequestBody setEmail(final String email) {
         this.email = email;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(final String name) {
+    public CustomerRequestBody setName(final String name) {
         this.name = name;
+        return this;
     }
 
     public String getPhone() {
         return phone;
     }
 
-    public void setPhone(final String phone) {
+    public CustomerRequestBody setPhone(final String phone) {
         this.phone = phone;
+        return this;
     }
 
     public Map<String, String> getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(final Map<String, String> metadata) {
+    public CustomerRequestBody setMetadata(final Map<String, String> metadata) {
         this.metadata = metadata;
+        return this;
     }
 
     public String getZipCode() {
         return zipCode;
     }
 
-    public void setZipCode(final String zipCode) {
+    public CustomerRequestBody setZipCode(final String zipCode) {
         this.zipCode = zipCode;
+        return this;
     }
 
     public String getCity() {
         return city;
     }
 
-    public void setCity(final String city) {
+    public CustomerRequestBody setCity(final String city) {
         this.city = city;
+        return this;
     }
 
     public String getAddress() {
         return address;
     }
 
-    public void setAddress(final String address) {
+    public CustomerRequestBody setAddress(final String address) {
         this.address = address;
+        return this;
     }
 
     public String getCountry() {
         return country;
     }
 
-    public void setCountry(final String country) {
+    public CustomerRequestBody setCountry(final String country) {
         this.country = country;
+        return this;
     }
 
     public JSONObject toJSON() throws JSONException {
@@ -181,8 +193,8 @@ public class Customer {
             return this;
         }
 
-        public Customer build() {
-            return new Customer(
+        public CustomerRequestBody build() {
+            return new CustomerRequestBody(
                     this.merchantCustomerId,
                     this.description,
                     this.email,
