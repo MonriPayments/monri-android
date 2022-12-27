@@ -11,7 +11,7 @@
         android:id="@+id/customer_result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="For update, delete, retrieve you have to create customer."/>
+        android:text="For update, delete, retrieve, you have to create customer."/>
 
     <Button
         android:id="@+id/btn_create_customer"
@@ -55,10 +55,15 @@
         android:layout_height="wrap_content"
         android:text="@string/btn_retrieve_saved_cards_from_customer" />
 
-    <TextView
-        android:id="@+id/customer_api_result"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:text="customer API result"/>
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/customer_api_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="customer API result"/>
+    </ScrollView>
 
 </LinearLayout>

@@ -7,23 +7,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CustomerDeleteResponse {
-    private String status;
-    private String id;
-    private boolean deleted;
+    private final String status;
+    private final String uuid;
+    private final boolean deleted;
 
-    public CustomerDeleteResponse(final String status, final String id, final boolean deleted) {
+    public CustomerDeleteResponse(final String status, final String uuid, final boolean deleted) {
         this.status = status;
-        this.id = id;
+        this.uuid = uuid;
         this.deleted = deleted;
     }
 
     public static CustomerDeleteResponse fromJSON(JSONObject jsonObject) throws JSONException {
-        Map<String, String> metadata = new HashMap<>();
-        JSONObject metaJSONObject = jsonObject.getJSONObject("metadata");
-
         return new CustomerDeleteResponse(
                 jsonObject.getString("status"),
-                jsonObject.getString("id"),
+                jsonObject.getString("uuid"),
                 jsonObject.getBoolean("deleted")
         );
     }
@@ -32,8 +29,8 @@ public class CustomerDeleteResponse {
         return status;
     }
 
-    public String getId() {
-        return id;
+    public String getUuid() {
+        return uuid;
     }
 
     public boolean isDeleted() {

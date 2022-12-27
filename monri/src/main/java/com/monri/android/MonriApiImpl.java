@@ -2,6 +2,7 @@ package com.monri.android;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
+import com.monri.android.model.CustomerAllResponse;
 import com.monri.android.model.CustomerCreateRequest;
 import com.monri.android.model.CustomerDeleteRequest;
 import com.monri.android.model.CustomerDeleteResponse;
@@ -113,24 +114,54 @@ class MonriApiImpl implements MonriApi {
 
     @Override
     public void retrieveCustomer(final CustomerRetrieveRequest customerRetrieveRequest, final ResultCallback<CustomerResponse> callback) {
-
+        taskRunner.executeAsync(
+                () -> {
+                    final MonriHttpResult<CustomerResponse> result = monriHttpApi.retrieveCustomer(customerRetrieveRequest);
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback
+        );
     }
 
     @Override
     public void retrieveCustomerViaMerchantCustomerId(final CustomerRetrieveMerchantIdRequest customerRetrieveMerchantIdRequest, final ResultCallback<CustomerResponse> callback) {
-
+        taskRunner.executeAsync(
+                () -> {
+                    final MonriHttpResult<CustomerResponse> result = monriHttpApi.retrieveCustomerViaMerchantCustomerId(customerRetrieveMerchantIdRequest);
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback
+        );
     }
 
     @Override
     public void retrieveCustomerPaymentMethods(final CustomerPaymentMethodRequest customerPaymentMethodRequest, final ResultCallback<CustomerPaymentMethodResponse> callback) {
-
+        taskRunner.executeAsync(
+                () -> {
+                    final MonriHttpResult<CustomerPaymentMethodResponse> result = monriHttpApi.getPaymentMethodsForCustomer(customerPaymentMethodRequest);
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback
+        );
     }
 
     @Override
-    public void getAllCustomers(final String accessToken, ResultCallback<Object> callback) {
+    public void getAllCustomers(final String accessToken, ResultCallback<CustomerAllResponse> callback) {
         taskRunner.executeAsync(
                 () -> {
-                    MonriHttpResult<Object> result = monriHttpApi.getAllCustomers(accessToken);
+                    MonriHttpResult<CustomerAllResponse> result = monriHttpApi.getAllCustomers(accessToken);
                     if (result.getCause() != null) {
                         throw result.getCause();
                     } else {

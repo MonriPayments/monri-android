@@ -5,10 +5,12 @@ import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
+import com.monri.android.model.CustomerAllResponse;
 import com.monri.android.model.CustomerDeleteRequest;
 import com.monri.android.model.CustomerDeleteResponse;
 import com.monri.android.model.CustomerCreateRequest;
 import com.monri.android.model.CustomerPaymentMethodRequest;
+import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.CustomerResponse;
 import com.monri.android.model.CustomerRetrieveMerchantIdRequest;
 import com.monri.android.model.CustomerRetrieveRequest;
@@ -319,7 +321,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<Object> getAllCustomers(final String accessToken) {
+    public MonriHttpResult<CustomerAllResponse> getAllCustomers(final String accessToken) {
         final MonriHttpResult<JSONObject> response = httpsGET(
                 baseUrl + "/v2/customers",
                 new HashMap<>(){{
@@ -329,13 +331,8 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
         try {
             if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-                List<Object> customers = new ArrayList<>();
-                JSONArray jsonArray = response.getResult().getJSONArray("data");
-                int len = jsonArray.length();
-                for (int i = 0; i < len; i++) {
-                    customers.add(CustomerResponse.fromJSON(jsonArray.getJSONObject(i)));
-                }
-                return MonriHttpResult.success(customers, response.getResponseCode());
+                final CustomerAllResponse customerAllResponse = CustomerAllResponse.fromJSON(response.getResult());
+                return MonriHttpResult.success(customerAllResponse, response.getResponseCode());
             } else {
                 return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
             }
@@ -345,10 +342,10 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<Object> getPaymentMethodsForCustomer(final CustomerPaymentMethodRequest customerPaymentMethodRequest) {
+    public MonriHttpResult<CustomerPaymentMethodResponse> getPaymentMethodsForCustomer(final CustomerPaymentMethodRequest customerPaymentMethodRequest) {
         final MonriHttpResult<JSONObject> response = httpsGET(
                 baseUrl +
-                        "/v2/customers" +
+                        "/v2/customers/" +
                         customerPaymentMethodRequest.getMonriCustomerUuid() +
                         "/payment-methods?limit=" +
                         customerPaymentMethodRequest.getLimit() +
@@ -361,7 +358,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
         try {
             if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-                return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
+                return MonriHttpResult.success(CustomerPaymentMethodResponse.fromJSON(response.getResult()), response.getResponseCode());
             } else {
                 return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
             }

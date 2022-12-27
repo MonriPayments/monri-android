@@ -18,7 +18,8 @@ public class CustomerRequestBody {
     private String address;
     private String country;
 
-    public CustomerRequestBody(){}
+    public CustomerRequestBody() {
+    }
 
     public CustomerRequestBody(
             final String merchantCustomerId,
@@ -137,12 +138,6 @@ public class CustomerRequestBody {
     public JSONObject toJSON() throws JSONException {
         JSONObject customerJSON = new JSONObject();
 
-        JSONObject metaDataJSON = new JSONObject();
-        for (Map.Entry<String,String> entry : metadata.entrySet()){
-            metaDataJSON.put(entry.getKey(),entry.getValue());
-        }
-
-        customerJSON.put("metadata", metaDataJSON);
         customerJSON.put("merchant_customer_id", merchantCustomerId);
         customerJSON.put("description", description);
         customerJSON.put("email", email);
@@ -151,6 +146,14 @@ public class CustomerRequestBody {
         customerJSON.put("zip_code", zipCode);
         customerJSON.put("city", city);
         customerJSON.put("address", address);
+
+        if (metadata != null) {
+            JSONObject metaDataJSON = new JSONObject();
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                metaDataJSON.put(entry.getKey(), entry.getValue());
+            }
+            customerJSON.put("metadata", metaDataJSON);
+        }
 
         return customerJSON;
     }
@@ -176,18 +179,22 @@ public class CustomerRequestBody {
             this.description = description;
             return this;
         }
+
         public CustomerRequestBuilder email(String email) {
             this.email = email;
             return this;
         }
+
         public CustomerRequestBuilder name(String name) {
             this.name = name;
             return this;
         }
+
         public CustomerRequestBuilder phone(String phone) {
             this.phone = phone;
             return this;
         }
+
         public CustomerRequestBuilder metadata(final Map<String, String> metadata) {
             this.metadata = new HashMap<>(metadata);
             return this;

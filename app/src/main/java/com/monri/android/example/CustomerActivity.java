@@ -1,21 +1,22 @@
 package com.monri.android.example;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
+import com.monri.android.model.CustomerAllResponse;
+import com.monri.android.model.CustomerCreateRequest;
 import com.monri.android.model.CustomerDeleteRequest;
 import com.monri.android.model.CustomerDeleteResponse;
 import com.monri.android.model.CustomerPaymentMethodRequest;
 import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.CustomerRequestBody;
-import com.monri.android.model.CustomerCreateRequest;
 import com.monri.android.model.CustomerResponse;
 import com.monri.android.model.CustomerRetrieveMerchantIdRequest;
 import com.monri.android.model.CustomerRetrieveRequest;
@@ -48,7 +49,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
 
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
-        String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MTcyNDQ2NiwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI3ZGIxMWVhNWQ0YTFhZjMyNDIxYjU2NGM3OWI5NDZkMWVhZDNkYWYwIn0.dy-Dm4DO7R-3ZG6_Btnxo7E-cwdf4IELv0mt4Mvy9CABSbtCWpyUcTcoCFvVMIMVVaWZXnU2LE1wrPzc5GG9dW_i7yeZgiRgT0y95hzrvcvasaZxVs6l9G5I1kMhb-D-ZdSSLb6dN2I5ZRnBbSX0-ZeyfHfuij9B_hnBSvjDW5Ik4HleSZyWt2k33DCL8wgq95HfbjjBCbkQwvzq5vF0N92IwTYanCf9k8Qn0ajJCFxQublL9GsMRkrAoXHyIx08FFqFlw9KGgGazdEdqBPArCoJqBASvq1ACyTuyThAKCnmU-gv80un_0kvVqh-7qS1mKbET-LR7c4I_ZhiqZqeMw";
+        String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MjE3OTM2MCwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI3ZGIxMWVhNWQ0YTFhZjMyNDIxYjU2NGM3OWI5NDZkMWVhZDNkYWYwIn0.KMbpTjb4pRhtr7Dgw3K1w-1hsxj6GkPs-L6s3KkVMNJguq4dTGGeuA2rU3etgyeQ88fzD_5NUeQKICgrzyaJpDhWhS9DFLnhu5VPE-vuF3ywdi1G-pWYxxVKje8TEhHFTTkvUjq65Oy69D3x7b8bx1JlynqJjYw4-Lanz-ChWMdjbbufUBBiwOv5PQOtmysVQhuZ5T_VjUttT5OJXApJN4H6uB47pFdmprlJcjKYIuuAiLbzVb5y4mrpVdCNxdGF7B1ltc9e1TaxKUXMpjQ1B0nhE5RUKUJSvkDQqIZ8DTN-iYWRR9gtVWNDRnWBwSL4_CSBTD56LgQAjM1TkJlr2g";
         String timestamp = String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()));
 
         final CustomerRequestBody customerRequestBody = new CustomerRequestBody()
@@ -115,8 +116,8 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
 
         findViewById(R.id.btn_delete_customer).setOnClickListener(v -> monri.getMonriApi().deleteCustomer(
                 new CustomerDeleteRequest(
-                        customerResponse.getUuid(),
-                        accessToken
+                        accessToken,
+                        customerResponse.getUuid()
                 ),
                 new ResultCallback<CustomerDeleteResponse>() {
                     @Override
@@ -138,7 +139,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         findViewById(R.id.btn_retrieve_customer).setOnClickListener(v -> monri.getMonriApi().retrieveCustomer(
                 new CustomerRetrieveRequest(
                         accessToken,
-                        accessToken
+                        customerResponse.getUuid()
                 ),
                 new ResultCallback<CustomerResponse>() {
                     @Override
@@ -173,10 +174,14 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
 
         findViewById(R.id.btn_get_all_customers).setOnClickListener(v -> monri.getMonriApi().getAllCustomers(
                 accessToken,
-                new ResultCallback<Object>() {
+                new ResultCallback<CustomerAllResponse>() {
                     @Override
-                    public void onSuccess(final Object result) {
-                        customerApiResult.setText(String.format("%s", result.toString()));
+                    public void onSuccess(final CustomerAllResponse result) {
+                        StringBuilder name = new StringBuilder();
+                        for(CustomerResponse customerResponse : result.getCustomerResponseList()){
+                            name.append(customerResponse.getName()).append('\n');
+                        }
+                        customerApiResult.setText(String.format("%s", name.toString()));
                     }
 
                     @Override
@@ -217,5 +222,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         findViewById(R.id.btn_update_customer).setEnabled(customerResponse != null);
         findViewById(R.id.btn_delete_customer).setEnabled(customerResponse != null);
         findViewById(R.id.btn_retrieve_customer).setEnabled(customerResponse != null);
+        findViewById(R.id.btn_retrieve_customer_via_merchant_id).setEnabled(customerResponse != null);
+        findViewById(R.id.btn_retrieve_saved_cards_from_customer).setEnabled(customerResponse != null);
     }
 }

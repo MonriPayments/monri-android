@@ -1,5 +1,8 @@
 package com.monri.android.model;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class CustomerPaymentMethod {
     private final String status;
     private final String id;
@@ -34,6 +37,22 @@ public class CustomerPaymentMethod {
         this.customerUuid = customerUuid;
         this.token = token;
         this.expired = expired;
+    }
+
+    public static CustomerPaymentMethod fromJSON(final JSONObject jsonObject) throws JSONException {
+        return new CustomerPaymentMethod(
+                jsonObject.getString("status"),
+                jsonObject.getString("id"),
+                jsonObject.getString("masked_pan"),
+                jsonObject.getString("expiration_date"),
+                jsonObject.getString("keep_until"),
+                jsonObject.getString("created_at"),
+                jsonObject.getString("updated_at"),
+                jsonObject.getString("customer_uuid"),
+                jsonObject.getString("token"),
+                jsonObject.getBoolean("expired")
+
+        );
     }
 
     public String getStatus() {
@@ -75,4 +94,6 @@ public class CustomerPaymentMethod {
     public boolean isExpired() {
         return expired;
     }
+
+
 }

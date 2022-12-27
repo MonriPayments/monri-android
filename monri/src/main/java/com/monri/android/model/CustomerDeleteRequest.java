@@ -4,7 +4,7 @@ public class CustomerDeleteRequest {
    final String customerUuid;
    final String accessToken;
 
-   public CustomerDeleteRequest(final String customerUuid, final String accessToken) {
+   public CustomerDeleteRequest(final String accessToken, final String customerUuid ) {
       this.customerUuid = customerUuid;
       this.accessToken = accessToken;
    }

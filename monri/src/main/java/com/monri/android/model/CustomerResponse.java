@@ -2,7 +2,7 @@ package com.monri.android.model;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -192,6 +192,16 @@ public class CustomerResponse {
         Map<String, String> metadata = new HashMap<>();
         if(jsonObject.has("metadata")){
             Object metaJSONObject = jsonObject.get("metadata");
+            Iterator<String> iter = jsonObject.keys();
+            while (iter.hasNext()) {
+                String key = iter.next();
+                try {
+                    String value = jsonObject.getString(key);
+                    metadata.put(key, value);
+                } catch (JSONException e) {
+                    // Something went wrong!
+                }
+            }
         }
 
         return new CustomerResponse(
