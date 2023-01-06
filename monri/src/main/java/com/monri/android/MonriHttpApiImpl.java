@@ -19,7 +19,6 @@ import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentStatusResponse;
 import com.monri.android.model.TransactionParams;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,9 +30,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 class MonriHttpApiImpl implements MonriHttpApi {
@@ -346,7 +343,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
         final MonriHttpResult<JSONObject> response = httpsGET(
                 baseUrl +
                         "/v2/customers/" +
-                        customerPaymentMethodRequest.getMonriCustomerUuid() +
+                        customerPaymentMethodRequest.getCustomerUuid() +
                         "/payment-methods?limit=" +
                         customerPaymentMethodRequest.getLimit() +
                         "&offset="

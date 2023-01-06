@@ -39,20 +39,10 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         return new Intent(context, CustomerActivity.class);
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_customer);
-        enableButtons();
-
-        customerApiResult = findViewById(R.id.customer_api_result);
-
-        orderRepository = new OrderRepository(this, this);
-        monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
-        String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MjE3OTM2MCwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI3ZGIxMWVhNWQ0YTFhZjMyNDIxYjU2NGM3OWI5NDZkMWVhZDNkYWYwIn0.KMbpTjb4pRhtr7Dgw3K1w-1hsxj6GkPs-L6s3KkVMNJguq4dTGGeuA2rU3etgyeQ88fzD_5NUeQKICgrzyaJpDhWhS9DFLnhu5VPE-vuF3ywdi1G-pWYxxVKje8TEhHFTTkvUjq65Oy69D3x7b8bx1JlynqJjYw4-Lanz-ChWMdjbbufUBBiwOv5PQOtmysVQhuZ5T_VjUttT5OJXApJN4H6uB47pFdmprlJcjKYIuuAiLbzVb5y4mrpVdCNxdGF7B1ltc9e1TaxKUXMpjQ1B0nhE5RUKUJSvkDQqIZ8DTN-iYWRR9gtVWNDRnWBwSL4_CSBTD56LgQAjM1TkJlr2g";
+    private CustomerRequestBody getCustomerRequestBody(){
         String timestamp = String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()));
 
-        final CustomerRequestBody customerRequestBody = new CustomerRequestBody()
+        return new CustomerRequestBody()
                 .setMerchantCustomerId(timestamp)
                 .setDescription("description")
                 .setEmail("adnan.omerovic@monri.com")
@@ -66,53 +56,75 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
                 .setAddress("Džemala Bijedića 2")
                 .setCountry("BA");
 
-        findViewById(R.id.btn_create_customer).setOnClickListener(v -> monri.getMonriApi().createCustomer(
-                new CustomerCreateRequest(
-                        customerRequestBody,
-                        accessToken
-                )
-              , new ResultCallback<CustomerResponse>() {
-                    @Override
-                    public void onSuccess(final CustomerResponse result) {
-                        customerResponse = result;
-                        customerApiResult.setText(String.format("%s %s %s %s",
-                                result.getUuid(),
-                                result.getCity(),
-                                result.getMerchantCustomerId(),
-                                result.getUpdatedAt()
-                                ));
-                        enableButtons();
-                    }
+    }
 
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        customerApiResult.setText(throwable.getMessage());
-                    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_customer);
+        enableButtons();
+
+        customerApiResult = findViewById(R.id.customer_api_result);
+
+        orderRepository = new OrderRepository(this, this);
+        monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
+        String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MzAxNTYyNSwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI2YTEzZDc5YmRlOGRhOTMyMGU4ODkyM2NiMzQ3MmZiNjM4NjE5Y2NiIn0.JezpGfzm9dTgm2NhqDKlUicVikoIdyHEPtN8S5Lwz5xfoYpsXkwL19laefOJOrNDBUaIhxK1_bbQGXUV4WVD37wT8Vpu-RGmeAkbqVXJraix37AdSWztvvN-yhEOQebRztALAMPQ0p4LfteCnMQI2xN3nMe4ygRb5qFU3p1Tm6beI0XBr6fLkhNfneyXRqTEfpT1wG_9n5KE2tqiXGv-ZkdtHlG0u35mX7-RwHdtnApwtrfUhv6DzhSPTRUj42o6Df23ffd0zjfolGnhpvCon19QK1LTDP8ssqsMNSL26m_qOhaxLQiI8mTyNQ1tdhS3R2ktCQYXFgzGE5bPsljg3g";
+
+
+        findViewById(R.id.btn_create_customer).setOnClickListener(v -> {
+
+                    monri.getMonriApi().createCustomer(
+                            new CustomerCreateRequest(
+                                    getCustomerRequestBody(),
+                                    accessToken
+                            )
+                            , new ResultCallback<CustomerResponse>() {
+                                @Override
+                                public void onSuccess(final CustomerResponse result) {
+                                    customerResponse = result;
+                                    customerApiResult.setText(String.format("%s %s %s %s",
+                                            result.getUuid(),
+                                            result.getCity(),
+                                            result.getMerchantCustomerId(),
+                                            result.getUpdatedAt()
+                                    ));
+                                    enableButtons();
+                                }
+
+                                @Override
+                                public void onError(final Throwable throwable) {
+                                    customerApiResult.setText(throwable.getMessage());
+                                }
+                            }
+                    );
                 }
-        ));
+        );
 
 
-        findViewById(R.id.btn_update_customer).setOnClickListener(v -> monri.getMonriApi().updateCustomer(
-                new CustomerUpdateRequest(
-                        customerRequestBody.setMetadata(new HashMap<>() {{
-                            put("update customer", new Date().toString());
-                        }}),
-                        customerResponse.getUuid(),
-                        accessToken
+        findViewById(R.id.btn_update_customer).setOnClickListener(v -> {
+            final CustomerRequestBody customerRequestBody = getCustomerRequestBody();
+            monri.getMonriApi().updateCustomer(
+                    new CustomerUpdateRequest(
+                            customerRequestBody.setMetadata(new HashMap<>() {{
+                                put("update customer", new Date().toString());
+                            }}),
+                            customerResponse.getUuid(),
+                            accessToken
 
-                ),
-                new ResultCallback<CustomerResponse>() {
-                    @Override
-                    public void onSuccess(final CustomerResponse result) {
-                        customerApiResult.setText(String.format("%s", result.toString()));
+                    ),
+                    new ResultCallback<CustomerResponse>() {
+                        @Override
+                        public void onSuccess(final CustomerResponse result) {
+                            customerApiResult.setText(String.format("%s", result.toString()));
+                        }
+
+                        @Override
+                        public void onError(final Throwable throwable) {
+                            customerApiResult.setText(String.format("%s", throwable.getMessage()));
+                        }
                     }
-
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
-                    }
-                }
-        ));
+            );
+        });
 
         findViewById(R.id.btn_delete_customer).setOnClickListener(v -> monri.getMonriApi().deleteCustomer(
                 new CustomerDeleteRequest(
@@ -123,7 +135,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
                     @Override
                     public void onSuccess(final CustomerDeleteResponse result) {
                         customerApiResult.setText(String.format("%s", result.toString()));
-                        if("approved".equals(result.getStatus())){
+                        if ("approved".equals(result.getStatus())) {
                             customerResponse = null;
                             enableButtons();
                         }
@@ -178,7 +190,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
                     @Override
                     public void onSuccess(final CustomerAllResponse result) {
                         StringBuilder name = new StringBuilder();
-                        for(CustomerResponse customerResponse : result.getCustomerResponseList()){
+                        for (CustomerResponse customerResponse : result.getCustomerResponseList()) {
                             name.append(customerResponse.getName()).append('\n');
                         }
                         customerApiResult.setText(String.format("%s", name.toString()));
@@ -218,7 +230,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    private void enableButtons(){
+    private void enableButtons() {
         findViewById(R.id.btn_update_customer).setEnabled(customerResponse != null);
         findViewById(R.id.btn_delete_customer).setEnabled(customerResponse != null);
         findViewById(R.id.btn_retrieve_customer).setEnabled(customerResponse != null);

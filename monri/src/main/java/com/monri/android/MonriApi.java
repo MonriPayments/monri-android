@@ -38,7 +38,4 @@ public interface MonriApi {
     void getAllCustomers(final String accessToken, ResultCallback<CustomerAllResponse> callback);
 
     void retrieveCustomerPaymentMethods(final CustomerPaymentMethodRequest customerPaymentMethodRequest, final ResultCallback<CustomerPaymentMethodResponse> callback);
-
-//    void retrieveMerchantPaymentMethods(final CustomerPaymentMethodRequest customerPaymentMethodRequest, final ResultCallback<CustomerPaymentMethodResponse> callback);
-
 }

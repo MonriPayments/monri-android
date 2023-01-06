@@ -9,11 +9,11 @@ import java.util.List;
 
 public class CustomerPaymentMethodResponse {
    private final String status;
-   private final List<CustomerPaymentMethod> customerPaymentMethodMap;
+   private final List<CustomerPaymentMethod> customerPaymentMethod;
 
-   public CustomerPaymentMethodResponse(final String status, final List<CustomerPaymentMethod> customerPaymentMethodMap) {
+   public CustomerPaymentMethodResponse(final String status, final List<CustomerPaymentMethod> customerPaymentMethod) {
       this.status = status;
-      this.customerPaymentMethodMap = customerPaymentMethodMap;
+      this.customerPaymentMethod = customerPaymentMethod;
    }
 
    public static CustomerPaymentMethodResponse fromJSON(final JSONObject result) throws JSONException {
@@ -34,7 +34,7 @@ public class CustomerPaymentMethodResponse {
       return status;
    }
 
-   public List<CustomerPaymentMethod> getCustomerPaymentMethodMap() {
-      return customerPaymentMethodMap;
+   public List<CustomerPaymentMethod> getCustomerPaymentMethod() {
+      return customerPaymentMethod;
    }
 }

@@ -8,7 +8,7 @@ import android.os.Parcelable;
  * MonriAndroid
  */
 public class CustomerParams implements Parcelable {
-    private String customerId;
+    private String customerUuid;
     private String email;
     private String fullName;
     private String address;
@@ -20,13 +20,16 @@ public class CustomerParams implements Parcelable {
     public CustomerParams() {
     }
 
-    public CustomerParams(String email,
-                          String fullName,
-                          String address,
-                          String city,
-                          String zip,
-                          String phone,
-                          String country) {
+    public CustomerParams(
+            String customerUuid,
+            String email,
+            String fullName,
+            String address,
+            String city,
+            String zip,
+            String phone,
+            String country) {
+        this.customerUuid = customerUuid;
         this.email = email;
         this.fullName = fullName;
         this.address = address;
@@ -36,8 +39,8 @@ public class CustomerParams implements Parcelable {
         this.country = country;
     }
 
-    public String getCustomerId() {
-        return customerId;
+    public String getCustomerUuid() {
+        return customerUuid;
     }
 
     public String getEmail() {
@@ -68,8 +71,8 @@ public class CustomerParams implements Parcelable {
         return country;
     }
 
-    public CustomerParams setCustomerId(String customerId) {
-        this.customerId = customerId;
+    public CustomerParams setCustomerUuid(String customerUuid) {
+        this.customerUuid = customerUuid;
         return this;
     }
 
@@ -115,7 +118,7 @@ public class CustomerParams implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.customerId);
+        dest.writeString(this.customerUuid);
         dest.writeString(this.email);
         dest.writeString(this.fullName);
         dest.writeString(this.address);
@@ -126,7 +129,7 @@ public class CustomerParams implements Parcelable {
     }
 
     protected CustomerParams(Parcel in) {
-        this.customerId = in.readString();
+        this.customerUuid = in.readString();
         this.email = in.readString();
         this.fullName = in.readString();
         this.address = in.readString();

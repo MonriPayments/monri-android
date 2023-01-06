@@ -15,6 +15,8 @@ import com.monri.android.model.CustomerCreateRequest;
 import com.monri.android.model.CustomerDeleteRequest;
 import com.monri.android.model.CustomerDeleteResponse;
 import com.monri.android.model.CustomerParams;
+import com.monri.android.model.CustomerPaymentMethodRequest;
+import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.CustomerRequestBody;
 import com.monri.android.model.CustomerResponse;
 import com.monri.android.model.CustomerRetrieveMerchantIdRequest;
@@ -38,6 +40,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -155,8 +158,7 @@ public class MonriCustomerTest {
         }
     }
 
-    String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MjE1NTYyNCwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI3ZGIxMWVhNWQ0YTFhZjMyNDIxYjU2NGM3OWI5NDZkMWVhZDNkYWYwIn0.euKiUs8T8lQCfWmLV-ZzUkuhS-4lCUzy4e2W8EfY2uBtMZiFAw6XDp--K9TFZeEnPf8wJrL76YD9KDWgGjHdVYyoDAjJlTRusWWCBsAs8feW5LdnV3oFA9yh1O3vRBOB1M0qV2vu2Pgy2nmQgUXf0p1CM5grq4EnLN2EwwI4Nacg3jxaIHz6PuAIsyZdSuHPfBuJIe7uzzbslBYUjRw_ZSTRRHZ1kV2jqMkjpYX3puOY8obSC5-qgbHSmzHkOZT2tWeCrdWRc5UqVZ2FOfKWyYszLypY8Ra7qt-XVsjhnn8ClOgPkGo9CCY1RygEQxDnAu6LtPxNbNmTAhfL9y1NqQ";
-    String merchantCustomerId = String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()));
+    String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MzAyMDI4MiwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI2YTEzZDc5YmRlOGRhOTMyMGU4ODkyM2NiMzQ3MmZiNjM4NjE5Y2NiIn0.p9tiD8JZMwV2KRQJpKLj_I4m72-Sq5l1PMtDlOobEh0nnyQT3pM8vSIMBL-f4yBNPZb4Of7i_3VmaOXh9c94j51XHOoB0izWgwgCxgnZXjSqT95xacnpqe1MUDWtVXHxkVhUrECe1-zqeoNOixNTzqQHi20B2sEFw2H72VdagcL7y8zZWs843-n5OnHMWBQj1hbnPI3ueCkunormI47no69KWSQ08na3Zy-W9ialr7nN6MEIE-jhi_6PxAicwMbWZdtaISnh4ePN7d_Lu9eXlsCsDq7i_JYr5MZ-VL6HHIJ6SJurdH4JbEj0B1wC4re3xq5KdfuegBVoA50XXirMqw";
 
     private String createAccessToken() {
         return accessToken;
@@ -166,11 +168,104 @@ public class MonriCustomerTest {
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         MonriApiOptions monriApiOptions = MonriApiOptions.create(getAuthenticityToken(), true);
         return new Monri(appContext, monriApiOptions);
+    }
 
+    private Card getNon3DSCard() {
+        return new Card("4111 1111 1111 1111", 12, 2034, "123");
+    }
+
+    private ConfirmPaymentParams getConfirmPaymentParams(final String customerUuid, final String clientSecret, final Card card, final boolean shouldSaveCard) {
+        final CustomerParams customerParams = new CustomerParams()
+                .setCustomerUuid(customerUuid)
+                .setAddress("Adresa")
+                .setFullName("Adnan Omerovic")
+                .setCity("Sarajevo")
+                .setZip("71000")
+                .setPhone("+38761000111")
+                .setCountry("BA")
+                .setEmail("monri-android-sdk-test@monri.com");
+
+        card.setTokenizePan(shouldSaveCard);//save card for future payment
+
+        ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(
+                clientSecret,
+                card.toPaymentMethodParams(),
+                TransactionParams.create()
+                        .set("order_info", "Android SDK payment session")
+                        .set(customerParams)
+        );
+
+        return confirmPaymentParams;
+    }
+
+    private void createCustomer(final String accessToken, final ResultCallback<CustomerResponse> callback) throws InterruptedException, ExecutionException {
+        createCustomer(accessToken, callback, null);
+    }
+
+    private void createCustomer(final String accessToken, final ResultCallback<CustomerResponse> callback, final String merchantCustomerId) throws InterruptedException, ExecutionException {
+        Monri monri = createMonriInstance();
+//        String tmpMerchantCustomerId = UUID.randomUUID().toString();
+
+        final CustomerRequestBody customerRequestBody = new CustomerRequestBody()
+                .setDescription("description")
+                .setEmail("adnan.omerovic@monri.com")
+                .setName("Adnan")
+                .setPhone("00387000111")
+                .setMetadata(new HashMap<>() {{
+                    put("a", "b");
+                }})
+                .setZipCode("71000")
+                .setCity("Sarajevo")
+                .setAddress("Džemala Bijedića 2")
+                .setCountry("BA");
+
+        if (merchantCustomerId != null) {
+            customerRequestBody.setMerchantCustomerId(merchantCustomerId);
+        }
+
+        CustomerCreateRequest customerCreateRequest = new CustomerCreateRequest(
+                customerRequestBody,
+                accessToken
+        );
+
+        monri.getMonriApi().createCustomer(customerCreateRequest, callback);
+    }
+
+    private void createCustomer(Consumer<CustomerResponse> customerConsumer) {
+        taskRunnerExecuteWithCallback(
+                this::createAccessToken,
+                new ResultCallback<String>() {
+                    @Override
+                    public void onSuccess(final String accessToken) {
+                        try {
+                            createCustomer(accessToken, new ResultCallback<CustomerResponse>() {
+                                @Override
+                                public void onSuccess(final CustomerResponse result) {
+                                    customerConsumer.accept(result);
+                                }
+
+                                @Override
+                                public void onError(final Throwable throwable) {
+                                    Assert.fail("create customer has not been created: " + throwable.getMessage());
+                                }
+                            });
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                            Assert.fail("createCustomer failed:" + e.getMessage());
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(final Throwable throwable) {
+                        Assert.fail("createCustomer failed: " + throwable.getMessage());
+                    }
+                }
+        );
     }
 
     @Test
-    public void createAccessTokenAndCreateCustomer() throws InterruptedException {
+    public void testCreateCustomer() throws InterruptedException {
         CountDownLatch signal = new CountDownLatch(1);
 
         taskRunnerExecuteWithCallback(
@@ -208,40 +303,14 @@ public class MonriCustomerTest {
         );
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
-
-    }
-
-    private void createCustomer(final String accessToken, final ResultCallback<CustomerResponse> callback) throws InterruptedException, ExecutionException {
-        Monri monri = createMonriInstance();
-
-        final CustomerRequestBody customerRequestBody = new CustomerRequestBody()
-                .setMerchantCustomerId(merchantCustomerId)
-                .setDescription("description")
-                .setEmail("adnan.omerovic@monri.com")
-                .setName("Adnan")
-                .setPhone("00387000111")
-                .setMetadata(new HashMap<>() {{
-                    put("a", "b");
-                }})
-                .setZipCode("71000")
-                .setCity("Sarajevo")
-                .setAddress("Džemala Bijedića 2")
-                .setCountry("BA");
-
-        CustomerCreateRequest customerCreateRequest = new CustomerCreateRequest(
-                customerRequestBody,
-                accessToken
-        );
-
-        monri.getMonriApi().createCustomer(customerCreateRequest, callback);
     }
 
     @Test
-    public void createAccessTokenCreateCustomerUpdateCustomer() throws InterruptedException {
+    public void testUpdateCustomer() throws InterruptedException {
         Monri monri = createMonriInstance();
-        CountDownLatch signal = new CountDownLatch(1);
+        CountDownLatch signal = new CountDownLatch(2);
         CustomerRequestBody customerRequestBody = new CustomerRequestBody();
-        final String newName = "Jasmin Suljic";
+        final String newName = "Adnan Omerovic";
         customerRequestBody.setName(newName);
 
         taskRunnerExecuteWithCallback(
@@ -253,6 +322,7 @@ public class MonriCustomerTest {
                             createCustomer(accessToken, new ResultCallback<CustomerResponse>() {
                                 @Override
                                 public void onSuccess(final CustomerResponse createdCustomer) {
+                                    signal.countDown();
                                     monri.getMonriApi().updateCustomer(
                                             new CustomerUpdateRequest(
                                                     customerRequestBody,
@@ -285,12 +355,14 @@ public class MonriCustomerTest {
                         } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
                             Assert.fail("create customer failed");
+                            signal.countDown();
                         }
                     }
 
                     @Override
                     public void onError(final Throwable throwable) {
                         Assert.fail("client secret failed");
+                        signal.countDown();
                     }
                 }
         );
@@ -299,9 +371,9 @@ public class MonriCustomerTest {
     }
 
     @Test
-    public void createAccessTokenCreateCustomerRetrieveCustomer() throws InterruptedException {
+    public void testRetrieveCustomer() throws InterruptedException {
         Monri monri = createMonriInstance();
-        CountDownLatch signal = new CountDownLatch(1);
+        CountDownLatch signal = new CountDownLatch(2);
 
         taskRunnerExecuteWithCallback(
                 this::createAccessToken,
@@ -312,6 +384,7 @@ public class MonriCustomerTest {
                             createCustomer(accessToken, new ResultCallback<CustomerResponse>() {
                                 @Override
                                 public void onSuccess(final CustomerResponse createdCustomer) {
+                                    signal.countDown();
                                     monri.getMonriApi().retrieveCustomer(
                                             new CustomerRetrieveRequest(
                                                     accessToken,
@@ -343,12 +416,14 @@ public class MonriCustomerTest {
                         } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
                             Assert.fail("create customer failed");
+                            signal.countDown();
                         }
                     }
 
                     @Override
                     public void onError(final Throwable throwable) {
                         Assert.fail("client secret failed");
+                        signal.countDown();
                     }
                 }
         );
@@ -357,9 +432,10 @@ public class MonriCustomerTest {
     }
 
     @Test
-    public void createAccessTokenCreateCustomerRetrieveCustomerViaMerchantId() throws InterruptedException {
+    public void testRetrieveCustomerViaMerchantId() throws InterruptedException {
         Monri monri = createMonriInstance();
-        CountDownLatch signal = new CountDownLatch(1);
+        CountDownLatch signal = new CountDownLatch(2);
+        String merchantCustomerId = UUID.randomUUID().toString();
 
         taskRunnerExecuteWithCallback(
                 this::createAccessToken,
@@ -367,46 +443,53 @@ public class MonriCustomerTest {
                     @Override
                     public void onSuccess(final String accessToken) {
                         try {
-                            createCustomer(accessToken, new ResultCallback<CustomerResponse>() {
-                                @Override
-                                public void onSuccess(final CustomerResponse createdCustomer) {
-                                    monri.getMonriApi().retrieveCustomerViaMerchantCustomerId(
-                                            new CustomerRetrieveMerchantIdRequest(
-                                                    accessToken,
-                                                    merchantCustomerId
-                                            ),
-                                            new ResultCallback<CustomerResponse>() {
-                                                @Override
-                                                public void onSuccess(final CustomerResponse customer) {
-                                                    Assert.assertEquals(createdCustomer.getName(), customer.getName());
-                                                    Assert.assertEquals(createdCustomer.getCity(), customer.getCity());
-                                                    signal.countDown();
-                                                }
+                            createCustomer(
+                                    accessToken,
+                                    new ResultCallback<CustomerResponse>() {
+                                        @Override
+                                        public void onSuccess(final CustomerResponse createdCustomer) {
+                                            signal.countDown();
+                                            monri.getMonriApi().retrieveCustomerViaMerchantCustomerId(
+                                                    new CustomerRetrieveMerchantIdRequest(
+                                                            accessToken,
+                                                            merchantCustomerId
+                                                    ),
+                                                    new ResultCallback<CustomerResponse>() {
+                                                        @Override
+                                                        public void onSuccess(final CustomerResponse customer) {
+                                                            Assert.assertEquals(createdCustomer.getName(), customer.getName());
+                                                            Assert.assertEquals(createdCustomer.getCity(), customer.getCity());
+                                                            signal.countDown();
+                                                        }
 
-                                                @Override
-                                                public void onError(final Throwable throwable) {
-                                                    Assert.fail("retrieve customer via merchant id failed");
-                                                    signal.countDown();
-                                                }
-                                            }
-                                    );
-                                }
+                                                        @Override
+                                                        public void onError(final Throwable throwable) {
+                                                            Assert.fail("retrieve customer via merchant id failed");
+                                                            signal.countDown();
+                                                        }
+                                                    }
+                                            );
+                                        }
 
-                                @Override
-                                public void onError(final Throwable throwable) {
-                                    Assert.fail("create customer failed");
-                                    signal.countDown();
-                                }
-                            });
+                                        @Override
+                                        public void onError(final Throwable throwable) {
+                                            Assert.fail("create customer failed: " + throwable.getMessage());
+                                            signal.countDown();
+                                        }
+                                    },
+                                    merchantCustomerId
+                            );
                         } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
-                            Assert.fail("create customer failed");
+                            Assert.fail("create customer failed: " + e.getMessage());
+                            signal.countDown();
                         }
                     }
 
                     @Override
                     public void onError(final Throwable throwable) {
                         Assert.fail("client secret failed");
+                        signal.countDown();
                     }
                 }
         );
@@ -415,7 +498,7 @@ public class MonriCustomerTest {
     }
 
     @Test
-    public void createAccessTokenCreateCustomerDeleteCustomer() throws InterruptedException {
+    public void testDeleteCustomer() throws InterruptedException {
         Monri monri = createMonriInstance();
         CountDownLatch signal = new CountDownLatch(1);
 
@@ -428,6 +511,7 @@ public class MonriCustomerTest {
                             createCustomer(accessToken, new ResultCallback<CustomerResponse>() {
                                 @Override
                                 public void onSuccess(final CustomerResponse createdCustomer) {
+                                    signal.countDown();
                                     monri.getMonriApi().deleteCustomer(
                                             new CustomerDeleteRequest(
                                                     accessToken,
@@ -460,12 +544,14 @@ public class MonriCustomerTest {
                         } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
                             Assert.fail("create customer failed");
+                            signal.countDown();
                         }
                     }
 
                     @Override
                     public void onError(final Throwable throwable) {
                         Assert.fail("client secret failed");
+                        signal.countDown();
                     }
                 }
         );
@@ -474,88 +560,70 @@ public class MonriCustomerTest {
 
     }
 
-    //todo I have to create transaction in order to test customer payment methods,
-    //todo create a transaction and check if the customer is created....
-    private Card getNon3DSCard() {
-        return new Card("4111 1111 1111 1111", 12, 2034, "123");
-    }
-
-    private ConfirmPaymentParams getConfirmPaymentParams(final String clientSecret, final Card card, final boolean shouldSaveCard) {
-        final CustomerParams customerParams = new CustomerParams()
-                .setCustomerId(merchantCustomerId)
-                .setAddress("Adresa")
-                .setFullName("Adnan Omerovic")
-                .setCity("Sarajevo")
-                .setZip("71000")
-                .setPhone("+38761000111")
-                .setCountry("BA")
-                .setEmail("monri-android-sdk-test@monri.com");
-
-        card.setTokenizePan(shouldSaveCard);//save card for future payment
-
-        ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(
-                clientSecret,
-                card.toPaymentMethodParams(),
-                TransactionParams.create()
-                        .set("order_info", "Android SDK payment session")
-                        .set(customerParams)
-        );
-
-        return confirmPaymentParams;
-    }
-
     @Test
-    public void createPaymentSessionConfirmPaymentCheckIsCustomerCreated() throws InterruptedException {
-        CountDownLatch signal = new CountDownLatch(1);
+    public void testCustomerPayment() throws InterruptedException {
+        CountDownLatch signal = new CountDownLatch(3);
         Monri monri = createMonriInstance();
 
-        taskRunnerExecuteWithCallback(
-                this::createPaymentSession,
-                new ResultCallback<String>() {
-                    @Override
-                    public void onSuccess(final String clientSecretId) {
-                        final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams(
-                                clientSecretId,
-                                getNon3DSCard(),
-                                true
-                        );
-                        monri.getMonriApi().confirmPayment(confirmPaymentParams, new ResultCallback<ConfirmPaymentResponse>() {
-                            @Override
-                            public void onSuccess(final ConfirmPaymentResponse confirmPaymentResponse) {
-                                Assert.assertEquals(PaymentStatus.APPROVED, confirmPaymentResponse.getStatus());
-                                monri.getMonriApi().retrieveCustomerViaMerchantCustomerId(
-                                        new CustomerRetrieveMerchantIdRequest(accessToken, merchantCustomerId),
-                                        new ResultCallback<CustomerResponse>() {
-                                            @Override
-                                            public void onSuccess(final CustomerResponse customerResponse) {
-                                                Assert.assertEquals("Adnan Omerovic", customerResponse.getName());
-                                                signal.countDown();
+        createCustomer((CustomerResponse customerResponse) -> {
+            taskRunnerExecuteWithCallback(
+                    this::createPaymentSession,
+                    new ResultCallback<String>() {
+                        @Override
+                        public void onSuccess(final String clientSecretId) {
+                            signal.countDown();
+                            final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams(
+                                    customerResponse.getUuid(),
+                                    clientSecretId,
+                                    getNon3DSCard(),
+                                    true
+                            );
+                            monri.getMonriApi().confirmPayment(confirmPaymentParams, new ResultCallback<ConfirmPaymentResponse>() {
+                                @Override
+                                public void onSuccess(final ConfirmPaymentResponse confirmPaymentResponse) {
+                                    Assert.assertEquals(PaymentStatus.APPROVED, confirmPaymentResponse.getStatus());
+                                    signal.countDown();
+                                    monri.getMonriApi().retrieveCustomerPaymentMethods(
+                                            new CustomerPaymentMethodRequest(
+                                                    customerResponse.getUuid(),
+                                                    20,
+                                                    0,
+                                                    accessToken
+                                            ),
+                                            new ResultCallback<CustomerPaymentMethodResponse>() {
+                                                @Override
+                                                public void onSuccess(final CustomerPaymentMethodResponse result) {
+                                                    Assert.assertEquals("approved", result.getStatus());
+                                                    Assert.assertNotNull(result.getCustomerPaymentMethod());
+                                                    Assert.assertEquals(customerResponse.getUuid(), result.getCustomerPaymentMethod().get(0).getCustomerUuid());
+                                                    signal.countDown();
+                                                }
+
+                                                @Override
+                                                public void onError(final Throwable throwable) {
+                                                    signal.countDown();
+                                                }
                                             }
+                                    );
+                                }
 
-                                            @Override
-                                            public void onError(final Throwable throwable) {
-                                                Assert.fail("Retrieve customer via merchant id failed");
-                                                signal.countDown();
-                                            }
-                                        }
-                                );
-                            }
+                                @Override
+                                public void onError(final Throwable throwable) {
+                                    Assert.fail("confirmPaymentFailed");
+                                    signal.countDown();
+                                }
+                            });
 
-                            @Override
-                            public void onError(final Throwable throwable) {
-                                Assert.fail("confirmPaymentFailed");
-                                signal.countDown();
-                            }
-                        });
+                        }
 
+                        @Override
+                        public void onError(final Throwable throwable) {
+                            Assert.fail("client secret failed");
+                            signal.countDown();
+                        }
                     }
-
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        Assert.fail("client secret failed");
-                    }
-                }
-        );
+            );
+        });
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
     }

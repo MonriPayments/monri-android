@@ -192,6 +192,7 @@ public class CustomerResponse {
         Map<String, String> metadata = new HashMap<>();
         if(jsonObject.has("metadata")){
             Object metaJSONObject = jsonObject.get("metadata");
+            //todo fix this
             Iterator<String> iter = jsonObject.keys();
             while (iter.hasNext()) {
                 String key = iter.next();
