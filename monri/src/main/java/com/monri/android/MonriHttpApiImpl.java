@@ -5,16 +5,16 @@ import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
-import com.monri.android.model.CustomerAllResponse;
-import com.monri.android.model.CustomerDeleteRequest;
-import com.monri.android.model.CustomerDeleteResponse;
-import com.monri.android.model.CustomerCreateRequest;
-import com.monri.android.model.CustomerPaymentMethodRequest;
+import com.monri.android.model.MerchantCustomers;
+import com.monri.android.model.DeleteCustomerParams;
+import com.monri.android.model.DeleteCustomerResponse;
+import com.monri.android.model.CreateCustomerParams;
+import com.monri.android.model.CustomerPaymentMethodParams;
 import com.monri.android.model.CustomerPaymentMethodResponse;
-import com.monri.android.model.CustomerResponse;
-import com.monri.android.model.CustomerRetrieveMerchantIdRequest;
-import com.monri.android.model.CustomerRetrieveRequest;
-import com.monri.android.model.CustomerUpdateRequest;
+import com.monri.android.model.Customer;
+import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
+import com.monri.android.model.RetrieveCustomerParams;
+import com.monri.android.model.UpdateCustomerParams;
 import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentStatusResponse;
 import com.monri.android.model.TransactionParams;
@@ -226,33 +226,33 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     //post v2/customers
     @Override
-    public MonriHttpResult<CustomerResponse> createCustomer(@NonNull final CustomerCreateRequest customerCreateRequest) {
+    public MonriHttpResult<Customer> createCustomer(@NonNull final CreateCustomerParams createCustomerParams) {
         try {
             final MonriHttpResult<JSONObject> response = httpsPOST(
                     baseUrl + "/v2/customers",
-                    customerCreateRequest.getCustomer().toJSON(),
+                    createCustomerParams.getCustomer().toJSON(),
                     new HashMap<>(){{
-                        put("authorization", customerCreateRequest.getAccessToken());
+                        put("authorization", createCustomerParams.getAccessToken());
                     }}
             );
-            return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
+            return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
     }
 
     @Override
-    public MonriHttpResult<CustomerResponse> retrieveCustomer(final CustomerRetrieveRequest customerRetrieveRequest) {
+    public MonriHttpResult<Customer> retrieveCustomer(final RetrieveCustomerParams retrieveCustomerParams) {
         final MonriHttpResult<JSONObject> response = httpsGET(
-                baseUrl + "/v2/customers/" + customerRetrieveRequest.getCustomerUuid(),
+                baseUrl + "/v2/customers/" + retrieveCustomerParams.getCustomerUuid(),
                 new HashMap<>(){{
-                    put("authorization", customerRetrieveRequest.getAccessToken());
+                    put("authorization", retrieveCustomerParams.getAccessToken());
                 }}
         );
 
         try {
             if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-                return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
+                return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
             } else {
                 return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
             }
@@ -262,17 +262,17 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<CustomerResponse> retrieveCustomerViaMerchantCustomerId(final CustomerRetrieveMerchantIdRequest customerRetrieveMerchantIdRequest) {
+    public MonriHttpResult<Customer> retrieveCustomerViaMerchantCustomerId(final RetrieveCustomerViaMerchantCustomerUuidParams retrieveCustomerViaMerchantCustomerUuidParams) {
         final MonriHttpResult<JSONObject> response = httpsGET(
-                baseUrl + "/v2/merchants/customers/" + customerRetrieveMerchantIdRequest.getMerchantCustomerUuid(),
+                baseUrl + "/v2/merchants/customers/" + retrieveCustomerViaMerchantCustomerUuidParams.getMerchantCustomerUuid(),
                 new HashMap<>(){{
-                    put("authorization", customerRetrieveMerchantIdRequest.getAccessToken());
+                    put("authorization", retrieveCustomerViaMerchantCustomerUuidParams.getAccessToken());
                 }}
         );
 
         try {
             if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-                return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
+                return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
             } else {
                 return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
             }
@@ -282,33 +282,33 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<CustomerResponse> updateCustomer(@NonNull final CustomerUpdateRequest customerUpdateRequest) {
+    public MonriHttpResult<Customer> updateCustomer(@NonNull final UpdateCustomerParams updateCustomerParams) {
         try {
             final MonriHttpResult<JSONObject> response = httpsPOST(
-                    baseUrl + "/v2/customers/" + customerUpdateRequest.getCustomerUuid(),
-                    customerUpdateRequest.getCustomer().toJSON(),
+                    baseUrl + "/v2/customers/" + updateCustomerParams.getCustomerUuid(),
+                    updateCustomerParams.getCustomer().toJSON(),
                     new HashMap<>(){{
-                        put("authorization", customerUpdateRequest.getAccessToken());
+                        put("authorization", updateCustomerParams.getAccessToken());
                     }}
             );
-            return MonriHttpResult.success(CustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
+            return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
     }
 
     @Override
-    public MonriHttpResult<CustomerDeleteResponse> deleteCustomer(final CustomerDeleteRequest customerDeleteRequest) {
+    public MonriHttpResult<DeleteCustomerResponse> deleteCustomer(final DeleteCustomerParams deleteCustomerParams) {
         final MonriHttpResult<JSONObject> response = httpsDELETE(
-                baseUrl + "/v2/customers/" + customerDeleteRequest.getCustomerUuid(),
+                baseUrl + "/v2/customers/" + deleteCustomerParams.getCustomerUuid(),
                 new HashMap<>(){{
-                    put("authorization", customerDeleteRequest.getAccessToken());
+                    put("authorization", deleteCustomerParams.getAccessToken());
                 }}
         );
 
         try {
             if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-                return MonriHttpResult.success(CustomerDeleteResponse.fromJSON(response.getResult()), response.getResponseCode());
+                return MonriHttpResult.success(DeleteCustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
             } else {
                 return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
             }
@@ -318,7 +318,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<CustomerAllResponse> getAllCustomers(final String accessToken) {
+    public MonriHttpResult<MerchantCustomers> retrieveAllCustomers(final String accessToken) {
         final MonriHttpResult<JSONObject> response = httpsGET(
                 baseUrl + "/v2/customers",
                 new HashMap<>(){{
@@ -328,8 +328,8 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
         try {
             if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
-                final CustomerAllResponse customerAllResponse = CustomerAllResponse.fromJSON(response.getResult());
-                return MonriHttpResult.success(customerAllResponse, response.getResponseCode());
+                final MerchantCustomers merchantCustomers = MerchantCustomers.fromJSON(response.getResult());
+                return MonriHttpResult.success(merchantCustomers, response.getResponseCode());
             } else {
                 return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
             }
@@ -339,17 +339,17 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<CustomerPaymentMethodResponse> getPaymentMethodsForCustomer(final CustomerPaymentMethodRequest customerPaymentMethodRequest) {
+    public MonriHttpResult<CustomerPaymentMethodResponse> getPaymentMethodsForCustomer(final CustomerPaymentMethodParams customerPaymentMethodParams) {
         final MonriHttpResult<JSONObject> response = httpsGET(
                 baseUrl +
                         "/v2/customers/" +
-                        customerPaymentMethodRequest.getCustomerUuid() +
+                        customerPaymentMethodParams.getCustomerUuid() +
                         "/payment-methods?limit=" +
-                        customerPaymentMethodRequest.getLimit() +
+                        customerPaymentMethodParams.getLimit() +
                         "&offset="
-                        + customerPaymentMethodRequest.getOffset(),
+                        + customerPaymentMethodParams.getOffset(),
                 new HashMap<>(){{
-                    put("authorization", customerPaymentMethodRequest.getAccessToken());
+                    put("authorization", customerPaymentMethodParams.getAccessToken());
                 }}
         );
 

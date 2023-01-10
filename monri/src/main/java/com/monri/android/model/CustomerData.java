@@ -6,8 +6,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CustomerRequestBody {
-    private String merchantCustomerId;//can not be updated...
+public class CustomerData {
+    private String merchantCustomerUuid;
     private String description;
     private String email;
     private String name;
@@ -18,11 +18,11 @@ public class CustomerRequestBody {
     private String address;
     private String country;
 
-    public CustomerRequestBody() {
+    public CustomerData() {
     }
 
-    public CustomerRequestBody(
-            final String merchantCustomerId,
+    public CustomerData(
+            final String merchantCustomerUuid,
             final String description,
             final String email,
             final String name,
@@ -33,7 +33,7 @@ public class CustomerRequestBody {
             final String address,
             final String country
     ) {
-        this.merchantCustomerId = merchantCustomerId;
+        this.merchantCustomerUuid = merchantCustomerUuid;
         this.description = description;
         this.email = email;
         this.name = name;
@@ -45,12 +45,12 @@ public class CustomerRequestBody {
         this.country = country;
     }
 
-    public String getMerchantCustomerId() {
-        return merchantCustomerId;
+    public String getMerchantCustomerUuid() {
+        return merchantCustomerUuid;
     }
 
-    public CustomerRequestBody setMerchantCustomerId(final String merchantCustomerId) {
-        this.merchantCustomerId = merchantCustomerId;
+    public CustomerData setMerchantCustomerUuid(final String merchantCustomerUuid) {
+        this.merchantCustomerUuid = merchantCustomerUuid;
         return this;
     }
 
@@ -58,7 +58,7 @@ public class CustomerRequestBody {
         return description;
     }
 
-    public CustomerRequestBody setDescription(final String description) {
+    public CustomerData setDescription(final String description) {
         this.description = description;
         return this;
     }
@@ -67,7 +67,7 @@ public class CustomerRequestBody {
         return email;
     }
 
-    public CustomerRequestBody setEmail(final String email) {
+    public CustomerData setEmail(final String email) {
         this.email = email;
         return this;
     }
@@ -76,7 +76,7 @@ public class CustomerRequestBody {
         return name;
     }
 
-    public CustomerRequestBody setName(final String name) {
+    public CustomerData setName(final String name) {
         this.name = name;
         return this;
     }
@@ -85,7 +85,7 @@ public class CustomerRequestBody {
         return phone;
     }
 
-    public CustomerRequestBody setPhone(final String phone) {
+    public CustomerData setPhone(final String phone) {
         this.phone = phone;
         return this;
     }
@@ -94,7 +94,7 @@ public class CustomerRequestBody {
         return metadata;
     }
 
-    public CustomerRequestBody setMetadata(final Map<String, String> metadata) {
+    public CustomerData setMetadata(final Map<String, String> metadata) {
         this.metadata = metadata;
         return this;
     }
@@ -103,7 +103,7 @@ public class CustomerRequestBody {
         return zipCode;
     }
 
-    public CustomerRequestBody setZipCode(final String zipCode) {
+    public CustomerData setZipCode(final String zipCode) {
         this.zipCode = zipCode;
         return this;
     }
@@ -112,7 +112,7 @@ public class CustomerRequestBody {
         return city;
     }
 
-    public CustomerRequestBody setCity(final String city) {
+    public CustomerData setCity(final String city) {
         this.city = city;
         return this;
     }
@@ -121,7 +121,7 @@ public class CustomerRequestBody {
         return address;
     }
 
-    public CustomerRequestBody setAddress(final String address) {
+    public CustomerData setAddress(final String address) {
         this.address = address;
         return this;
     }
@@ -130,7 +130,7 @@ public class CustomerRequestBody {
         return country;
     }
 
-    public CustomerRequestBody setCountry(final String country) {
+    public CustomerData setCountry(final String country) {
         this.country = country;
         return this;
     }
@@ -138,7 +138,7 @@ public class CustomerRequestBody {
     public JSONObject toJSON() throws JSONException {
         JSONObject customerJSON = new JSONObject();
 
-        customerJSON.put("merchant_customer_id", merchantCustomerId);
+        customerJSON.put("merchant_customer_id", merchantCustomerUuid);
         customerJSON.put("description", description);
         customerJSON.put("email", email);
         customerJSON.put("name", name);
@@ -146,6 +146,7 @@ public class CustomerRequestBody {
         customerJSON.put("zip_code", zipCode);
         customerJSON.put("city", city);
         customerJSON.put("address", address);
+        customerJSON.put("country", country);
 
         if (metadata != null) {
             JSONObject metaDataJSON = new JSONObject();
@@ -200,8 +201,8 @@ public class CustomerRequestBody {
             return this;
         }
 
-        public CustomerRequestBody build() {
-            return new CustomerRequestBody(
+        public CustomerData build() {
+            return new CustomerData(
                     this.merchantCustomerId,
                     this.description,
                     this.email,

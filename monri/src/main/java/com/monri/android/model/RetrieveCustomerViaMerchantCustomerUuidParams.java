@@ -1,10 +1,10 @@
 package com.monri.android.model;
 
-public class CustomerRetrieveMerchantIdRequest {
+public class RetrieveCustomerViaMerchantCustomerUuidParams {
     final String accessToken;
     final String merchantCustomerUuid;
 
-    public CustomerRetrieveMerchantIdRequest(final String accessToken, final String merchantCustomerUuid) {
+    public RetrieveCustomerViaMerchantCustomerUuidParams(final String accessToken, final String merchantCustomerUuid) {
         this.accessToken = accessToken;
         this.merchantCustomerUuid = merchantCustomerUuid;
     }

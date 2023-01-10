@@ -2,18 +2,18 @@ package com.monri.android;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
-import com.monri.android.model.CustomerAllResponse;
-import com.monri.android.model.CustomerDeleteRequest;
-import com.monri.android.model.CustomerDeleteResponse;
+import com.monri.android.model.MerchantCustomers;
+import com.monri.android.model.DeleteCustomerParams;
+import com.monri.android.model.DeleteCustomerResponse;
 import com.monri.android.model.CustomerPaymentMethodResponse;
-import com.monri.android.model.CustomerCreateRequest;
-import com.monri.android.model.CustomerResponse;
-import com.monri.android.model.CustomerRetrieveMerchantIdRequest;
-import com.monri.android.model.CustomerRetrieveRequest;
-import com.monri.android.model.CustomerPaymentMethodRequest;
+import com.monri.android.model.CreateCustomerParams;
+import com.monri.android.model.Customer;
+import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
+import com.monri.android.model.RetrieveCustomerParams;
+import com.monri.android.model.CustomerPaymentMethodParams;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
-import com.monri.android.model.CustomerUpdateRequest;
+import com.monri.android.model.UpdateCustomerParams;
 
 /**
  * Created by jasminsuljic on 2019-12-05.
@@ -25,17 +25,17 @@ public interface MonriApi {
 
     void paymentStatus(PaymentStatusParams params, ResultCallback<PaymentStatusResponse> callback);
 
-    void createCustomer(final CustomerCreateRequest customerCreateRequest, final ResultCallback<CustomerResponse> callback);
+    void createCustomer(final CreateCustomerParams createCustomerParams, final ResultCallback<Customer> callback);
 
-    void updateCustomer(final CustomerUpdateRequest customerUpdateRequest, final ResultCallback<CustomerResponse> callback);
+    void updateCustomer(final UpdateCustomerParams updateCustomerParams, final ResultCallback<Customer> callback);
 
-    void deleteCustomer(final CustomerDeleteRequest customerDeleteRequest, final ResultCallback<CustomerDeleteResponse> callback);
+    void deleteCustomer(final DeleteCustomerParams deleteCustomerParams, final ResultCallback<DeleteCustomerResponse> callback);
 
-    void retrieveCustomer(final CustomerRetrieveRequest customerRetrieveRequest, final ResultCallback<CustomerResponse> callback);
+    void retrieveCustomer(final RetrieveCustomerParams retrieveCustomerParams, final ResultCallback<Customer> callback);
 
-    void retrieveCustomerViaMerchantCustomerId(final CustomerRetrieveMerchantIdRequest customerRetrieveMerchantIdRequest, final ResultCallback<CustomerResponse> callback);
+    void retrieveCustomerViaMerchantCustomerUuid(final RetrieveCustomerViaMerchantCustomerUuidParams retrieveCustomerViaMerchantCustomerUuidParams, final ResultCallback<Customer> callback);
 
-    void getAllCustomers(final String accessToken, ResultCallback<CustomerAllResponse> callback);
+    void retrieveAllCustomers(final String accessToken, ResultCallback<MerchantCustomers> callback);
 
-    void retrieveCustomerPaymentMethods(final CustomerPaymentMethodRequest customerPaymentMethodRequest, final ResultCallback<CustomerPaymentMethodResponse> callback);
+    void retrieveCustomerPaymentMethods(final CustomerPaymentMethodParams customerPaymentMethodParams, final ResultCallback<CustomerPaymentMethodResponse> callback);
 }

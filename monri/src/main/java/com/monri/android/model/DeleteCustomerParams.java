@@ -1,10 +1,10 @@
 package com.monri.android.model;
 
-public class CustomerDeleteRequest {
+public class DeleteCustomerParams {
    final String customerUuid;
    final String accessToken;
 
-   public CustomerDeleteRequest(final String accessToken, final String customerUuid ) {
+   public DeleteCustomerParams(final String accessToken, final String customerUuid ) {
       this.customerUuid = customerUuid;
       this.accessToken = accessToken;
    }

@@ -10,17 +10,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
-import com.monri.android.model.CustomerAllResponse;
-import com.monri.android.model.CustomerCreateRequest;
-import com.monri.android.model.CustomerDeleteRequest;
-import com.monri.android.model.CustomerDeleteResponse;
-import com.monri.android.model.CustomerPaymentMethodRequest;
+import com.monri.android.model.MerchantCustomers;
+import com.monri.android.model.CreateCustomerParams;
+import com.monri.android.model.DeleteCustomerParams;
+import com.monri.android.model.DeleteCustomerResponse;
+import com.monri.android.model.CustomerPaymentMethodParams;
 import com.monri.android.model.CustomerPaymentMethodResponse;
-import com.monri.android.model.CustomerRequestBody;
-import com.monri.android.model.CustomerResponse;
-import com.monri.android.model.CustomerRetrieveMerchantIdRequest;
-import com.monri.android.model.CustomerRetrieveRequest;
-import com.monri.android.model.CustomerUpdateRequest;
+import com.monri.android.model.CustomerData;
+import com.monri.android.model.Customer;
+import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
+import com.monri.android.model.RetrieveCustomerParams;
+import com.monri.android.model.UpdateCustomerParams;
 import com.monri.android.model.MonriApiOptions;
 
 import java.util.Date;
@@ -31,7 +31,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
     OrderRepository orderRepository;
     Monri monri;
     TextView customerApiResult;
-    CustomerResponse customerResponse = null;
+    Customer customer = null;
 
     public static Intent createIntent(
             Context context
@@ -39,11 +39,11 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         return new Intent(context, CustomerActivity.class);
     }
 
-    private CustomerRequestBody getCustomerRequestBody(){
+    private CustomerData getCustomerRequestBody(){
         String timestamp = String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()));
 
-        return new CustomerRequestBody()
-                .setMerchantCustomerId(timestamp)
+        return new CustomerData()
+
                 .setDescription("description")
                 .setEmail("adnan.omerovic@monri.com")
                 .setName("Adnan")
@@ -68,20 +68,19 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
 
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
-        String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MzAxNTYyNSwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI2YTEzZDc5YmRlOGRhOTMyMGU4ODkyM2NiMzQ3MmZiNjM4NjE5Y2NiIn0.JezpGfzm9dTgm2NhqDKlUicVikoIdyHEPtN8S5Lwz5xfoYpsXkwL19laefOJOrNDBUaIhxK1_bbQGXUV4WVD37wT8Vpu-RGmeAkbqVXJraix37AdSWztvvN-yhEOQebRztALAMPQ0p4LfteCnMQI2xN3nMe4ygRb5qFU3p1Tm6beI0XBr6fLkhNfneyXRqTEfpT1wG_9n5KE2tqiXGv-ZkdtHlG0u35mX7-RwHdtnApwtrfUhv6DzhSPTRUj42o6Df23ffd0zjfolGnhpvCon19QK1LTDP8ssqsMNSL26m_qOhaxLQiI8mTyNQ1tdhS3R2ktCQYXFgzGE5bPsljg3g";
-
+        String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MzM0NTc1OSwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI2YTEzZDc5YmRlOGRhOTMyMGU4ODkyM2NiMzQ3MmZiNjM4NjE5Y2NiIn0.KV3gBvvty_kssWo89QWYauPkUHoPbwbSPY8QV2YHGA8lYB8hz0xl-mhieah9QbLc2XCqlTZ5jwD36nAWup3BUkf7atYsVQqYL-3eblKz08o6JP09BW5NMDN_nmacbjYP7CBbTeycJLCcWi8jvt97fyXkXv5XSc1HuLsbsQckUojZIZ_xGyKowia5ItIyMtj51qApczYhBVceOb3m7Yu2ZZbxm35CJMTTVi0BmX61hhDSnXwhpbVQ63djWUoPHKc3xN-PWXkg1M7pbFIU95mzNAPN796V0TghE8Lf9dXe7NnnwP8nVZ8dj4EyUm0mDxZZlfgeKt11uu0wLdDrYz3XRA";
 
         findViewById(R.id.btn_create_customer).setOnClickListener(v -> {
 
                     monri.getMonriApi().createCustomer(
-                            new CustomerCreateRequest(
+                            new CreateCustomerParams(
                                     getCustomerRequestBody(),
                                     accessToken
                             )
-                            , new ResultCallback<CustomerResponse>() {
+                            , new ResultCallback<Customer>() {
                                 @Override
-                                public void onSuccess(final CustomerResponse result) {
-                                    customerResponse = result;
+                                public void onSuccess(final Customer result) {
+                                    customer = result;
                                     customerApiResult.setText(String.format("%s %s %s %s",
                                             result.getUuid(),
                                             result.getCity(),
@@ -102,19 +101,19 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
 
 
         findViewById(R.id.btn_update_customer).setOnClickListener(v -> {
-            final CustomerRequestBody customerRequestBody = getCustomerRequestBody();
+            final CustomerData customerData = getCustomerRequestBody();
             monri.getMonriApi().updateCustomer(
-                    new CustomerUpdateRequest(
-                            customerRequestBody.setMetadata(new HashMap<>() {{
+                    new UpdateCustomerParams(
+                            customerData.setMetadata(new HashMap<>() {{
                                 put("update customer", new Date().toString());
                             }}),
-                            customerResponse.getUuid(),
+                            customer.getUuid(),
                             accessToken
 
                     ),
-                    new ResultCallback<CustomerResponse>() {
+                    new ResultCallback<Customer>() {
                         @Override
-                        public void onSuccess(final CustomerResponse result) {
+                        public void onSuccess(final Customer result) {
                             customerApiResult.setText(String.format("%s", result.toString()));
                         }
 
@@ -127,16 +126,16 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         });
 
         findViewById(R.id.btn_delete_customer).setOnClickListener(v -> monri.getMonriApi().deleteCustomer(
-                new CustomerDeleteRequest(
+                new DeleteCustomerParams(
                         accessToken,
-                        customerResponse.getUuid()
+                        customer.getUuid()
                 ),
-                new ResultCallback<CustomerDeleteResponse>() {
+                new ResultCallback<DeleteCustomerResponse>() {
                     @Override
-                    public void onSuccess(final CustomerDeleteResponse result) {
+                    public void onSuccess(final DeleteCustomerResponse result) {
                         customerApiResult.setText(String.format("%s", result.toString()));
                         if ("approved".equals(result.getStatus())) {
-                            customerResponse = null;
+                            customer = null;
                             enableButtons();
                         }
                     }
@@ -149,13 +148,13 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         ));
 
         findViewById(R.id.btn_retrieve_customer).setOnClickListener(v -> monri.getMonriApi().retrieveCustomer(
-                new CustomerRetrieveRequest(
+                new RetrieveCustomerParams(
                         accessToken,
-                        customerResponse.getUuid()
+                        customer.getUuid()
                 ),
-                new ResultCallback<CustomerResponse>() {
+                new ResultCallback<Customer>() {
                     @Override
-                    public void onSuccess(final CustomerResponse result) {
+                    public void onSuccess(final Customer result) {
                         customerApiResult.setText(String.format("Retrieve customer: %s", result.toString()));
                     }
 
@@ -166,14 +165,14 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
                 }
         ));
 
-        findViewById(R.id.btn_retrieve_customer_via_merchant_id).setOnClickListener(v -> monri.getMonriApi().retrieveCustomerViaMerchantCustomerId(
-                new CustomerRetrieveMerchantIdRequest(
+        findViewById(R.id.btn_retrieve_customer_via_merchant_id).setOnClickListener(v -> monri.getMonriApi().retrieveCustomerViaMerchantCustomerUuid(
+                new RetrieveCustomerViaMerchantCustomerUuidParams(
                         accessToken,
-                        customerResponse.getMerchantCustomerId()
+                        customer.getMerchantCustomerId()
                 ),
-                new ResultCallback<CustomerResponse>() {
+                new ResultCallback<Customer>() {
                     @Override
-                    public void onSuccess(final CustomerResponse result) {
+                    public void onSuccess(final Customer result) {
                         customerApiResult.setText(String.format("Retrieve customer via customer_merchant_id: %s", result.toString()));
                     }
 
@@ -184,16 +183,16 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
                 }
         ));
 
-        findViewById(R.id.btn_get_all_customers).setOnClickListener(v -> monri.getMonriApi().getAllCustomers(
+        findViewById(R.id.btn_get_all_customers).setOnClickListener(v -> monri.getMonriApi().retrieveAllCustomers(
                 accessToken,
-                new ResultCallback<CustomerAllResponse>() {
+                new ResultCallback<MerchantCustomers>() {
                     @Override
-                    public void onSuccess(final CustomerAllResponse result) {
+                    public void onSuccess(final MerchantCustomers result) {
                         StringBuilder name = new StringBuilder();
-                        for (CustomerResponse customerResponse : result.getCustomerResponseList()) {
-                            name.append(customerResponse.getName()).append('\n');
+                        for (Customer customer : result.getCustomerResponseList()) {
+                            name.append(customer.getName()).append('\n');
                         }
-                        customerApiResult.setText(String.format("%s", name.toString()));
+                        customerApiResult.setText(String.format("%s", name));
                     }
 
                     @Override
@@ -204,8 +203,8 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         ));
 
         findViewById(R.id.btn_retrieve_saved_cards_from_customer).setOnClickListener(v -> monri.getMonriApi().retrieveCustomerPaymentMethods(
-                new CustomerPaymentMethodRequest(
-                        customerResponse.getUuid(),
+                new CustomerPaymentMethodParams(
+                        customer.getUuid(),
                         20,
                         0,
                         accessToken
@@ -231,10 +230,10 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
     }
 
     private void enableButtons() {
-        findViewById(R.id.btn_update_customer).setEnabled(customerResponse != null);
-        findViewById(R.id.btn_delete_customer).setEnabled(customerResponse != null);
-        findViewById(R.id.btn_retrieve_customer).setEnabled(customerResponse != null);
-        findViewById(R.id.btn_retrieve_customer_via_merchant_id).setEnabled(customerResponse != null);
-        findViewById(R.id.btn_retrieve_saved_cards_from_customer).setEnabled(customerResponse != null);
+        findViewById(R.id.btn_update_customer).setEnabled(customer != null);
+        findViewById(R.id.btn_delete_customer).setEnabled(customer != null);
+        findViewById(R.id.btn_retrieve_customer).setEnabled(customer != null);
+        findViewById(R.id.btn_retrieve_customer_via_merchant_id).setEnabled(customer != null);
+        findViewById(R.id.btn_retrieve_saved_cards_from_customer).setEnabled(customer != null);
     }
 }

@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CustomerResponse {
+public class Customer {
     private String status;
     private String uuid;
     private String merchantCustomerId;
@@ -19,12 +19,12 @@ public class CustomerResponse {
     private String city;
     private String address;
     private String country;
-    private String deleted;
+    private boolean deleted;
     private String createdAt;
     private String updatedAt;
     private String deletedAt;
 
-    public CustomerResponse(
+    public Customer(
             final String status,
             final String uuid,
             final String merchantCustomerId,
@@ -37,7 +37,7 @@ public class CustomerResponse {
             final String city,
             final String address,
             final String country,
-            final String deleted,
+            final boolean deleted,
             final String created_at,
             final String updated_at,
             final String deleted_at
@@ -156,11 +156,11 @@ public class CustomerResponse {
         this.country = country;
     }
 
-    public String getDeleted() {
+    public boolean getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(final String deleted) {
+    public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
 
@@ -188,24 +188,26 @@ public class CustomerResponse {
         this.deletedAt = deletedAt;
     }
 
-    public static CustomerResponse fromJSON(JSONObject jsonObject) throws JSONException {
+    public static Customer fromJSON(JSONObject jsonObject) throws JSONException {
         Map<String, String> metadata = new HashMap<>();
         if(jsonObject.has("metadata")){
-            Object metaJSONObject = jsonObject.get("metadata");
-            //todo fix this
-            Iterator<String> iter = jsonObject.keys();
+//            new JSONObject(jsonObject.get("metadata"));
+            JSONObject metaJSONObject = (JSONObject) jsonObject.get("metadata");
+
+            Iterator<String> iter = metaJSONObject.keys();
             while (iter.hasNext()) {
                 String key = iter.next();
                 try {
-                    String value = jsonObject.getString(key);
+                    String value = metaJSONObject.getString(key);
                     metadata.put(key, value);
                 } catch (JSONException e) {
+                    String error = e.getMessage();
                     // Something went wrong!
                 }
             }
         }
 
-        return new CustomerResponse(
+        return new Customer(
                 jsonObject.getString("status"),
                 jsonObject.getString("uuid"),
                 jsonObject.getString("merchant_customer_id"),
@@ -218,7 +220,7 @@ public class CustomerResponse {
                 jsonObject.getString("city"),
                 jsonObject.getString("address"),
                 jsonObject.getString("country"),
-                jsonObject.getString("deleted"),
+                jsonObject.getBoolean("deleted"),
                 jsonObject.getString("created_at"),
                 jsonObject.getString("updated_at"),
                 jsonObject.getString("deleted_at")
