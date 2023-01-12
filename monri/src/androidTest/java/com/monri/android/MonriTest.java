@@ -156,11 +156,11 @@ public class MonriTest {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("add_payment_method", false);
 
-            String baseUrl = "https://mobile.webteh.hr/";
+            String baseUrl = "https://dashboard.monri.com/api/";
 
             final HttpURLConnection urlConnection =
                     createHttpURLConnection(
-                            baseUrl + "example/create-payment-session",
+                            baseUrl + "examples/ruby/examples/create-payment-session",
                             MonriHttpMethod.POST,
                             new HashMap<>()
                     );

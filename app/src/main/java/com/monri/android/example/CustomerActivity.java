@@ -27,7 +27,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+
 public class CustomerActivity extends AppCompatActivity implements ViewDelegate {
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     OrderRepository orderRepository;
     Monri monri;
     TextView customerApiResult;
@@ -39,11 +43,10 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         return new Intent(context, CustomerActivity.class);
     }
 
-    private CustomerData getCustomerRequestBody(){
+    private CustomerData getCustomerRequestBody() {
         String timestamp = String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()));
 
         return new CustomerData()
-
                 .setDescription("description")
                 .setEmail("adnan.omerovic@monri.com")
                 .setName("Adnan")
@@ -68,159 +71,203 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
 
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
-        String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MzM0NTc1OSwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI2YTEzZDc5YmRlOGRhOTMyMGU4ODkyM2NiMzQ3MmZiNjM4NjE5Y2NiIn0.KV3gBvvty_kssWo89QWYauPkUHoPbwbSPY8QV2YHGA8lYB8hz0xl-mhieah9QbLc2XCqlTZ5jwD36nAWup3BUkf7atYsVQqYL-3eblKz08o6JP09BW5NMDN_nmacbjYP7CBbTeycJLCcWi8jvt97fyXkXv5XSc1HuLsbsQckUojZIZ_xGyKowia5ItIyMtj51qApczYhBVceOb3m7Yu2ZZbxm35CJMTTVi0BmX61hhDSnXwhpbVQ63djWUoPHKc3xN-PWXkg1M7pbFIU95mzNAPN796V0TghE8Lf9dXe7NnnwP8nVZ8dj4EyUm0mDxZZlfgeKt11uu0wLdDrYz3XRA";
 
         findViewById(R.id.btn_create_customer).setOnClickListener(v -> {
 
-                    monri.getMonriApi().createCustomer(
-                            new CreateCustomerParams(
-                                    getCustomerRequestBody(),
-                                    accessToken
-                            )
-                            , new ResultCallback<Customer>() {
-                                @Override
-                                public void onSuccess(final Customer result) {
-                                    customer = result;
-                                    customerApiResult.setText(String.format("%s %s %s %s",
-                                            result.getUuid(),
-                                            result.getCity(),
-                                            result.getMerchantCustomerId(),
-                                            result.getUpdatedAt()
-                                    ));
-                                    enableButtons();
-                                }
+                    final Disposable subscribe = orderRepository.createAccessToken()
+                            .subscribe(accessTokenResponse -> {
+                                monri.getMonriApi().createCustomer(
+                                        new CreateCustomerParams(
+                                                getCustomerRequestBody(),
+                                                "Bearer " + accessTokenResponse.accessToken
+                                        )
+                                        , new ResultCallback<Customer>() {
+                                            @Override
+                                            public void onSuccess(final Customer result) {
+                                                customer = result;
+                                                customerApiResult.setText(String.format("%s %s %s %s",
+                                                        result.getUuid(),
+                                                        result.getCity(),
+                                                        result.getMerchantCustomerId(),
+                                                        result.getUpdatedAt()
+                                                ));
+                                                enableButtons();
+                                            }
 
-                                @Override
-                                public void onError(final Throwable throwable) {
-                                    customerApiResult.setText(throwable.getMessage());
-                                }
-                            }
-                    );
+                                            @Override
+                                            public void onError(final Throwable throwable) {
+                                                customerApiResult.setText(throwable.getMessage());
+                                            }
+                                        }
+                                );
+                            });
+
+                    compositeDisposable.add(subscribe);
                 }
         );
 
 
         findViewById(R.id.btn_update_customer).setOnClickListener(v -> {
-            final CustomerData customerData = getCustomerRequestBody();
-            monri.getMonriApi().updateCustomer(
-                    new UpdateCustomerParams(
-                            customerData.setMetadata(new HashMap<>() {{
-                                put("update customer", new Date().toString());
-                            }}),
-                            customer.getUuid(),
-                            accessToken
+            final Disposable subscribe = orderRepository.createAccessToken()
+                    .subscribe(accessTokenResponse -> {
+                        final CustomerData customerData = getCustomerRequestBody();
+                        monri.getMonriApi().updateCustomer(
+                                new UpdateCustomerParams(
+                                        customerData.setMetadata(new HashMap<>() {{
+                                            put("update customer", new Date().toString());
+                                        }}),
+                                        customer.getUuid(),
+                                        "Bearer " + accessTokenResponse.accessToken
 
-                    ),
-                    new ResultCallback<Customer>() {
-                        @Override
-                        public void onSuccess(final Customer result) {
-                            customerApiResult.setText(String.format("%s", result.toString()));
-                        }
+                                ),
+                                new ResultCallback<Customer>() {
+                                    @Override
+                                    public void onSuccess(final Customer result) {
+                                        customerApiResult.setText(String.format("%s", result.toString()));
+                                    }
 
-                        @Override
-                        public void onError(final Throwable throwable) {
-                            customerApiResult.setText(String.format("%s", throwable.getMessage()));
-                        }
-                    }
-            );
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
+                                    }
+                                }
+                        );
+                    });
+
+            compositeDisposable.add(subscribe);
         });
 
-        findViewById(R.id.btn_delete_customer).setOnClickListener(v -> monri.getMonriApi().deleteCustomer(
-                new DeleteCustomerParams(
-                        accessToken,
-                        customer.getUuid()
-                ),
-                new ResultCallback<DeleteCustomerResponse>() {
-                    @Override
-                    public void onSuccess(final DeleteCustomerResponse result) {
-                        customerApiResult.setText(String.format("%s", result.toString()));
-                        if ("approved".equals(result.getStatus())) {
-                            customer = null;
-                            enableButtons();
-                        }
-                    }
+        findViewById(R.id.btn_delete_customer).setOnClickListener(v -> {
+            final Disposable subscribe = orderRepository.createAccessToken()
+                    .subscribe(accessTokenResponse -> {
+                        monri.getMonriApi().deleteCustomer(
+                                new DeleteCustomerParams(
+                                        "Bearer " + accessTokenResponse.accessToken,
+                                        customer.getUuid()
+                                ),
+                                new ResultCallback<DeleteCustomerResponse>() {
+                                    @Override
+                                    public void onSuccess(final DeleteCustomerResponse result) {
+                                        customerApiResult.setText(String.format("%s", result.toString()));
+                                        if ("approved".equals(result.getStatus())) {
+                                            customer = null;
+                                            enableButtons();
+                                        }
+                                    }
 
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
-                    }
-                }
-        ));
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
+                                    }
+                                }
+                        );
+                    });
 
-        findViewById(R.id.btn_retrieve_customer).setOnClickListener(v -> monri.getMonriApi().retrieveCustomer(
-                new RetrieveCustomerParams(
-                        accessToken,
-                        customer.getUuid()
-                ),
-                new ResultCallback<Customer>() {
-                    @Override
-                    public void onSuccess(final Customer result) {
-                        customerApiResult.setText(String.format("Retrieve customer: %s", result.toString()));
-                    }
+            compositeDisposable.add(subscribe);
+        });
 
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
-                    }
-                }
-        ));
+        findViewById(R.id.btn_retrieve_customer).setOnClickListener(v -> {
+            final Disposable subscribe = orderRepository.createAccessToken()
+                    .subscribe(accessTokenResponse -> {
+                        monri.getMonriApi().retrieveCustomer(
+                                new RetrieveCustomerParams(
+                                        "Bearer " + accessTokenResponse.accessToken,
+                                        customer.getUuid()
+                                ),
+                                new ResultCallback<Customer>() {
+                                    @Override
+                                    public void onSuccess(final Customer result) {
+                                        customerApiResult.setText(String.format("Retrieve customer: %s", result.toString()));
+                                    }
 
-        findViewById(R.id.btn_retrieve_customer_via_merchant_id).setOnClickListener(v -> monri.getMonriApi().retrieveCustomerViaMerchantCustomerUuid(
-                new RetrieveCustomerViaMerchantCustomerUuidParams(
-                        accessToken,
-                        customer.getMerchantCustomerId()
-                ),
-                new ResultCallback<Customer>() {
-                    @Override
-                    public void onSuccess(final Customer result) {
-                        customerApiResult.setText(String.format("Retrieve customer via customer_merchant_id: %s", result.toString()));
-                    }
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
+                                    }
+                                }
+                        );
+                    });
 
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
-                    }
-                }
-        ));
+            compositeDisposable.add(subscribe);
+        });
 
-        findViewById(R.id.btn_get_all_customers).setOnClickListener(v -> monri.getMonriApi().retrieveAllCustomers(
-                accessToken,
-                new ResultCallback<MerchantCustomers>() {
-                    @Override
-                    public void onSuccess(final MerchantCustomers result) {
-                        StringBuilder name = new StringBuilder();
-                        for (Customer customer : result.getCustomerResponseList()) {
-                            name.append(customer.getName()).append('\n');
-                        }
-                        customerApiResult.setText(String.format("%s", name));
-                    }
+        findViewById(R.id.btn_retrieve_customer_via_merchant_id).setOnClickListener(v -> {
+            final Disposable subscribe = orderRepository.createAccessToken()
+                    .subscribe(accessTokenResponse -> {
+                        monri.getMonriApi().retrieveCustomerViaMerchantCustomerUuid(
+                                new RetrieveCustomerViaMerchantCustomerUuidParams(
+                                        "Bearer " + accessTokenResponse.accessToken,
+                                        customer.getMerchantCustomerId()
+                                ),
+                                new ResultCallback<Customer>() {
+                                    @Override
+                                    public void onSuccess(final Customer result) {
+                                        customerApiResult.setText(String.format("Retrieve customer via customer_merchant_id: %s", result.toString()));
+                                    }
 
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
-                    }
-                }
-        ));
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
+                                    }
+                                }
+                        );
+                    });
 
-        findViewById(R.id.btn_retrieve_saved_cards_from_customer).setOnClickListener(v -> monri.getMonriApi().retrieveCustomerPaymentMethods(
-                new CustomerPaymentMethodParams(
-                        customer.getUuid(),
-                        20,
-                        0,
-                        accessToken
-                ),
-                new ResultCallback<CustomerPaymentMethodResponse>() {
-                    @Override
-                    public void onSuccess(final CustomerPaymentMethodResponse result) {
-                        customerApiResult.setText(String.format("Payment methods: %s", result.toString()));
-                    }
+            compositeDisposable.add(subscribe);
+        });
 
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
-                    }
-                }
-        ));
+        findViewById(R.id.btn_get_all_customers).setOnClickListener(v -> {
+            final Disposable subscribe = orderRepository.createAccessToken()
+                    .subscribe(accessTokenResponse -> {
+                        monri.getMonriApi().retrieveAllCustomers(
+                                "Bearer " + accessTokenResponse.accessToken,
+                                new ResultCallback<MerchantCustomers>() {
+                                    @Override
+                                    public void onSuccess(final MerchantCustomers result) {
+                                        StringBuilder name = new StringBuilder();
+                                        for (Customer customer : result.getCustomerResponseList()) {
+                                            name.append(customer.getName()).append('\n');
+                                        }
+                                        customerApiResult.setText(String.format("%s", name));
+                                    }
+
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
+                                    }
+                                }
+                        );
+                    });
+
+            compositeDisposable.add(subscribe);
+        });
+
+        findViewById(R.id.btn_retrieve_saved_cards_from_customer).setOnClickListener(v -> {
+            final Disposable subscribe = orderRepository.createAccessToken()
+                    .subscribe(accessTokenResponse -> {
+                        monri.getMonriApi().retrieveCustomerPaymentMethods(
+                                new CustomerPaymentMethodParams(
+                                        customer.getUuid(),
+                                        20,
+                                        0,
+                                        "Bearer " + accessTokenResponse.accessToken
+                                ),
+                                new ResultCallback<CustomerPaymentMethodResponse>() {
+                                    @Override
+                                    public void onSuccess(final CustomerPaymentMethodResponse result) {
+                                        customerApiResult.setText(String.format("Payment methods: %s", result.toString()));
+                                    }
+
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        customerApiResult.setText(String.format("%s", throwable.getMessage()));
+                                    }
+                                }
+                        );
+                    });
+
+            compositeDisposable.add(subscribe);
+        });
     }
 
 
@@ -235,5 +282,11 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         findViewById(R.id.btn_retrieve_customer).setEnabled(customer != null);
         findViewById(R.id.btn_retrieve_customer_via_merchant_id).setEnabled(customer != null);
         findViewById(R.id.btn_retrieve_saved_cards_from_customer).setEnabled(customer != null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.dispose();
     }
 }

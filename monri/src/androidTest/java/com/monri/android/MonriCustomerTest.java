@@ -12,39 +12,31 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
-import com.monri.android.model.CustomerPaymentMethod;
-import com.monri.android.model.MerchantCustomers;
 import com.monri.android.model.CreateCustomerParams;
-import com.monri.android.model.DeleteCustomerParams;
-import com.monri.android.model.DeleteCustomerResponse;
+import com.monri.android.model.Customer;
+import com.monri.android.model.CustomerData;
 import com.monri.android.model.CustomerParams;
+import com.monri.android.model.CustomerPaymentMethod;
 import com.monri.android.model.CustomerPaymentMethodParams;
 import com.monri.android.model.CustomerPaymentMethodResponse;
-import com.monri.android.model.CustomerData;
-import com.monri.android.model.Customer;
-import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
-import com.monri.android.model.RetrieveCustomerParams;
-import com.monri.android.model.UpdateCustomerParams;
+import com.monri.android.model.DeleteCustomerParams;
+import com.monri.android.model.DeleteCustomerResponse;
+import com.monri.android.model.MerchantCustomers;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentStatus;
+import com.monri.android.model.RetrieveCustomerParams;
+import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
 import com.monri.android.model.TransactionParams;
+import com.monri.android.model.UpdateCustomerParams;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -86,87 +78,63 @@ public class MonriCustomerTest {
         taskRunner.executeAsync(callable, callback);
     }
 
-    private HttpURLConnection createHttpURLConnection(
-            final String endpoint,
-            final MonriHttpMethod monriHttpMethod,
-            final Map<String, String> headers
-    ) throws IOException {
-        URL url = new URL(endpoint);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod(monriHttpMethod.getValue());
-
-        switch (monriHttpMethod) {
-            case GET:
-                break;
-            case POST:
-                urlConnection.setDoInput(true);//Allow Inputs
-                urlConnection.setDoOutput(true);//Allow Outputs
-                urlConnection.setChunkedStreamingMode(0);
-                urlConnection.setUseCaches(false);//Don't use a cached Copy
-                break;
-            default:
-        }
-
-        for (String key : headers.keySet()) {
-            urlConnection.setRequestProperty(key, headers.get(key));
-        }
-
-        return urlConnection;
-    }
-
     private String createPaymentSession() {
+
         try {
-            JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject();
             jsonObject.put("add_payment_method", false);
+            final String url = "https://dashboard.monri.com/api/examples/ruby/examples/create-payment-session";
+            final MonriHttpResult<JSONObject> jsonObjectMonriHttpResult = MonriHttpUtil.httpsPOST(
+                    url,
+                    jsonObject,
+                    new HashMap<>()
+            );
 
-            String baseUrl = "https://mobile.webteh.hr/";
+            JSONObject jsonResponse = jsonObjectMonriHttpResult.getResult();
+            Assert.assertNotNull(jsonResponse);
 
-            final HttpURLConnection urlConnection =
-                    createHttpURLConnection(
-                            baseUrl + "example/create-payment-session",
-                            MonriHttpMethod.POST,
-                            new HashMap<>()
-                    );
+            String clientSecret = "";
 
-            try (OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream())) {
-                wr.write(jsonObject.toString());
-                wr.flush();
+            if (jsonResponse.has("client_secret")) {
+                clientSecret = jsonResponse.getString("client_secret");
             }
 
-            //now read response
-            try {
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                StringBuilder jsonStringResponse = new StringBuilder();
-                for (String line; (line = r.readLine()) != null; ) {
-                    jsonStringResponse.append(line).append('\n');
-                }
-
-                JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
-
-                Assert.assertNotNull(jsonResponse);
-
-                String clientSecret = "";
-
-                if (jsonResponse.has("client_secret")) {
-                    clientSecret = jsonResponse.getString("client_secret");
-                }
-
-                return clientSecret;
-
-            } finally {
-                urlConnection.disconnect();
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error while creating payment session");
-            return "Error while creating payment session";
+            return clientSecret;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Assert.fail("createPaymentSession failed");
+            return "";
         }
     }
 
-    String accessToken = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZXMiOlsiY3VzdG9tZXJzIiwicGF5bWVudC1tZXRob2RzIl0sImV4cCI6MTY3MzM0NzY5MCwiaXNzIjoiaHR0cHM6Ly9tb25yaS5jb20iLCJzdWIiOiI2YTEzZDc5YmRlOGRhOTMyMGU4ODkyM2NiMzQ3MmZiNjM4NjE5Y2NiIn0.Vi-u-pELd9Py7Yzf3QK5PhfkDiHUgkJZa8i8vM2Kvn3y_qR2mORR_SS6vmFVp6QxtPcAIi8fsaQu4sOe06jlKPUlKHSYYMaMyTgaPj1K8Qwf-11HS5kzhdbif6nHYNRvY5wdrKZWnx72Wqtkvv463LPXqJBYANRulvFOvkFelYWrCxWBDaFMB3q2j92RDrg_UnEcZRFjsRo6LIaYkBDZxQPxRiO3tbVvL54mA_KunMyONTKp-suCusBQ5Q2Mtnqg-X9uI3IYWQhHc3npz6AVKHQ1JGRGY7_vgBMr-TT-LWgNGkKpvLrJRZKT8jUTx7KdB-2Xv97njjj2NVJF94FiCw";
+    private String accessToken = null;
 
     private String createAccessToken() {
+        if (accessToken != null) {
+            return accessToken;
+        }
+
+        final MonriHttpResult<JSONObject> jsonObjectMonriHttpResult = MonriHttpUtil.httpsGET(
+                "https://dashboard.monri.com/api/examples/ruby/examples/access_token",
+                new HashMap<>()
+        );
+
+        JSONObject jsonResponse = jsonObjectMonriHttpResult.getResult();
+        Assert.assertNotNull(jsonResponse);
+
+        String accessToken = "";
+
+        if (jsonResponse.has("access_token")) {
+            try {
+                accessToken = "Bearer " + jsonResponse.getString("access_token");
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Assert.fail("create access token failed");
+            }
+        }
+
+        this.accessToken = accessToken;
+
         return accessToken;
     }
 
@@ -516,6 +484,7 @@ public class MonriCustomerTest {
                     public void onSuccess(final String accessToken) {
                         createCustomers(accessToken, (short) 3, (Pair<List<Customer>, String> listStringPair) -> {
                             final List<Customer> customerResponse = listStringPair.first;
+                            System.out.println("Adnan:" + accessToken + "-< Jasmin");
                             if (customerResponse == null) {
                                 Assert.fail(listStringPair.second);
                             }
@@ -545,7 +514,7 @@ public class MonriCustomerTest {
                 }
         );
 
-        Assert.assertTrue(signal.await(10, TimeUnit.SECONDS));
+        Assert.assertTrue(signal.await(15, TimeUnit.SECONDS));
 
         final List<Customer> createdCustomers = createdCustomersAtomicReference.get();
         final List<Customer> allCustomers = createdCustomersAtomicReference.get();
@@ -723,7 +692,7 @@ public class MonriCustomerTest {
                                                     customer.getUuid(),
                                                     20,
                                                     0,
-                                                    accessToken
+                                                    createAccessToken()
                                             ),
                                             new ResultCallback<CustomerPaymentMethodResponse>() {
                                                 @Override

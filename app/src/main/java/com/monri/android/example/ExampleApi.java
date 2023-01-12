@@ -2,6 +2,7 @@ package com.monri.android.example;
 
 import io.reactivex.Single;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 /**
@@ -9,12 +10,15 @@ import retrofit2.http.POST;
  * MonriAndroid
  */
 public interface ExampleApi {
-    @POST("example/order")
+    @POST("examples/order")
     Single<OrderResponse> order(@Body OrderRequest orderRequest);
 
-    @POST("example/prepare-transaction")
+    @POST("examples/prepare-transaction")
     Single<PrepareTransactionResponse> prepareTransaction();
 
-    @POST("example/create-payment-session")
+    @POST("examples/create-payment-session")
     Single<NewPaymentResponse> createPaymentSession(@Body NewPaymentRequest request);
+
+    @GET("examples/access_token")
+    Single<AccessTokenResponse> createAccessToken();
 }
