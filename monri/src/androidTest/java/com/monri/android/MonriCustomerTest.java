@@ -24,7 +24,7 @@ import com.monri.android.model.DeleteCustomerResponse;
 import com.monri.android.model.MerchantCustomers;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentStatus;
-import com.monri.android.model.RetrieveCustomerParams;
+import com.monri.android.model.GetCustomerParams;
 import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
 import com.monri.android.model.TransactionParams;
 import com.monri.android.model.UpdateCustomerParams;
@@ -205,7 +205,7 @@ public class MonriCustomerTest {
                 accessToken
         );
 
-        monri.getMonriApi().createCustomer(createCustomerParams, callback);
+        monri.getMonriApi().customers().create(createCustomerParams, callback);
     }
 
     private void createCustomer(Consumer<Customer> customerConsumer) {
@@ -339,7 +339,7 @@ public class MonriCustomerTest {
                                 @Override
                                 public void onSuccess(final Customer createdCustomer) {
                                     signal.countDown();
-                                    monri.getMonriApi().updateCustomer(
+                                    monri.getMonriApi().customers().update(
                                             new UpdateCustomerParams(
                                                     customerData,
                                                     createdCustomer.getUuid(),
@@ -412,8 +412,8 @@ public class MonriCustomerTest {
                                 @Override
                                 public void onSuccess(final Customer createdCustomer) {
                                     signal.countDown();
-                                    monri.getMonriApi().retrieveCustomer(
-                                            new RetrieveCustomerParams(
+                                    monri.getMonriApi().customers().get(
+                                            new GetCustomerParams(
                                                     accessToken,
                                                     createdCustomer.getUuid()
                                             ),
@@ -491,7 +491,7 @@ public class MonriCustomerTest {
 
                             createdCustomersAtomicReference.set(customerResponse);
 
-                            monri.getMonriApi().retrieveAllCustomers(accessToken, new ResultCallback<MerchantCustomers>() {
+                            monri.getMonriApi().customers().all(accessToken, new ResultCallback<MerchantCustomers>() {
                                 @Override
                                 public void onSuccess(final MerchantCustomers result) {
                                     allCustomersAtomicReference.set(result.getCustomerResponseList());
@@ -542,7 +542,7 @@ public class MonriCustomerTest {
                                         @Override
                                         public void onSuccess(final Customer createdCustomer) {
                                             signal.countDown();
-                                            monri.getMonriApi().retrieveCustomerViaMerchantCustomerUuid(
+                                            monri.getMonriApi().customers().getViaMerchantCustomerUuid(
                                                     new RetrieveCustomerViaMerchantCustomerUuidParams(
                                                             accessToken,
                                                             merchantCustomerId
@@ -616,7 +616,7 @@ public class MonriCustomerTest {
                                 @Override
                                 public void onSuccess(final Customer createdCustomer) {
                                     signal.countDown();
-                                    monri.getMonriApi().deleteCustomer(
+                                    monri.getMonriApi().customers().delete(
                                             new DeleteCustomerParams(
                                                     accessToken,
                                                     createdCustomer.getUuid()
@@ -687,7 +687,7 @@ public class MonriCustomerTest {
                                 public void onSuccess(final ConfirmPaymentResponse confirmPaymentResponse) {
                                     Assert.assertEquals(PaymentStatus.APPROVED, confirmPaymentResponse.getStatus());
                                     signal.countDown();
-                                    monri.getMonriApi().retrieveCustomerPaymentMethods(
+                                    monri.getMonriApi().customers().paymentMethods(
                                             new CustomerPaymentMethodParams(
                                                     customer.getUuid(),
                                                     20,

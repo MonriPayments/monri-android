@@ -13,7 +13,7 @@ import com.monri.android.model.CustomerPaymentMethodParams;
 import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.Customer;
 import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
-import com.monri.android.model.RetrieveCustomerParams;
+import com.monri.android.model.GetCustomerParams;
 import com.monri.android.model.UpdateCustomerParams;
 import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentStatusResponse;
@@ -242,7 +242,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<Customer> retrieveCustomer(final RetrieveCustomerParams retrieveCustomerParams) {
+    public MonriHttpResult<Customer> retrieveCustomer(final GetCustomerParams retrieveCustomerParams) {
         final MonriHttpResult<JSONObject> response = httpsGET(
                 baseUrl + "/v2/customers/" + retrieveCustomerParams.getCustomerUuid(),
                 new HashMap<>(){{

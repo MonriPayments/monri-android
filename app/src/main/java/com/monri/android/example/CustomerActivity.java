@@ -19,7 +19,7 @@ import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.CustomerData;
 import com.monri.android.model.Customer;
 import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
-import com.monri.android.model.RetrieveCustomerParams;
+import com.monri.android.model.GetCustomerParams;
 import com.monri.android.model.UpdateCustomerParams;
 import com.monri.android.model.MonriApiOptions;
 
@@ -76,7 +76,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
 
                     final Disposable subscribe = orderRepository.createAccessToken()
                             .subscribe(accessTokenResponse -> {
-                                monri.getMonriApi().createCustomer(
+                                monri.getMonriApi().customers().create(
                                         new CreateCustomerParams(
                                                 getCustomerRequestBody(),
                                                 "Bearer " + accessTokenResponse.accessToken
@@ -111,7 +111,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
             final Disposable subscribe = orderRepository.createAccessToken()
                     .subscribe(accessTokenResponse -> {
                         final CustomerData customerData = getCustomerRequestBody();
-                        monri.getMonriApi().updateCustomer(
+                        monri.getMonriApi().customers().update(
                                 new UpdateCustomerParams(
                                         customerData.setMetadata(new HashMap<>() {{
                                             put("update customer", new Date().toString());
@@ -140,7 +140,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         findViewById(R.id.btn_delete_customer).setOnClickListener(v -> {
             final Disposable subscribe = orderRepository.createAccessToken()
                     .subscribe(accessTokenResponse -> {
-                        monri.getMonriApi().deleteCustomer(
+                        monri.getMonriApi().customers().delete(
                                 new DeleteCustomerParams(
                                         "Bearer " + accessTokenResponse.accessToken,
                                         customer.getUuid()
@@ -169,8 +169,8 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         findViewById(R.id.btn_retrieve_customer).setOnClickListener(v -> {
             final Disposable subscribe = orderRepository.createAccessToken()
                     .subscribe(accessTokenResponse -> {
-                        monri.getMonriApi().retrieveCustomer(
-                                new RetrieveCustomerParams(
+                        monri.getMonriApi().customers().get(
+                                new GetCustomerParams(
                                         "Bearer " + accessTokenResponse.accessToken,
                                         customer.getUuid()
                                 ),
@@ -194,7 +194,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         findViewById(R.id.btn_retrieve_customer_via_merchant_id).setOnClickListener(v -> {
             final Disposable subscribe = orderRepository.createAccessToken()
                     .subscribe(accessTokenResponse -> {
-                        monri.getMonriApi().retrieveCustomerViaMerchantCustomerUuid(
+                        monri.getMonriApi().customers().getViaMerchantCustomerUuid(
                                 new RetrieveCustomerViaMerchantCustomerUuidParams(
                                         "Bearer " + accessTokenResponse.accessToken,
                                         customer.getMerchantCustomerId()
@@ -219,7 +219,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         findViewById(R.id.btn_get_all_customers).setOnClickListener(v -> {
             final Disposable subscribe = orderRepository.createAccessToken()
                     .subscribe(accessTokenResponse -> {
-                        monri.getMonriApi().retrieveAllCustomers(
+                        monri.getMonriApi().customers().all(
                                 "Bearer " + accessTokenResponse.accessToken,
                                 new ResultCallback<MerchantCustomers>() {
                                     @Override
@@ -245,7 +245,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         findViewById(R.id.btn_retrieve_saved_cards_from_customer).setOnClickListener(v -> {
             final Disposable subscribe = orderRepository.createAccessToken()
                     .subscribe(accessTokenResponse -> {
-                        monri.getMonriApi().retrieveCustomerPaymentMethods(
+                        monri.getMonriApi().customers().paymentMethods(
                                 new CustomerPaymentMethodParams(
                                         customer.getUuid(),
                                         20,

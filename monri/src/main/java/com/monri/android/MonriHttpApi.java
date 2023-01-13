@@ -10,7 +10,7 @@ import com.monri.android.model.CreateCustomerParams;
 import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.Customer;
 import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
-import com.monri.android.model.RetrieveCustomerParams;
+import com.monri.android.model.GetCustomerParams;
 import com.monri.android.model.UpdateCustomerParams;
 import com.monri.android.model.PaymentStatusResponse;
 
@@ -41,7 +41,7 @@ interface MonriHttpApi {
     MonriHttpResult<DeleteCustomerResponse> deleteCustomer(final DeleteCustomerParams deleteCustomerParams);
 
     //retrieve customer /v2/customers/:uuid
-    MonriHttpResult<Customer> retrieveCustomer(final RetrieveCustomerParams retrieveCustomerParams);
+    MonriHttpResult<Customer> retrieveCustomer(final GetCustomerParams retrieveCustomerParams);
 
     //Retrieve a customer via merchant_customer_id /v2/merchants/customers/:merchant_customer_id
     MonriHttpResult<Customer> retrieveCustomerViaMerchantCustomerId(final RetrieveCustomerViaMerchantCustomerUuidParams retrieveCustomerViaMerchantCustomerUuidParams);
