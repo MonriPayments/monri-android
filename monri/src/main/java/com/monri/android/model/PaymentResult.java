@@ -4,7 +4,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -165,4 +171,67 @@ public class PaymentResult implements Parcelable {
             return new PaymentResult[size];
         }
     };
+
+    @VisibleForTesting
+    public static PaymentResult fromJSON(JSONObject paymentResultJSON) throws JSONException {
+        final String paymentStatusResult = paymentResultJSON.getString("status");
+        final String paymentStatusCurrency = paymentResultJSON.getString("currency");
+        final Integer paymentStatusAmount = paymentResultJSON.getInt("amount");
+        final String paymentStatusOrderNumber = paymentResultJSON.getString("order_number");
+
+        String paymentStatusPanToken = "null";
+
+        if (paymentResultJSON.has("pan_token")) {
+            paymentStatusPanToken = paymentResultJSON.getString("pan_token");
+        }
+
+        final String paymentStatusCreatedAt = paymentResultJSON.getString("created_at");
+        final String paymentStatusTransactionType = paymentResultJSON.getString("transaction_type");
+
+        SavedCardPaymentMethod savedCardPaymentMethod = null;
+
+        if (paymentResultJSON.has("payment_method")) {
+            final JSONObject paymentStatusPaymentMethodJSON = paymentResultJSON.getJSONObject("payment_method");
+            final String paymentStatusPaymentMethodType = paymentStatusPaymentMethodJSON.getString("type");
+            final JSONObject pmData = paymentStatusPaymentMethodJSON.getJSONObject("data");
+            final String brand = pmData.getString("brand");
+            final String issuer = pmData.getString("issuer");
+            final String masked = pmData.getString("masked");
+            final String expiration_date = pmData.getString("expiration_date");
+            final String token = pmData.getString("token");
+            final SavedCardPaymentMethod.Data data = new SavedCardPaymentMethod.Data(brand, issuer, masked, expiration_date, token);
+
+            savedCardPaymentMethod = new SavedCardPaymentMethod(
+                    paymentStatusPaymentMethodType,
+                    data
+            );
+        }
+
+        List<String> paymentStatusErrors = null;
+
+        if (paymentResultJSON.has("errors")) {
+            paymentStatusErrors = new ArrayList<>();
+            JSONArray jsonArray = paymentResultJSON.getJSONArray("errors");
+            if (jsonArray != null) {
+                int len = jsonArray.length();
+                for (int i = 0; i < len; i++) {
+                    paymentStatusErrors.add(jsonArray.get(i).toString());
+                }
+            }
+        }
+
+        PaymentResult paymentResult = new PaymentResult(
+                paymentStatusResult,
+                paymentStatusCurrency,
+                paymentStatusAmount,
+                paymentStatusOrderNumber,
+                paymentStatusPanToken,
+                paymentStatusCreatedAt,
+                paymentStatusTransactionType,
+                savedCardPaymentMethod,
+                paymentStatusErrors
+        );
+
+        return paymentResult;
+    }
 }

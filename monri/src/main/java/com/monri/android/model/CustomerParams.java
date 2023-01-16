@@ -8,30 +8,28 @@ import android.os.Parcelable;
  * MonriAndroid
  */
 public class CustomerParams implements Parcelable {
+    private String customerUuid;
     private String email;
-
     private String fullName;
-
     private String address;
-
     private String city;
-
     private String zip;
-
     private String phone;
-
     private String country;
 
     public CustomerParams() {
     }
 
-    public CustomerParams(String email,
-                          String fullName,
-                          String address,
-                          String city,
-                          String zip,
-                          String phone,
-                          String country) {
+    public CustomerParams(
+            String customerUuid,
+            String email,
+            String fullName,
+            String address,
+            String city,
+            String zip,
+            String phone,
+            String country) {
+        this.customerUuid = customerUuid;
         this.email = email;
         this.fullName = fullName;
         this.address = address;
@@ -39,6 +37,10 @@ public class CustomerParams implements Parcelable {
         this.zip = zip;
         this.phone = phone;
         this.country = country;
+    }
+
+    public String getCustomerUuid() {
+        return customerUuid;
     }
 
     public String getEmail() {
@@ -67,6 +69,11 @@ public class CustomerParams implements Parcelable {
 
     public String getCountry() {
         return country;
+    }
+
+    public CustomerParams setCustomerUuid(String customerUuid) {
+        this.customerUuid = customerUuid;
+        return this;
     }
 
     public CustomerParams setEmail(String email) {
@@ -111,6 +118,7 @@ public class CustomerParams implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.customerUuid);
         dest.writeString(this.email);
         dest.writeString(this.fullName);
         dest.writeString(this.address);
@@ -121,6 +129,7 @@ public class CustomerParams implements Parcelable {
     }
 
     protected CustomerParams(Parcel in) {
+        this.customerUuid = in.readString();
         this.email = in.readString();
         this.fullName = in.readString();
         this.address = in.readString();

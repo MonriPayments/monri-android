@@ -15,7 +15,6 @@ import androidx.core.util.Supplier;
 
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
-import com.monri.android.TokenCallback;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
@@ -23,7 +22,6 @@ import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.model.SavedCard;
-import com.monri.android.model.Token;
 import com.monri.android.model.TransactionParams;
 import com.monri.android.view.CardMultilineWidget;
 

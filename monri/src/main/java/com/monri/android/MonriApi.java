@@ -15,4 +15,5 @@ public interface MonriApi {
 
     void paymentStatus(PaymentStatusParams params, ResultCallback<PaymentStatusResponse> callback);
 
+    CustomerApi customers();
 }

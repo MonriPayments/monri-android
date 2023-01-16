@@ -10,6 +10,7 @@
         android:id="@+id/payment_picker_new_card"
         android:layout_height="match_parent"
         android:visibility="invisible"
+        tools:visibility="visible"
         android:orientation="vertical">
 
         <com.monri.android.view.CardMultilineWidget

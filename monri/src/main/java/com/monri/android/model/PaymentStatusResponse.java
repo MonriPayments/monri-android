@@ -5,6 +5,9 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 /**
  * Created by jasminsuljic on 2019-12-12.
@@ -63,4 +66,18 @@ public class PaymentStatusResponse implements Parcelable {
             return new PaymentStatusResponse[size];
         }
     };
+
+    public static PaymentStatusResponse fromJSON(final JSONObject paymentStatusResponseJSON) throws JSONException {
+        final String status = paymentStatusResponseJSON.getString("status");
+        final PaymentStatus paymentStatus = PaymentStatus.forValue(paymentStatusResponseJSON.getString("payment_status"));
+
+        final JSONObject paymentResultJSON = paymentStatusResponseJSON.getJSONObject("payment_result");
+        final PaymentResult paymentResult = PaymentResult.fromJSON(paymentResultJSON);
+
+        return new PaymentStatusResponse(
+                paymentStatus,
+                status,
+                paymentResult
+        );
+    }
 }

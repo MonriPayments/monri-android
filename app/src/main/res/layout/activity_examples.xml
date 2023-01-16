@@ -33,4 +33,10 @@
         android:layout_height="wrap_content"
         android:text="@string/btn_payment_session_create" />
 
+    <Button
+        android:id="@+id/btn_customer_activity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_customer_activity" />
+
 </LinearLayout>

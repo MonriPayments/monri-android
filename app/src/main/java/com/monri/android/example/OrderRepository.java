@@ -28,7 +28,7 @@ public class OrderRepository {
     public OrderRepository(Context context, ViewDelegate viewDelegate) {
         this.context = context;
         this.viewDelegate = viewDelegate;
-        String url = "https://mobile.webteh.hr/";
+        String url = "https://dashboard.monri.com/api/examples/ruby/";
         ExampleModule module = new ExampleModule(url);
         exampleApi = module.publicApi();
     }
@@ -43,6 +43,12 @@ public class OrderRepository {
 
     Single<PrepareTransactionResponse> prepareTransaction() {
         return exampleApi.prepareTransaction()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    Single<AccessTokenResponse> createAccessToken() {
+        return exampleApi.createAccessToken()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

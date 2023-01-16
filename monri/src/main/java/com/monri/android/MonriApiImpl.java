@@ -13,6 +13,7 @@ class MonriApiImpl implements MonriApi {
 
     private final MonriHttpApi monriHttpApi;
     private final TaskRunner taskRunner;
+    private CustomerApi customerApi;
 
     MonriApiImpl(final MonriHttpApi monriHttpApi) {
         this.monriHttpApi = monriHttpApi;
@@ -46,6 +47,15 @@ class MonriApiImpl implements MonriApi {
                 },
                 callback
         );
+    }
+
+    @Override
+    public CustomerApi customers() {
+        if (customerApi != null) {
+            return customerApi;
+        }
+        customerApi = new CustomerApi(monriHttpApi, taskRunner);
+        return customerApi;
     }
 
 }

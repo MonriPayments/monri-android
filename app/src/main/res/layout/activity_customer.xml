@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CustomerActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/customer_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="For update, delete, retrieve, you have to create customer."/>
+
+    <Button
+        android:id="@+id/btn_create_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_create_customer" />
+
+    <Button
+        android:id="@+id/btn_update_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_update_customer" />
+
+    <Button
+        android:id="@+id/btn_delete_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_delete_customer" />
+
+    <Button
+        android:id="@+id/btn_retrieve_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_retrieve_customer" />
+
+    <Button
+        android:id="@+id/btn_retrieve_customer_via_merchant_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_retrieve_customer_via_merchant_id" />
+
+    <Button
+        android:id="@+id/btn_get_all_customers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_get_all_customers" />
+
+    <Button
+        android:id="@+id/btn_retrieve_saved_cards_from_customer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_retrieve_saved_cards_from_customer" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/customer_api_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="customer API result"/>
+    </ScrollView>
+
+</LinearLayout>

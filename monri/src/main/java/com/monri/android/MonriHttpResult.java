@@ -26,4 +26,8 @@ public class MonriHttpResult<T> {
     public MonriHttpException getCause() {
         return cause;
     }
+
+    public Integer getResponseCode() {
+        return responseCode;
+    }
 }
