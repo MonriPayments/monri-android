@@ -70,18 +70,9 @@ public final class Monri {
         this(context, MonriApiOptions.create(authenticityToken, false));
     }
 
+    @Deprecated
     public Monri(Context context, MonriApiOptions monriApiOptions) {
-        this.authenticityToken = monriApiOptions.getAuthenticityToken();
-        this.apiOptions = monriApiOptions;
-
-        String url = monriApiOptions.isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
-
-        final String authorizationHeader = String.format("WP3-v2-Client %s", apiOptions.getAuthenticityToken());
-
-        this.monriApi = new MonriApiImpl(getMonriHttpApi(url, getHttpHeaders(authorizationHeader)));
-
-        registeredForActivityResult = null;
-        paymentController = new MonriPaymentController(monriApiOptions, registeredForActivityResult);
+        this(((ActivityResultCaller) context), monriApiOptions);
     }
 
     public Monri(ActivityResultCaller activityResultCaller, MonriApiOptions monriApiOptions) {
@@ -106,7 +97,7 @@ public final class Monri {
                 return ConfirmPaymentActivity.parseResponse(resultCode, intent);
             }
         }, result -> {
-            paymentController.acceptResult(new ActionResult<>(result.getPaymentResult(), null));
+            paymentController.acceptResult(result.getPaymentResult(), null);
         });
         paymentController = new MonriPaymentController(monriApiOptions, registeredForActivityResult);
     }

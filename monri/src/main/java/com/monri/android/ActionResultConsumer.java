@@ -2,5 +2,5 @@ package com.monri.android;
 
 @FunctionalInterface
 public interface ActionResultConsumer<T> {
-    void accept(ActionResult<T> result);
+    void accept(T result, Throwable cause);
 }

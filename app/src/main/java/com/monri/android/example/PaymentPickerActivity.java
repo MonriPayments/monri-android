@@ -13,8 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Supplier;
 
-import com.monri.android.ActionResult;
-import com.monri.android.ActionResultConsumer;
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
 import com.monri.android.model.Card;
@@ -191,14 +189,12 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                         TransactionParams.create()
                                 .set("order_info", "Android SDK payment session")
                                 .set(customerParams)
-                ), result -> {
-                    if (result.isFailed()) {
-                        Throwable throwable = result.getThrowable();
+                ), (result, throwable) -> {
+                    if (throwable != null) {
                         txtViewResult.setText(String.format("%s\n\n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
                         Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
                     } else {
-                        PaymentResult paymentResult = result.getResult();
-                        Toast.makeText(this, String.format("Transaction processed with result %s", paymentResult.getStatus()), Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, String.format("Transaction processed with result %s", result.getStatus()), Toast.LENGTH_LONG).show();
                         txtViewResult.setText(result.toString());
                     }
                 });
