@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCaller;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Supplier;
@@ -86,7 +87,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
         setContentView(R.layout.activity_payment_picker);
 
         orderRepository = new OrderRepository(this, this);
-        monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
+        monri = new Monri(((ActivityResultCaller) this),MonriApiOptions.create(orderRepository.authenticityToken(), true));
 
         Intent intent = getIntent();
         boolean newCardPayment = intent.getBooleanExtra("NEW_CARD_PAYMENT", true);
@@ -199,7 +200,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                     } else {
                         PaymentResult paymentResult = result.getResult();
                         Toast.makeText(this, String.format("Transaction processed with result %s", paymentResult.getStatus()), Toast.LENGTH_LONG).show();
-                        txtViewResult.setText(result.toString());
+                        txtViewResult.setText(paymentResult.toString());
                     }
                 });
 
