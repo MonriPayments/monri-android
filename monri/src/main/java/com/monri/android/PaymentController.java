@@ -21,4 +21,5 @@ public interface PaymentController {
     boolean shouldHandlePaymentResult(int requestCode, Intent data);
 
     void handlePaymentResult(int requestCode, Intent data, ResultCallback<PaymentResult> callback);
+    void acceptResult(ActionResult<PaymentResult> result);
 }
