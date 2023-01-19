@@ -192,12 +192,13 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                         TransactionParams.create()
                                 .set("order_info", "Android SDK payment session")
                                 .set(customerParams)
-                ), result -> {
-                    if (result.isFailed()) {
-                        Throwable throwable = result.getThrowable();
+                ), (result, throwable) -> {
+                    if (throwable != null) {
                         txtViewResult.setText(String.format("%s\n\n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
                         Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
                     } else {
+                        Toast.makeText(this, String.format("Transaction processed with result %s", result.getStatus()), Toast.LENGTH_LONG).show();
+                        txtViewResult.setText(result.toString());
                         PaymentResult paymentResult = result.getResult();
                         Toast.makeText(this, String.format("Transaction processed with result %s", paymentResult.getStatus()), Toast.LENGTH_LONG).show();
                         txtViewResult.setText(paymentResult.toString());

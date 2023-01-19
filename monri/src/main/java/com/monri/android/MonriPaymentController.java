@@ -66,13 +66,11 @@ final class MonriPaymentController implements PaymentController {
     }
 
     @Override
-    public void acceptResult(ActionResult<PaymentResult> result) {
+    public void acceptResult(PaymentResult result, Throwable throwable) {
         if (delegatedCallback == null) {
             // TODO: throw exception
         } else {
-            delegatedCallback.accept(result);
+            delegatedCallback.accept(result, throwable);
         }
     }
-
-
 }
