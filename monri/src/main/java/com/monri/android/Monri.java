@@ -183,7 +183,7 @@ public final class Monri {
                     TokenCallback callback);
     }
 
-    private class ResponseWrapper {
+    private static class ResponseWrapper {
         final Token token;
         final Exception error;
 
