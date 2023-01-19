@@ -14,8 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Supplier;
 
-import com.monri.android.ActionResult;
-import com.monri.android.ActionResultConsumer;
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
 import com.monri.android.model.Card;
@@ -199,9 +197,6 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                     } else {
                         Toast.makeText(this, String.format("Transaction processed with result %s", result.getStatus()), Toast.LENGTH_LONG).show();
                         txtViewResult.setText(result.toString());
-                        PaymentResult paymentResult = result.getResult();
-                        Toast.makeText(this, String.format("Transaction processed with result %s", paymentResult.getStatus()), Toast.LENGTH_LONG).show();
-                        txtViewResult.setText(paymentResult.toString());
                     }
                 });
 
