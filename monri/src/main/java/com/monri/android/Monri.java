@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
+import androidx.activity.result.ActivityResultCaller;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
@@ -19,6 +20,7 @@ import com.monri.android.model.Token;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import static com.monri.android.MonriConfig.PROD_ENV_HOST;
 import static com.monri.android.MonriConfig.TEST_ENV_HOST;
@@ -102,9 +104,19 @@ public final class Monri {
         }
     }
 
+    /**
+     * @deprecated use {@link #confirmPayment(ActivityResultCaller, ConfirmPaymentParams, ActionResultConsumer)}
+     * @param context
+     * @param confirmPaymentParams
+     */
+    @Deprecated(since = "1.4.0", forRemoval = true)
     public void confirmPayment(Activity context,
                                ConfirmPaymentParams confirmPaymentParams) {
         paymentController.confirmPayment(context, confirmPaymentParams);
+    }
+
+    public void confirmPayment(ActivityResultCaller context, ConfirmPaymentParams confirmPaymentParams, ActionResultConsumer<PaymentResult> callback) {
+        paymentController.confirmPayment(context, confirmPaymentParams, callback);
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {

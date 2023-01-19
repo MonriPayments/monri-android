@@ -1,12 +1,21 @@
 package com.monri.android;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultCaller;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentResult;
+
+import java.util.function.Consumer;
 
 /**
  * Created by jasminsuljic on 2019-12-05.
@@ -26,6 +35,24 @@ final class MonriPaymentController implements PaymentController {
     @Override
     public void confirmPayment(Activity activity, ConfirmPaymentParams params) {
         activity.startActivityForResult(ConfirmPaymentActivity.createIntent(activity, params, monriApiOptions), PAYMENT_REQUEST_CODE);
+    }
+
+    @Override
+    public void confirmPayment(ActivityResultCaller activity, ConfirmPaymentParams params, ActionResultConsumer<PaymentResult> resultCallback) {
+        activity.<ConfirmPaymentActivity.Request, ConfirmPaymentActivity.Response>registerForActivityResult(new ActivityResultContract<>() {
+            @NonNull
+            @Override
+            public Intent createIntent(@NonNull Context context, ConfirmPaymentActivity.Request input) {
+                return ConfirmPaymentActivity.createIntent(context, input);
+            }
+
+            @Override
+            public ConfirmPaymentActivity.Response parseResult(int resultCode, @Nullable Intent intent) {
+                return ConfirmPaymentActivity.parseResponse(resultCode, intent);
+            }
+        }, result -> {
+            resultCallback.accept(new ActionResult<>(result.getPaymentResult(), null));
+        }).launch(new ConfirmPaymentActivity.Request(params, monriApiOptions));
     }
 
     @Override
