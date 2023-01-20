@@ -29,6 +29,9 @@ final class MonriPaymentController implements PaymentController {
         this.registeredForActivityResult = registeredForActivityResult;
     }
 
+    /**
+     * @deprecated use {@link #confirmPayment(ActivityResultCaller, ConfirmPaymentParams, ActionResultConsumer)}
+     */
     @Override
     public void confirmPayment(Activity activity, ConfirmPaymentParams params) {
         activity.startActivityForResult(ConfirmPaymentActivity.createIntent(activity, params, monriApiOptions), PAYMENT_REQUEST_CODE);
@@ -69,6 +72,7 @@ final class MonriPaymentController implements PaymentController {
     public void acceptResult(PaymentResult result, Throwable throwable) {
         if (delegatedCallback == null) {
             // TODO: throw exception
+            // throw new Exception("delegatedCallback is null");
         } else {
             delegatedCallback.accept(result, throwable);
         }

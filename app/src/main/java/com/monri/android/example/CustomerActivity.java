@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCaller;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.monri.android.Monri;
@@ -70,7 +71,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
         customerApiResult = findViewById(R.id.customer_api_result);
 
         orderRepository = new OrderRepository(this, this);
-        monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
+        monri = new Monri(((ActivityResultCaller) this), MonriApiOptions.create(orderRepository.authenticityToken(), true));
 
         findViewById(R.id.btn_create_customer).setOnClickListener(v -> {
 

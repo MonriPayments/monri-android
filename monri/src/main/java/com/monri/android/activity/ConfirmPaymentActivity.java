@@ -1,5 +1,6 @@
 package com.monri.android.activity;
 
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +8,10 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.ProgressBar;
+
+import androidx.activity.ComponentActivity;
+import androidx.activity.result.ActivityResultCaller;
+import androidx.annotation.Nullable;
 
 import com.monri.android.BuildConfig;
 import com.monri.android.Monri;
@@ -17,7 +22,7 @@ import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.three_ds1.auth.PaymentAuthWebView;
 
-public class ConfirmPaymentActivity extends Activity {
+public class ConfirmPaymentActivity extends ComponentActivity {
 
     private static final String CONFIRM_PAYMENT_PARAMS_BUNDLE = "CONFIRM_PAYMENT_PARAMS_BUNDLE";
     private static final String MONRI_API_OPTIONS = "MONRI_API_OPTIONS";
@@ -26,6 +31,9 @@ public class ConfirmPaymentActivity extends Activity {
     PaymentAuthWebView webView;
     ProgressBar progressBar;
 
+    /**
+     * @deprecated use {@link #createIntent(Context context, Request input)}
+     */
     public static Intent createIntent(Context context, ConfirmPaymentParams params, MonriApiOptions apiOptions) {
         final Intent intent = new Intent(context, ConfirmPaymentActivity.class);
         intent.putExtra(CONFIRM_PAYMENT_PARAMS_BUNDLE, params);
@@ -33,6 +41,7 @@ public class ConfirmPaymentActivity extends Activity {
         return intent;
     }
 
+    @Nullable
     public static Response parseResponse(int resultCode, Intent intent) {
         if (resultCode == Activity.RESULT_OK) {
             PaymentResult paymentResult = intent.getParcelableExtra(PaymentResult.BUNDLE_NAME);
@@ -42,7 +51,10 @@ public class ConfirmPaymentActivity extends Activity {
     }
 
     public static Intent createIntent(Context context, Request input) {
-        return createIntent(context, input.params, input.apiOptions);
+        final Intent intent = new Intent(context, ConfirmPaymentActivity.class);
+        intent.putExtra(CONFIRM_PAYMENT_PARAMS_BUNDLE, input.params);
+        intent.putExtra(MONRI_API_OPTIONS, input.apiOptions);
+        return intent;
     }
 
     @Override
@@ -62,7 +74,7 @@ public class ConfirmPaymentActivity extends Activity {
                 .set("meta.library", MonriUtil.library(getApplicationContext()))
                 .set("meta.library_version", BuildConfig.MONRI_SDK_VERSION);
 
-        monri = new Monri(this, apiOptions);
+        monri = new Monri(((ActivityResultCaller) this), apiOptions);
 
         ConfirmPaymentResponseCallback responseCallback = ConfirmPaymentResponseCallback.create(this, webView, progressBar, confirmPaymentParams, monri.getMonriApi());
 

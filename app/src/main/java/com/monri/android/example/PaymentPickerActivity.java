@@ -85,7 +85,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
         setContentView(R.layout.activity_payment_picker);
 
         orderRepository = new OrderRepository(this, this);
-        monri = new Monri(((ActivityResultCaller) this),MonriApiOptions.create(orderRepository.authenticityToken(), true));
+        monri = new Monri(((ActivityResultCaller) this), MonriApiOptions.create(orderRepository.authenticityToken(), true));
 
         Intent intent = getIntent();
         boolean newCardPayment = intent.getBooleanExtra("NEW_CARD_PAYMENT", true);
@@ -210,15 +210,6 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
 
     PaymentMethodParams threeDsCard() {
         return new Card("4341 7920 0000 0044", 12, 2024, "123").toPaymentMethodParams();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        ResultCallback<PaymentResult> callback = this;
-        final boolean monriPaymentResult = monri.onPaymentResult(requestCode, data, callback);
-        if (!monriPaymentResult) {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
     }
 
     @Override

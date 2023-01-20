@@ -11,6 +11,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCaller;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements ViewDelegate {
 
 
         orderRepository = new OrderRepository(this, this);
-        final Monri monri = new Monri(this.getApplicationContext(), orderRepository.monriApiOptions());
+        final Monri monri = new Monri(((ActivityResultCaller) this), orderRepository.monriApiOptions());
 
         final PrepareTransactionResponse prepareTransactionResponse = getIntent().getParcelableExtra("PREPARE_TRANSACTION_RESPONSE");
 

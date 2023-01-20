@@ -37,7 +37,6 @@ public final class Monri {
     private final MonriApiOptions apiOptions;
     private final MonriApi monriApi;
     private PaymentController paymentController;
-    private final ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult;
     @VisibleForTesting
     private
     TokenCreator mTokenCreator = (apiOptions, tokenParams, executor, callback) -> {
@@ -85,7 +84,7 @@ public final class Monri {
 
         this.monriApi = new MonriApiImpl(getMonriHttpApi(url, getHttpHeaders(authorizationHeader)));
 
-        registeredForActivityResult = activityResultCaller.<ConfirmPaymentActivity.Request, ConfirmPaymentActivity.Response>registerForActivityResult(new ActivityResultContract<>() {
+        ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult = activityResultCaller.<ConfirmPaymentActivity.Request, ConfirmPaymentActivity.Response>registerForActivityResult(new ActivityResultContract<>() {
             @NonNull
             @Override
             public Intent createIntent(@NonNull Context context, ConfirmPaymentActivity.Request input) {
@@ -165,6 +164,7 @@ public final class Monri {
         return monriApi;
     }
 
+    @Deprecated
     public boolean onPaymentResult(int requestCode, Intent data, ResultCallback<PaymentResult> callback) {
 
         if (!paymentController.shouldHandlePaymentResult(requestCode, data)) {
