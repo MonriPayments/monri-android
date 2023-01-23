@@ -71,8 +71,7 @@ final class MonriPaymentController implements PaymentController {
     @Override
     public void acceptResult(PaymentResult result, Throwable throwable) {
         if (delegatedCallback == null) {
-            // TODO: throw exception
-            // throw new Exception("delegatedCallback is null");
+             throw new NullPointerException("delegatedCallback is null");
         } else {
             delegatedCallback.accept(result, throwable);
         }

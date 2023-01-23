@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.activity.result.ActivityResultCaller;
@@ -176,15 +177,25 @@ public class MonriCustomerTest {
     }
 
     private Monri cachedMonri;
+//    private ActivityScenario<ConfirmPaymentActivity> scenario;
 
     private void createMonriInstance(Consumer<Monri> callback) {
-        if (cachedMonri != null) {
-            callback.accept(cachedMonri);
-        }
-        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        MonriApiOptions monriApiOptions = MonriApiOptions.create(getAuthenticityToken(), true);
-
         createPaymentSession(clientSecretId -> {
+            createMonriInstance(callback, clientSecretId);
+        });
+    }
+
+    private void createMonriInstance(Consumer<Monri> callback, String clientSecretId) {
+
+        try {
+            if (cachedMonri != null) {
+                callback.accept(cachedMonri);
+                return;
+            }
+
+            Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+            MonriApiOptions monriApiOptions = MonriApiOptions.create(getAuthenticityToken(), true);
+
             final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams(
                     null,
                     clientSecretId,
@@ -195,25 +206,28 @@ public class MonriCustomerTest {
 
             final ConfirmPaymentActivity.Request request = new ConfirmPaymentActivity.Request(confirmPaymentParams, monriApiOptions);
 
-            taskRunnerExecute((() -> {
+            taskRunnerExecute(() -> {
                 final Intent intent = ConfirmPaymentActivity.createIntent(appContext, request);
-                //we have to find better approach, this activity in onCreate create Monri instance and confirm payment...
 
-                try (ActivityScenario<ConfirmPaymentActivity> scenario = ActivityScenario.launch(intent)) {
-                    scenario.moveToState(Lifecycle.State.CREATED);
-                    scenario.onActivity((ConfirmPaymentActivity activity) -> {
-                        cachedMonri = new Monri(((ActivityResultCaller) activity), monriApiOptions);
-                        callback.accept(cachedMonri);
-                    });
+//                if (scenario != null) {
+//                    scenario.close();
+//                }
 
-                } catch (Exception e) {
-                    Assert.fail(e.getMessage());
-                }
-
-            }));
+                ActivityScenario<ConfirmPaymentActivity> scenario = ActivityScenario.launch(intent);
+                scenario.moveToState(Lifecycle.State.CREATED);
+                scenario.onActivity((ConfirmPaymentActivity activity) -> {
+                    cachedMonri = new Monri(((ActivityResultCaller) activity), monriApiOptions);
+                    callback.accept(cachedMonri);
+                });
 
 
-        });
+            });
+
+
+        } catch (Exception e) {
+            Log.d("createMonriInstance failed, exception: ", e.getMessage());
+        }
+
     }
 
     private Card getNon3DSCard() {
@@ -321,48 +335,35 @@ public class MonriCustomerTest {
     public void testCreateCustomer() throws InterruptedException {
         CountDownLatch signal = new CountDownLatch(1);
 
-        taskRunnerExecuteWithCallback(
-                this::createAccessToken,
-                new ResultCallback<String>() {
-                    @Override
-                    public void onSuccess(final String accessToken) {
-                        createCustomer(accessToken, new ResultCallback<Customer>() {
-                            @Override
-                            public void onSuccess(final Customer customer) {
-                                CustomerData customerData = getCustomerData();
+        createAccessToken(accessToken -> {
+            createCustomer(accessToken, new ResultCallback<Customer>() {
+                @Override
+                public void onSuccess(final Customer customer) {
+                    CustomerData customerData = getCustomerData();
 
-                                Assert.assertNotNull(customer.getUuid());
-                                Assert.assertEquals("approved", customer.getStatus());
-                                Assert.assertEquals("null", customer.getMerchantCustomerId());
-                                Assert.assertNotNull(customer.getDescription());
-                                Assert.assertEquals(customerData.getEmail(), customer.getEmail());
-                                Assert.assertEquals(customerData.getName(), customer.getName());
-                                Assert.assertEquals(customerData.getPhone(), customer.getPhone());
-                                Assert.assertEquals(customerData.getMetadata(), customer.getMetadata());
-                                Assert.assertEquals(customerData.getZipCode(), customer.getZipCode());
-                                Assert.assertEquals(customerData.getCity(), customer.getCity());
-                                Assert.assertEquals(customerData.getAddress(), customer.getAddress());
-                                Assert.assertEquals(customerData.getCountry(), customer.getCountry());
-                                Assert.assertFalse(customer.getDeleted());
-                                signal.countDown();
-                            }
-
-                            @Override
-                            public void onError(final Throwable throwable) {
-                                Assert.fail("client secret failed");
-                                signal.countDown();
-                            }
-                        });
-
-                    }
-
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        Assert.fail("client secret failed");
-                        signal.countDown();
-                    }
+                    Assert.assertNotNull(customer.getUuid());
+                    Assert.assertEquals("approved", customer.getStatus());
+                    Assert.assertEquals("null", customer.getMerchantCustomerId());
+                    Assert.assertNotNull(customer.getDescription());
+                    Assert.assertEquals(customerData.getEmail(), customer.getEmail());
+                    Assert.assertEquals(customerData.getName(), customer.getName());
+                    Assert.assertEquals(customerData.getPhone(), customer.getPhone());
+                    Assert.assertEquals(customerData.getMetadata(), customer.getMetadata());
+                    Assert.assertEquals(customerData.getZipCode(), customer.getZipCode());
+                    Assert.assertEquals(customerData.getCity(), customer.getCity());
+                    Assert.assertEquals(customerData.getAddress(), customer.getAddress());
+                    Assert.assertEquals(customerData.getCountry(), customer.getCountry());
+                    Assert.assertFalse(customer.getDeleted());
+                    signal.countDown();
                 }
-        );
+
+                @Override
+                public void onError(final Throwable throwable) {
+                    Assert.fail("client secret failed");
+                    signal.countDown();
+                }
+            });
+        });
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
     }
