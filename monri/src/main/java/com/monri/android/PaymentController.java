@@ -16,10 +16,10 @@ import java.util.function.Consumer;
  */
 public interface PaymentController {
     /**
-     * @deprecated use {@link #confirmPayment(ActivityResultCaller, ConfirmPaymentParams, ActionResultConsumer)}
+     * @deprecated use {@link #confirmPayment(ConfirmPaymentParams, ActionResultConsumer)}
      */
     void confirmPayment(Activity activity, ConfirmPaymentParams params);
-    void confirmPayment(ActivityResultCaller activity, ConfirmPaymentParams params, ActionResultConsumer<PaymentResult> resultCallback);
+    void confirmPayment(ConfirmPaymentParams params, ActionResultConsumer<PaymentResult> resultCallback);
 
     @Deprecated
     boolean shouldHandlePaymentResult(int requestCode, Intent data);

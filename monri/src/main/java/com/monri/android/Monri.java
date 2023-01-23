@@ -71,7 +71,16 @@ public final class Monri {
 
     @Deprecated
     public Monri(Context context, MonriApiOptions monriApiOptions) {
-        this(((ActivityResultCaller) context), monriApiOptions);
+        this.authenticityToken = monriApiOptions.getAuthenticityToken();
+        this.apiOptions = monriApiOptions;
+
+        String url = monriApiOptions.isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
+
+        final String authorizationHeader = String.format("WP3-v2-Client %s", apiOptions.getAuthenticityToken());
+
+        this.monriApi = new MonriApiImpl(getMonriHttpApi(url, getHttpHeaders(authorizationHeader)));
+
+        paymentController = new MonriPaymentController(monriApiOptions);
     }
 
     public Monri(ActivityResultCaller activityResultCaller, MonriApiOptions monriApiOptions) {
@@ -127,7 +136,7 @@ public final class Monri {
     }
 
     /**
-     * @deprecated use {@link #confirmPayment(ActivityResultCaller, ConfirmPaymentParams, ActionResultConsumer)}
+     * @deprecated use {@link #confirmPayment(ConfirmPaymentParams, ActionResultConsumer)}
      * @param context
      * @param confirmPaymentParams
      */
@@ -137,8 +146,8 @@ public final class Monri {
         paymentController.confirmPayment(context, confirmPaymentParams);
     }
 
-    public void confirmPayment(ActivityResultCaller context, ConfirmPaymentParams confirmPaymentParams, ActionResultConsumer<PaymentResult> callback) {
-        paymentController.confirmPayment(context, confirmPaymentParams, callback);
+    public void confirmPayment(ConfirmPaymentParams confirmPaymentParams, ActionResultConsumer<PaymentResult> callback) {
+        paymentController.confirmPayment(confirmPaymentParams, callback);
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {

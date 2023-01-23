@@ -24,13 +24,18 @@ final class MonriPaymentController implements PaymentController {
     private final ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult;
     ActionResultConsumer<PaymentResult> delegatedCallback;
 
+    MonriPaymentController(MonriApiOptions monriApiOptions) {
+        this.monriApiOptions = monriApiOptions;
+        registeredForActivityResult = null;
+    }
+
     MonriPaymentController(MonriApiOptions monriApiOptions, ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult) {
         this.monriApiOptions = monriApiOptions;
         this.registeredForActivityResult = registeredForActivityResult;
     }
 
     /**
-     * @deprecated use {@link #confirmPayment(ActivityResultCaller, ConfirmPaymentParams, ActionResultConsumer)}
+     * @deprecated use {@link #confirmPayment(ConfirmPaymentParams, ActionResultConsumer)}
      */
     @Override
     public void confirmPayment(Activity activity, ConfirmPaymentParams params) {
@@ -38,7 +43,10 @@ final class MonriPaymentController implements PaymentController {
     }
 
     @Override
-    public void confirmPayment(ActivityResultCaller activity, ConfirmPaymentParams params, ActionResultConsumer<PaymentResult> resultCallback) {
+    public void confirmPayment(ConfirmPaymentParams params, ActionResultConsumer<PaymentResult> resultCallback) {
+        if(registeredForActivityResult == null){
+            throw new NullPointerException("In Monri constructor you didn't provide activityResultCaller, registeredForActivityResult in null.");
+        }
         this.delegatedCallback = resultCallback;
         registeredForActivityResult.launch(new ConfirmPaymentActivity.Request(params, monriApiOptions));
     }
