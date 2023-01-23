@@ -177,7 +177,6 @@ public class MonriCustomerTest {
     }
 
     private Monri cachedMonri;
-//    private ActivityScenario<ConfirmPaymentActivity> scenario;
 
     private void createMonriInstance(Consumer<Monri> callback) {
         createPaymentSession(clientSecretId -> {
@@ -208,10 +207,6 @@ public class MonriCustomerTest {
 
             taskRunnerExecute(() -> {
                 final Intent intent = ConfirmPaymentActivity.createIntent(appContext, request);
-
-//                if (scenario != null) {
-//                    scenario.close();
-//                }
 
                 ActivityScenario<ConfirmPaymentActivity> scenario = ActivityScenario.launch(intent);
                 scenario.moveToState(Lifecycle.State.CREATED);
