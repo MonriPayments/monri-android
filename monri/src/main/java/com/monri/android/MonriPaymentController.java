@@ -3,7 +3,6 @@ package com.monri.android;
 import android.app.Activity;
 import android.content.Intent;
 
-import androidx.activity.result.ActivityResultCaller;
 import androidx.activity.result.ActivityResultLauncher;
 
 import com.monri.android.activity.ConfirmPaymentActivity;

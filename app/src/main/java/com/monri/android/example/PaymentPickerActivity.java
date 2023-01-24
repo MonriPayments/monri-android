@@ -86,8 +86,6 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
 
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(((ActivityResultCaller) this), MonriApiOptions.create(orderRepository.authenticityToken(), true));
-        //old way
-        //monri = new Monri(getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
 
         Intent intent = getIntent();
         boolean newCardPayment = intent.getBooleanExtra("NEW_CARD_PAYMENT", true);
@@ -202,15 +200,6 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                     }
                 });
 
-                //old way
-//                monri.confirmPayment(this, ConfirmPaymentParams.create(
-//                        newPaymentResponse.getClientSecret(),
-//                        paymentMethodParamsSupplier.get(),
-//                        TransactionParams.create()
-//                                .set("order_info", "Android SDK payment session")
-//                                .set(customerParams)
-//                ));
-
             }
         };
     }
@@ -222,16 +211,6 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
     PaymentMethodParams threeDsCard() {
         return new Card("4341 7920 0000 0044", 12, 2024, "123").toPaymentMethodParams();
     }
-
-    //old way onActivityResult
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        ResultCallback<PaymentResult> callback = this;
-//        final boolean monriPaymentResult = monri.onPaymentResult(requestCode, data, callback);
-//        if (!monriPaymentResult) {
-//            super.onActivityResult(requestCode, resultCode, data);
-//        }
-//    }
 
     @Override
     public void onSuccess(PaymentResult result) {

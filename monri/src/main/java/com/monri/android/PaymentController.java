@@ -18,6 +18,7 @@ public interface PaymentController {
     /**
      * @deprecated use {@link #confirmPayment(ConfirmPaymentParams, ActionResultConsumer)}
      */
+    @Deprecated
     void confirmPayment(Activity activity, ConfirmPaymentParams params);
     void confirmPayment(ConfirmPaymentParams params, ActionResultConsumer<PaymentResult> resultCallback);
 

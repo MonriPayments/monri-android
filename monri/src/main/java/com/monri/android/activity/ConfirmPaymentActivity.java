@@ -34,6 +34,7 @@ public class ConfirmPaymentActivity extends ComponentActivity {
     /**
      * @deprecated use {@link #createIntent(Context context, Request input)}
      */
+    @Deprecated
     public static Intent createIntent(Context context, ConfirmPaymentParams params, MonriApiOptions apiOptions) {
         final Intent intent = new Intent(context, ConfirmPaymentActivity.class);
         intent.putExtra(CONFIRM_PAYMENT_PARAMS_BUNDLE, params);
