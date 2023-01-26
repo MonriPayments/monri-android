@@ -343,7 +343,6 @@ class MonriHttpApiImpl implements MonriHttpApi {
             } else {
                 return MonriHttpResult.failed(response.getCause());
             }
-//            return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
