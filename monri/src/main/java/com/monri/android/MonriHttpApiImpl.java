@@ -239,7 +239,11 @@ class MonriHttpApiImpl implements MonriHttpApi {
                     confirmPaymentParamsToJSON(confirmPaymentParams),
                     new HashMap<>()
             );
-            return MonriHttpResult.success(ConfirmPaymentResponse.fromJSON(response.getResult()), response.getResponseCode());
+            if (response.getCause() == null) {
+                return MonriHttpResult.success(ConfirmPaymentResponse.fromJSON(response.getResult()), response.getResponseCode());
+            } else {
+                return MonriHttpResult.failed(response.getCause());
+            }
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }

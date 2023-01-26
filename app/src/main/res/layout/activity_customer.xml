@@ -55,6 +55,12 @@
         android:layout_height="wrap_content"
         android:text="@string/btn_retrieve_saved_cards_from_customer" />
 
+    <Button
+        android:id="@+id/btn_confirm_payment_customer_uuid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_confirm_payment_customer_uuid" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">

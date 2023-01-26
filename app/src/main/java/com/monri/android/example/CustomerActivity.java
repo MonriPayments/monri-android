@@ -11,18 +11,23 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
-import com.monri.android.model.MerchantCustomers;
+import com.monri.android.model.Card;
+import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CreateCustomerParams;
-import com.monri.android.model.DeleteCustomerParams;
-import com.monri.android.model.DeleteCustomerResponse;
+import com.monri.android.model.Customer;
+import com.monri.android.model.CustomerData;
+import com.monri.android.model.CustomerParams;
 import com.monri.android.model.CustomerPaymentMethodParams;
 import com.monri.android.model.CustomerPaymentMethodResponse;
-import com.monri.android.model.CustomerData;
-import com.monri.android.model.Customer;
-import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
+import com.monri.android.model.DeleteCustomerParams;
+import com.monri.android.model.DeleteCustomerResponse;
 import com.monri.android.model.GetCustomerParams;
-import com.monri.android.model.UpdateCustomerParams;
+import com.monri.android.model.MerchantCustomers;
 import com.monri.android.model.MonriApiOptions;
+import com.monri.android.model.PaymentResult;
+import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
+import com.monri.android.model.TransactionParams;
+import com.monri.android.model.UpdateCustomerParams;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -42,6 +47,34 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
             Context context
     ) {
         return new Intent(context, CustomerActivity.class);
+    }
+
+    private Card getNon3DSCard() {
+        return new Card("4111 1111 1111 1111", 12, 2034, "123");
+    }
+
+    private ConfirmPaymentParams getConfirmPaymentParams(final String customerUuid, final String clientSecret, final Card card, final boolean shouldSaveCard) {
+        final CustomerParams customerParams = new CustomerParams()
+                .setCustomerUuid(customerUuid)
+                .setAddress("Adresa")
+                .setFullName("Adnan Omerovic")
+                .setCity("Sarajevo")
+                .setZip("71000")
+                .setPhone("+38761000111")
+                .setCountry("BA")
+                .setEmail("monri-android-sdk-test@monri.com");
+
+        card.setTokenizePan(shouldSaveCard);//save card for future payment
+
+        ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(
+                clientSecret,
+                card.toPaymentMethodParams(),
+                TransactionParams.create()
+                        .set("order_info", "Android SDK payment session")
+                        .set(customerParams)
+        );
+
+        return confirmPaymentParams;
     }
 
     private CustomerData getCustomerRequestBody() {
@@ -269,6 +302,66 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
 
             compositeDisposable.add(subscribe);
         });
+
+
+        findViewById(R.id.btn_confirm_payment_customer_uuid).setOnClickListener(v -> {
+            final Disposable subscribe = orderRepository.createAccessToken()
+                    .subscribe(accessTokenResponse -> {
+                        monri.getMonriApi().customers().create(
+                                new CreateCustomerParams(
+                                        getCustomerRequestBody(),
+                                        "Bearer " + accessTokenResponse.accessToken
+                                )
+                                , new ResultCallback<Customer>() {
+                                    @Override
+                                    public void onSuccess(final Customer result) {
+                                        customer = result;
+                                        customerApiResult.setText(String.format("%s %s %s %s",
+                                                result.getUuid(),
+                                                result.getCity(),
+                                                result.getMerchantCustomerId(),
+                                                result.getUpdatedAt()
+                                        ));
+                                        confirmPayment(customer.getUuid());
+                                    }
+
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        customerApiResult.setText(throwable.getMessage());
+                                    }
+                                }
+                        );
+                    });
+
+            compositeDisposable.add(subscribe);
+        });
+    }
+
+
+    private void confirmPayment(String customerUuid) {
+        final Disposable subscribe = orderRepository.createPayment(true)
+                .subscribe(response -> {
+                    final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams(
+                            customerUuid,
+                            response.clientSecret,
+                            getNon3DSCard(),
+                            true
+                    );
+                    monri.confirmPayment(confirmPaymentParams, (PaymentResult result, Throwable cause) -> {
+                        if (cause == null) {
+                            customerApiResult.setText(String.format("Payment: %s \n", result.getStatus()));
+                            if (result.getErrors() != null) {
+                                for (String error : result.getErrors()) {
+                                    customerApiResult.append(String.format("Error: %s \n", error));
+                                }
+                            }
+                        } else {
+                            customerApiResult.setText(String.format("%s", cause.getMessage()));
+                        }
+                    });
+                });
+
+        compositeDisposable.add(subscribe);
     }
 
 
