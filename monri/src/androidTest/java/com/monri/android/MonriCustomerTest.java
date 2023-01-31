@@ -682,4 +682,55 @@ public class MonriCustomerTest {
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
     }
+
+    @Test
+    public void testCreateCustomerTwiceWithSameId() throws InterruptedException {
+        CountDownLatch signal = new CountDownLatch(1);
+        String merchantCustomerId = UUID.randomUUID().toString();
+
+        createAccessToken(accessToken -> {
+            createCustomer(accessToken, new ResultCallback<Customer>() {
+                @Override
+                public void onSuccess(final Customer customer) {
+                    CustomerData customerData = getCustomerData();
+
+                    Assert.assertNotNull(customer.getUuid());
+                    Assert.assertEquals("approved", customer.getStatus());
+                    Assert.assertEquals(merchantCustomerId, customer.getMerchantCustomerId());
+                    Assert.assertNotNull(customer.getDescription());
+                    Assert.assertEquals(customerData.getEmail(), customer.getEmail());
+                    Assert.assertEquals(customerData.getName(), customer.getName());
+                    Assert.assertEquals(customerData.getPhone(), customer.getPhone());
+                    Assert.assertEquals(customerData.getMetadata(), customer.getMetadata());
+                    Assert.assertEquals(customerData.getZipCode(), customer.getZipCode());
+                    Assert.assertEquals(customerData.getCity(), customer.getCity());
+                    Assert.assertEquals(customerData.getAddress(), customer.getAddress());
+                    Assert.assertEquals(customerData.getCountry(), customer.getCountry());
+                    Assert.assertFalse(customer.getDeleted());
+
+                    createCustomer(accessToken, new ResultCallback<Customer>() {
+                        @Override
+                        public void onSuccess(final Customer customer) {
+                            Assert.fail("Customer created twice with same merchant UUID");
+                            signal.countDown();
+                        }
+
+                        @Override
+                        public void onError(final Throwable throwable) {
+                            Assert.assertNotNull(throwable.getMessage());
+                            signal.countDown();
+                        }
+                    }, merchantCustomerId);
+                }
+
+                @Override
+                public void onError(final Throwable throwable) {
+                    Assert.fail("client secret failed");
+                    signal.countDown();
+                }
+            }, merchantCustomerId);
+        });
+
+        Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
+    }
 }
