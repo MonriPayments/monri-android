@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCaller;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.monri.android.Monri;
@@ -71,7 +72,7 @@ public class SavedCardPaymentActivity extends AppCompatActivity implements ViewD
         tvMaskedPan.setText(maskedPan);
 
 //        Step one - instantiate monri
-        final Monri monri = new Monri(this.getApplicationContext(), orderRepository.monriApiOptions());
+        final Monri monri = new Monri(((ActivityResultCaller) this), orderRepository.monriApiOptions());
 
         btnPay.setOnClickListener(v -> {
             SavedCard savedCard = new SavedCard(panToken, etCvv.getText().toString());

@@ -3,7 +3,6 @@
 buildscript {
     repositories {
         google()
-        jcenter()
         mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
@@ -18,7 +17,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
@@ -30,6 +29,6 @@ ext {
     javaAnnotationVersion = "1.0"
     junitVersion = "4.13.2"
     mockitoCoreVersion = "3.9.0"
-    robolectricVersion = '4.3'
-    monriSdkVersion = '1.4.0'
+    robolectricVersion = '4.9.2'
+    monriSdkVersion = '2.0.0'
 }

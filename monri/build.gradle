@@ -42,7 +42,7 @@ dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
 
     api 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'androidx.test:core:1.4.0'
+    androidTestImplementation 'androidx.test:core:1.4.0'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test:rules:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-web:3.4.0'

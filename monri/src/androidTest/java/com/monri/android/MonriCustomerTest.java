@@ -1,14 +1,20 @@
 package com.monri.android;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.Pair;
 
+import androidx.activity.result.ActivityResultCaller;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
@@ -21,10 +27,10 @@ import com.monri.android.model.CustomerPaymentMethodParams;
 import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.DeleteCustomerParams;
 import com.monri.android.model.DeleteCustomerResponse;
+import com.monri.android.model.GetCustomerParams;
 import com.monri.android.model.MerchantCustomers;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentStatus;
-import com.monri.android.model.GetCustomerParams;
 import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
 import com.monri.android.model.TransactionParams;
 import com.monri.android.model.UpdateCustomerParams;
@@ -40,7 +46,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -107,6 +112,22 @@ public class MonriCustomerTest {
         }
     }
 
+    private void createPaymentSession(Consumer<String> callback) {
+        taskRunnerExecuteWithCallback(
+                this::createPaymentSession,
+                new ResultCallback<>() {
+                    @Override
+                    public void onSuccess(final String clientSecretId) {
+                        callback.accept(clientSecretId);
+                    }
+
+                    @Override
+                    public void onError(final Throwable throwable) {
+                        Assert.fail(throwable.getMessage());
+                    }
+                });
+    }
+
     private String accessToken = null;
 
     private String createAccessToken() {
@@ -138,10 +159,70 @@ public class MonriCustomerTest {
         return accessToken;
     }
 
-    private Monri createMonriInstance() {
-        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        MonriApiOptions monriApiOptions = MonriApiOptions.create(getAuthenticityToken(), true);
-        return new Monri(appContext, monriApiOptions);
+    private void createAccessToken(Consumer<String> callback) {
+        taskRunnerExecuteWithCallback(
+                this::createAccessToken,
+                new ResultCallback<String>() {
+                    @Override
+                    public void onSuccess(final String accessToken) {
+                        callback.accept(accessToken);
+                    }
+
+                    @Override
+                    public void onError(final Throwable throwable) {
+                        Assert.fail(throwable.getMessage());
+                    }
+                }
+        );
+    }
+
+    private Monri cachedMonri;
+
+    private void createMonriInstance(Consumer<Monri> callback) {
+        createPaymentSession(clientSecretId -> {
+            createMonriInstance(callback, clientSecretId);
+        });
+    }
+
+    private void createMonriInstance(Consumer<Monri> callback, String clientSecretId) {
+
+        try {
+            if (cachedMonri != null) {
+                callback.accept(cachedMonri);
+                return;
+            }
+
+            Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+            MonriApiOptions monriApiOptions = MonriApiOptions.create(getAuthenticityToken(), true);
+
+            final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams(
+                    null,
+                    clientSecretId,
+                    getNon3DSCard(),
+                    false
+            );
+
+
+            final ConfirmPaymentActivity.Request request = new ConfirmPaymentActivity.Request(confirmPaymentParams, monriApiOptions);
+
+            taskRunnerExecute(() -> {
+                final Intent intent = ConfirmPaymentActivity.createIntent(appContext, request);
+
+                ActivityScenario<ConfirmPaymentActivity> scenario = ActivityScenario.launch(intent);
+                scenario.moveToState(Lifecycle.State.CREATED);
+                scenario.onActivity((ConfirmPaymentActivity activity) -> {
+                    cachedMonri = new Monri(((ActivityResultCaller) activity), monriApiOptions);
+                    callback.accept(cachedMonri);
+                });
+
+
+            });
+
+
+        } catch (Exception e) {
+            Log.d("createMonriInstance failed, exception: ", e.getMessage());
+        }
+
     }
 
     private Card getNon3DSCard() {
@@ -187,79 +268,59 @@ public class MonriCustomerTest {
                 .setCountry("BA");
     }
 
-    private void createCustomer(final String accessToken, final ResultCallback<Customer> callback) throws InterruptedException, ExecutionException {
+    private void createCustomer(final String accessToken, final ResultCallback<Customer> callback) {
         createCustomer(accessToken, callback, null);
     }
 
-    private void createCustomer(final String accessToken, final ResultCallback<Customer> callback, final String merchantCustomerId) throws InterruptedException, ExecutionException {
-        Monri monri = createMonriInstance();
+    private void createCustomer(final String accessToken, final ResultCallback<Customer> callback, final String merchantCustomerId) {
+        createMonriInstance(monri -> {
+            final CustomerData customerData = getCustomerData();
 
-        final CustomerData customerData = getCustomerData();
+            if (merchantCustomerId != null) {
+                customerData.setMerchantCustomerUuid(merchantCustomerId);
+            }
 
-        if (merchantCustomerId != null) {
-            customerData.setMerchantCustomerUuid(merchantCustomerId);
-        }
+            CreateCustomerParams createCustomerParams = new CreateCustomerParams(
+                    customerData,
+                    accessToken
+            );
 
-        CreateCustomerParams createCustomerParams = new CreateCustomerParams(
-                customerData,
-                accessToken
-        );
+            monri.getMonriApi().customers().create(createCustomerParams, callback);
+        });
 
-        monri.getMonriApi().customers().create(createCustomerParams, callback);
     }
 
     private void createCustomer(Consumer<Customer> customerConsumer) {
-        taskRunnerExecuteWithCallback(
-                this::createAccessToken,
-                new ResultCallback<String>() {
-                    @Override
-                    public void onSuccess(final String accessToken) {
-                        try {
-                            createCustomer(accessToken, new ResultCallback<Customer>() {
-                                @Override
-                                public void onSuccess(final Customer result) {
-                                    customerConsumer.accept(result);
-                                }
-
-                                @Override
-                                public void onError(final Throwable throwable) {
-                                    Assert.fail("create customer has not been created: " + throwable.getMessage());
-                                }
-                            });
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                            Assert.fail("createCustomer failed:" + e.getMessage());
-                        }
-
-                    }
-
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        Assert.fail("createCustomer failed: " + throwable.getMessage());
-                    }
+        createAccessToken(accessToken -> {
+            createCustomer(accessToken, new ResultCallback<Customer>() {
+                @Override
+                public void onSuccess(final Customer result) {
+                    customerConsumer.accept(result);
                 }
-        );
+
+                @Override
+                public void onError(final Throwable throwable) {
+                    Assert.fail("create customer has not been created: " + throwable.getMessage());
+                }
+            });
+        });
+
     }
 
     private void createCustomers(String accessToken, short size, Consumer<Pair<List<Customer>, String>> callback) {
         List<Customer> customerList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            try {
-                createCustomer(accessToken, new ResultCallback<Customer>() {
-                    @Override
-                    public void onSuccess(final Customer createdCustomer) {
-                        customerList.add(createdCustomer);
-                    }
+            createCustomer(accessToken, new ResultCallback<Customer>() {
+                @Override
+                public void onSuccess(final Customer createdCustomer) {
+                    customerList.add(createdCustomer);
+                }
 
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        callback.accept(Pair.create(null, throwable.getMessage()));
-                    }
-                });
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                callback.accept(Pair.create(null, e.getMessage()));
-            }
+                @Override
+                public void onError(final Throwable throwable) {
+                    callback.accept(Pair.create(null, throwable.getMessage()));
+                }
+            });
         }
 
         callback.accept(Pair.create(customerList, null));
@@ -269,252 +330,184 @@ public class MonriCustomerTest {
     public void testCreateCustomer() throws InterruptedException {
         CountDownLatch signal = new CountDownLatch(1);
 
-        taskRunnerExecuteWithCallback(
-                this::createAccessToken,
-                new ResultCallback<String>() {
-                    @Override
-                    public void onSuccess(final String accessToken) {
-                        try {
-                            createCustomer(accessToken, new ResultCallback<Customer>() {
-                                @Override
-                                public void onSuccess(final Customer customer) {
-                                    CustomerData customerData = getCustomerData();
+        createAccessToken(accessToken -> {
+            createCustomer(accessToken, new ResultCallback<Customer>() {
+                @Override
+                public void onSuccess(final Customer customer) {
+                    CustomerData customerData = getCustomerData();
 
-                                    Assert.assertNotNull(customer.getUuid());
-                                    Assert.assertEquals("approved", customer.getStatus());
-                                    Assert.assertEquals("null", customer.getMerchantCustomerId());
-                                    Assert.assertNotNull(customer.getDescription());
-                                    Assert.assertEquals(customerData.getEmail(), customer.getEmail());
-                                    Assert.assertEquals(customerData.getName(), customer.getName());
-                                    Assert.assertEquals(customerData.getPhone(), customer.getPhone());
-                                    Assert.assertEquals(customerData.getMetadata(), customer.getMetadata());
-                                    Assert.assertEquals(customerData.getZipCode(), customer.getZipCode());
-                                    Assert.assertEquals(customerData.getCity(), customer.getCity());
-                                    Assert.assertEquals(customerData.getAddress(), customer.getAddress());
-                                    Assert.assertEquals(customerData.getCountry(), customer.getCountry());
-                                    Assert.assertFalse(customer.getDeleted());
-                                    signal.countDown();
-                                }
-
-                                @Override
-                                public void onError(final Throwable throwable) {
-                                    Assert.fail("client secret failed");
-                                    signal.countDown();
-                                }
-                            });
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                            Assert.fail("testConfirmPaymentActivity failed");
-                            signal.countDown();
-                        }
-
-                    }
-
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        Assert.fail("client secret failed");
-                        signal.countDown();
-                    }
+                    Assert.assertNotNull(customer.getUuid());
+                    Assert.assertEquals("approved", customer.getStatus());
+                    Assert.assertEquals("null", customer.getMerchantCustomerId());
+                    Assert.assertNotNull(customer.getDescription());
+                    Assert.assertEquals(customerData.getEmail(), customer.getEmail());
+                    Assert.assertEquals(customerData.getName(), customer.getName());
+                    Assert.assertEquals(customerData.getPhone(), customer.getPhone());
+                    Assert.assertEquals(customerData.getMetadata(), customer.getMetadata());
+                    Assert.assertEquals(customerData.getZipCode(), customer.getZipCode());
+                    Assert.assertEquals(customerData.getCity(), customer.getCity());
+                    Assert.assertEquals(customerData.getAddress(), customer.getAddress());
+                    Assert.assertEquals(customerData.getCountry(), customer.getCountry());
+                    Assert.assertFalse(customer.getDeleted());
+                    signal.countDown();
                 }
-        );
+
+                @Override
+                public void onError(final Throwable throwable) {
+                    Assert.fail("client secret failed");
+                    signal.countDown();
+                }
+            });
+        });
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
     }
 
     @Test
     public void testUpdateCustomer() throws InterruptedException {
-        Monri monri = createMonriInstance();
-        CountDownLatch signal = new CountDownLatch(2);
+        CountDownLatch signal = new CountDownLatch(1);
         CustomerData customerData = new CustomerData();
         final String newName = "Adnan Omerovic";
         customerData.setName(newName);
 
-        taskRunnerExecuteWithCallback(
-                this::createAccessToken,
-                new ResultCallback<String>() {
+        createMonriInstance(monri -> {
+            createAccessToken(accessToken -> {
+                createCustomer(accessToken, new ResultCallback<Customer>() {
                     @Override
-                    public void onSuccess(final String accessToken) {
-                        try {
-                            createCustomer(accessToken, new ResultCallback<Customer>() {
-                                @Override
-                                public void onSuccess(final Customer createdCustomer) {
-                                    signal.countDown();
-                                    monri.getMonriApi().customers().update(
-                                            new UpdateCustomerParams(
-                                                    customerData,
-                                                    createdCustomer.getUuid(),
-                                                    accessToken
-                                            ),
-                                            new ResultCallback<Customer>() {
-                                                @Override
-                                                public void onSuccess(final Customer updatedCustomer) {
-                                                    Assert.assertEquals(newName, updatedCustomer.getName());
-                                                    Assert.assertNotNull(updatedCustomer.getUuid());
-                                                    Assert.assertEquals("approved", updatedCustomer.getStatus());
-                                                    Assert.assertEquals("null", updatedCustomer.getMerchantCustomerId());
-                                                    Assert.assertNotNull(updatedCustomer.getDescription());
-                                                    Assert.assertEquals(createdCustomer.getEmail(), updatedCustomer.getEmail());
-                                                    Assert.assertEquals(createdCustomer.getPhone(), updatedCustomer.getPhone());
-                                                    Assert.assertEquals(createdCustomer.getMetadata(), updatedCustomer.getMetadata());
-                                                    Assert.assertEquals(createdCustomer.getZipCode(), updatedCustomer.getZipCode());
-                                                    Assert.assertEquals(createdCustomer.getCity(), updatedCustomer.getCity());
-                                                    Assert.assertEquals(createdCustomer.getAddress(), updatedCustomer.getAddress());
-                                                    Assert.assertEquals(createdCustomer.getCountry(), updatedCustomer.getCountry());
-                                                    Assert.assertFalse(updatedCustomer.getDeleted());
-                                                    signal.countDown();
-                                                }
+                    public void onSuccess(final Customer createdCustomer) {
+                        monri.getMonriApi().customers().update(
+                                new UpdateCustomerParams(
+                                        customerData,
+                                        createdCustomer.getUuid(),
+                                        accessToken
+                                ),
+                                new ResultCallback<Customer>() {
+                                    @Override
+                                    public void onSuccess(final Customer updatedCustomer) {
+                                        Assert.assertEquals(newName, updatedCustomer.getName());
+                                        Assert.assertNotNull(updatedCustomer.getUuid());
+                                        Assert.assertEquals("approved", updatedCustomer.getStatus());
+                                        Assert.assertEquals("null", updatedCustomer.getMerchantCustomerId());
+                                        Assert.assertNotNull(updatedCustomer.getDescription());
+                                        Assert.assertEquals(createdCustomer.getEmail(), updatedCustomer.getEmail());
+                                        Assert.assertEquals(createdCustomer.getPhone(), updatedCustomer.getPhone());
+                                        Assert.assertEquals(createdCustomer.getMetadata(), updatedCustomer.getMetadata());
+                                        Assert.assertEquals(createdCustomer.getZipCode(), updatedCustomer.getZipCode());
+                                        Assert.assertEquals(createdCustomer.getCity(), updatedCustomer.getCity());
+                                        Assert.assertEquals(createdCustomer.getAddress(), updatedCustomer.getAddress());
+                                        Assert.assertEquals(createdCustomer.getCountry(), updatedCustomer.getCountry());
+                                        Assert.assertFalse(updatedCustomer.getDeleted());
+                                        signal.countDown();
+                                    }
 
-                                                @Override
-                                                public void onError(final Throwable throwable) {
-                                                    Assert.fail("update customer failed");
-                                                    signal.countDown();
-                                                }
-                                            }
-                                    );
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        Assert.fail("update customer failed");
+                                        signal.countDown();
+                                    }
                                 }
-
-                                @Override
-                                public void onError(final Throwable throwable) {
-                                    Assert.fail("create customer failed: " + throwable.getMessage());
-                                    signal.countDown();
-                                }
-                            });
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                            Assert.fail("create customer failed");
-                            signal.countDown();
-                        }
+                        );
                     }
 
                     @Override
                     public void onError(final Throwable throwable) {
-                        Assert.fail("client secret failed");
-                        signal.countDown();
+                        Assert.fail("create customer failed: " + throwable.getMessage());
                     }
-                }
-        );
+                });
+            });
+        });
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
     }
 
     @Test
     public void testRetrieveCustomer() throws InterruptedException {
-        Monri monri = createMonriInstance();
-        CountDownLatch signal = new CountDownLatch(2);
+        CountDownLatch signal = new CountDownLatch(1);
 
-        taskRunnerExecuteWithCallback(
-                this::createAccessToken,
-                new ResultCallback<String>() {
+        createMonriInstance(monri -> {
+            createAccessToken(accessToken -> {
+                createCustomer(accessToken, new ResultCallback<Customer>() {
                     @Override
-                    public void onSuccess(final String accessToken) {
-                        try {
-                            createCustomer(accessToken, new ResultCallback<Customer>() {
-                                @Override
-                                public void onSuccess(final Customer createdCustomer) {
-                                    signal.countDown();
-                                    monri.getMonriApi().customers().get(
-                                            new GetCustomerParams(
-                                                    accessToken,
-                                                    createdCustomer.getUuid()
-                                            ),
-                                            new ResultCallback<Customer>() {
-                                                @Override
-                                                public void onSuccess(final Customer customer) {
-                                                    Assert.assertNotNull(customer.getUuid());
-                                                    Assert.assertEquals("approved", customer.getStatus());
-                                                    Assert.assertEquals("null", customer.getMerchantCustomerId());
-                                                    Assert.assertNotNull(customer.getDescription());
-                                                    Assert.assertEquals(createdCustomer.getEmail(), customer.getEmail());
-                                                    Assert.assertEquals(createdCustomer.getName(), customer.getName());
-                                                    Assert.assertEquals(createdCustomer.getPhone(), customer.getPhone());
-                                                    Assert.assertEquals(createdCustomer.getMetadata(), customer.getMetadata());
-                                                    Assert.assertEquals(createdCustomer.getZipCode(), customer.getZipCode());
-                                                    Assert.assertEquals(createdCustomer.getCity(), customer.getCity());
-                                                    Assert.assertEquals(createdCustomer.getAddress(), customer.getAddress());
-                                                    Assert.assertEquals(createdCustomer.getCountry(), customer.getCountry());
-                                                    Assert.assertFalse(customer.getDeleted());
-                                                    signal.countDown();
-                                                }
+                    public void onSuccess(final Customer createdCustomer) {
+                        monri.getMonriApi().customers().get(
+                                new GetCustomerParams(
+                                        accessToken,
+                                        createdCustomer.getUuid()
+                                ),
+                                new ResultCallback<Customer>() {
+                                    @Override
+                                    public void onSuccess(final Customer customer) {
+                                        Assert.assertNotNull(customer.getUuid());
+                                        Assert.assertEquals("approved", customer.getStatus());
+                                        Assert.assertEquals("null", customer.getMerchantCustomerId());
+                                        Assert.assertNotNull(customer.getDescription());
+                                        Assert.assertEquals(createdCustomer.getEmail(), customer.getEmail());
+                                        Assert.assertEquals(createdCustomer.getName(), customer.getName());
+                                        Assert.assertEquals(createdCustomer.getPhone(), customer.getPhone());
+                                        Assert.assertEquals(createdCustomer.getMetadata(), customer.getMetadata());
+                                        Assert.assertEquals(createdCustomer.getZipCode(), customer.getZipCode());
+                                        Assert.assertEquals(createdCustomer.getCity(), customer.getCity());
+                                        Assert.assertEquals(createdCustomer.getAddress(), customer.getAddress());
+                                        Assert.assertEquals(createdCustomer.getCountry(), customer.getCountry());
+                                        Assert.assertFalse(customer.getDeleted());
+                                        signal.countDown();
+                                    }
 
-                                                @Override
-                                                public void onError(final Throwable throwable) {
-                                                    Assert.fail("retrieve customer failed");
-                                                    signal.countDown();
-                                                }
-                                            }
-                                    );
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        Assert.fail("retrieve customer failed");
+                                        signal.countDown();
+                                    }
                                 }
-
-                                @Override
-                                public void onError(final Throwable throwable) {
-                                    Assert.fail("create customer failed: " + throwable.getMessage());
-                                    signal.countDown();
-                                }
-                            });
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                            Assert.fail("create customer failed");
-                            signal.countDown();
-                        }
+                        );
                     }
 
                     @Override
                     public void onError(final Throwable throwable) {
-                        Assert.fail("client secret failed");
-                        signal.countDown();
+                        Assert.fail("create customer failed: " + throwable.getMessage());
                     }
-                }
-        );
+                });
+            });
+        });
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
     }
 
     @Test
     public void testRetrieveAllCustomers() throws InterruptedException {
-        Monri monri = createMonriInstance();
         CountDownLatch signal = new CountDownLatch(1);
 
         final AtomicReference<List<Customer>> createdCustomersAtomicReference = new AtomicReference<>();
         final AtomicReference<List<Customer>> allCustomersAtomicReference = new AtomicReference<>();
 
-        taskRunnerExecuteWithCallback(
-                this::createAccessToken,
-                new ResultCallback<String>() {
-                    @Override
-                    public void onSuccess(final String accessToken) {
-                        createCustomers(accessToken, (short) 3, (Pair<List<Customer>, String> listStringPair) -> {
-                            final List<Customer> customerResponse = listStringPair.first;
-                            System.out.println("Adnan:" + accessToken + "-< Jasmin");
-                            if (customerResponse == null) {
-                                Assert.fail(listStringPair.second);
-                            }
+        createMonriInstance(monri -> {
+            createAccessToken(accessToken -> {
+                createCustomers(accessToken, (short) 3, (Pair<List<Customer>, String> listStringPair) -> {
+                    final List<Customer> customerResponse = listStringPair.first;
 
-                            createdCustomersAtomicReference.set(customerResponse);
-
-                            monri.getMonriApi().customers().all(accessToken, new ResultCallback<MerchantCustomers>() {
-                                @Override
-                                public void onSuccess(final MerchantCustomers result) {
-                                    allCustomersAtomicReference.set(result.getCustomerResponseList());
-                                    signal.countDown();
-                                }
-
-                                @Override
-                                public void onError(final Throwable throwable) {
-                                    signal.countDown();
-                                }
-                            });
-                        });
+                    if (customerResponse == null) {
+                        Assert.fail(listStringPair.second);
                     }
 
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        Assert.fail("client secret failed");
-                        signal.countDown();
-                    }
-                }
-        );
+                    createdCustomersAtomicReference.set(customerResponse);
 
-        Assert.assertTrue(signal.await(15, TimeUnit.SECONDS));
+                    monri.getMonriApi().customers().all(accessToken, new ResultCallback<MerchantCustomers>() {
+                        @Override
+                        public void onSuccess(final MerchantCustomers result) {
+                            allCustomersAtomicReference.set(result.getCustomerResponseList());
+                            signal.countDown();
+                        }
+
+                        @Override
+                        public void onError(final Throwable throwable) {
+                            signal.countDown();
+                        }
+                    });
+                });
+            });
+        });
+
+        Assert.assertTrue(signal.await(20, TimeUnit.SECONDS));
 
         final List<Customer> createdCustomers = createdCustomersAtomicReference.get();
         final List<Customer> allCustomers = createdCustomersAtomicReference.get();
@@ -526,139 +519,103 @@ public class MonriCustomerTest {
 
     @Test
     public void testRetrieveCustomerViaMerchantId() throws InterruptedException {
-        Monri monri = createMonriInstance();
-        CountDownLatch signal = new CountDownLatch(2);
+        CountDownLatch signal = new CountDownLatch(1);
         String merchantCustomerId = UUID.randomUUID().toString();
 
-        taskRunnerExecuteWithCallback(
-                this::createAccessToken,
-                new ResultCallback<String>() {
-                    @Override
-                    public void onSuccess(final String accessToken) {
-                        try {
-                            createCustomer(
-                                    accessToken,
-                                    new ResultCallback<Customer>() {
-                                        @Override
-                                        public void onSuccess(final Customer createdCustomer) {
-                                            signal.countDown();
-                                            monri.getMonriApi().customers().getViaMerchantCustomerUuid(
-                                                    new RetrieveCustomerViaMerchantCustomerUuidParams(
-                                                            accessToken,
-                                                            merchantCustomerId
-                                                    ),
-                                                    new ResultCallback<Customer>() {
-                                                        @Override
-                                                        public void onSuccess(final Customer customer) {
-                                                            Assert.assertNotNull(customer.getUuid());
-                                                            Assert.assertEquals("approved", customer.getStatus());
-                                                            Assert.assertEquals(merchantCustomerId, customer.getMerchantCustomerId());
-                                                            Assert.assertNotNull(customer.getDescription());
-                                                            Assert.assertEquals(createdCustomer.getEmail(), customer.getEmail());
-                                                            Assert.assertEquals(createdCustomer.getName(), customer.getName());
-                                                            Assert.assertEquals(createdCustomer.getPhone(), customer.getPhone());
-                                                            Assert.assertEquals(createdCustomer.getMetadata(), customer.getMetadata());
-                                                            Assert.assertEquals(createdCustomer.getZipCode(), customer.getZipCode());
-                                                            Assert.assertEquals(createdCustomer.getCity(), customer.getCity());
-                                                            Assert.assertEquals(createdCustomer.getAddress(), customer.getAddress());
-                                                            Assert.assertEquals(createdCustomer.getCountry(), customer.getCountry());
-                                                            Assert.assertFalse(customer.getDeleted());
-                                                            signal.countDown();
-                                                        }
+        createMonriInstance(monri -> {
+            createAccessToken(accessToken -> {
+                createCustomer(
+                        accessToken,
+                        new ResultCallback<Customer>() {
+                            @Override
+                            public void onSuccess(final Customer createdCustomer) {
+                                monri.getMonriApi().customers().getViaMerchantCustomerUuid(
+                                        new RetrieveCustomerViaMerchantCustomerUuidParams(
+                                                accessToken,
+                                                merchantCustomerId
+                                        ),
+                                        new ResultCallback<Customer>() {
+                                            @Override
+                                            public void onSuccess(final Customer customer) {
+                                                Assert.assertNotNull(customer.getUuid());
+                                                Assert.assertEquals("approved", customer.getStatus());
+                                                Assert.assertEquals(merchantCustomerId, customer.getMerchantCustomerId());
+                                                Assert.assertNotNull(customer.getDescription());
+                                                Assert.assertEquals(createdCustomer.getEmail(), customer.getEmail());
+                                                Assert.assertEquals(createdCustomer.getName(), customer.getName());
+                                                Assert.assertEquals(createdCustomer.getPhone(), customer.getPhone());
+                                                Assert.assertEquals(createdCustomer.getMetadata(), customer.getMetadata());
+                                                Assert.assertEquals(createdCustomer.getZipCode(), customer.getZipCode());
+                                                Assert.assertEquals(createdCustomer.getCity(), customer.getCity());
+                                                Assert.assertEquals(createdCustomer.getAddress(), customer.getAddress());
+                                                Assert.assertEquals(createdCustomer.getCountry(), customer.getCountry());
+                                                Assert.assertFalse(customer.getDeleted());
+                                                signal.countDown();
+                                            }
 
-                                                        @Override
-                                                        public void onError(final Throwable throwable) {
-                                                            Assert.fail("retrieve customer via merchant id failed");
-                                                            signal.countDown();
-                                                        }
-                                                    }
-                                            );
+                                            @Override
+                                            public void onError(final Throwable throwable) {
+                                                Assert.fail("retrieve customer via merchant id failed");
+                                                signal.countDown();
+                                            }
                                         }
+                                );
+                            }
 
-                                        @Override
-                                        public void onError(final Throwable throwable) {
-                                            Assert.fail("create customer failed: " + throwable.getMessage());
-                                            signal.countDown();
-                                        }
-                                    },
-                                    merchantCustomerId
-                            );
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                            Assert.fail("create customer failed: " + e.getMessage());
-                            signal.countDown();
-                        }
-                    }
-
-                    @Override
-                    public void onError(final Throwable throwable) {
-                        Assert.fail("client secret failed");
-                        signal.countDown();
-                    }
-                }
-        );
+                            @Override
+                            public void onError(final Throwable throwable) {
+                                Assert.fail("create customer failed: " + throwable.getMessage());
+                            }
+                        },
+                        merchantCustomerId
+                );
+            });
+        });
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
     }
 
     @Test
     public void testDeleteCustomer() throws InterruptedException {
-        Monri monri = createMonriInstance();
         CountDownLatch signal = new CountDownLatch(1);
 
-        taskRunnerExecuteWithCallback(
-                this::createAccessToken,
-                new ResultCallback<String>() {
+        createMonriInstance(monri -> {
+            createAccessToken(accessToken -> {
+                createCustomer(accessToken, new ResultCallback<Customer>() {
                     @Override
-                    public void onSuccess(final String accessToken) {
-                        try {
-                            createCustomer(accessToken, new ResultCallback<Customer>() {
-                                @Override
-                                public void onSuccess(final Customer createdCustomer) {
-                                    signal.countDown();
-                                    monri.getMonriApi().customers().delete(
-                                            new DeleteCustomerParams(
-                                                    accessToken,
-                                                    createdCustomer.getUuid()
-                                            ),
-                                            new ResultCallback<DeleteCustomerResponse>() {
-                                                @Override
-                                                public void onSuccess(final DeleteCustomerResponse result) {
-                                                    Assert.assertTrue(result.isDeleted());
-                                                    Assert.assertEquals(createdCustomer.getUuid(), result.getUuid());
-                                                    Assert.assertEquals("approved", result.getStatus());
-                                                    signal.countDown();
-                                                }
+                    public void onSuccess(final Customer createdCustomer) {
+                        signal.countDown();
+                        monri.getMonriApi().customers().delete(
+                                new DeleteCustomerParams(
+                                        accessToken,
+                                        createdCustomer.getUuid()
+                                ),
+                                new ResultCallback<DeleteCustomerResponse>() {
+                                    @Override
+                                    public void onSuccess(final DeleteCustomerResponse result) {
+                                        Assert.assertTrue(result.isDeleted());
+                                        Assert.assertEquals(createdCustomer.getUuid(), result.getUuid());
+                                        Assert.assertEquals("approved", result.getStatus());
+                                        signal.countDown();
+                                    }
 
-                                                @Override
-                                                public void onError(final Throwable throwable) {
-                                                    Assert.fail("delete customer failed");
-                                                    signal.countDown();
-                                                }
-                                            }
-                                    );
+                                    @Override
+                                    public void onError(final Throwable throwable) {
+                                        Assert.fail("delete customer failed");
+                                        signal.countDown();
+                                    }
                                 }
-
-                                @Override
-                                public void onError(final Throwable throwable) {
-                                    Assert.fail("create customer failed: " + throwable.getMessage());
-                                    signal.countDown();
-                                }
-                            });
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                            Assert.fail("create customer failed");
-                            signal.countDown();
-                        }
+                        );
                     }
 
                     @Override
                     public void onError(final Throwable throwable) {
-                        Assert.fail("client secret failed");
+                        Assert.fail("create customer failed: " + throwable.getMessage());
                         signal.countDown();
                     }
-                }
-        );
+                });
+            });
+        });
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
 
@@ -666,75 +623,112 @@ public class MonriCustomerTest {
 
     @Test
     public void testCustomerPayment() throws InterruptedException {
-        CountDownLatch signal = new CountDownLatch(3);
-        Monri monri = createMonriInstance();
+        CountDownLatch signal = new CountDownLatch(1);
 
-        createCustomer((Customer customer) -> {
-            taskRunnerExecuteWithCallback(
-                    this::createPaymentSession,
-                    new ResultCallback<String>() {
+        createMonriInstance(monri -> {
+            createCustomer((Customer customer) -> {
+                createPaymentSession(clientSecretId -> {
+                    final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams(
+                            customer.getUuid(),
+                            clientSecretId,
+                            getNon3DSCard(),
+                            true
+                    );
+                    monri.getMonriApi().confirmPayment(confirmPaymentParams, new ResultCallback<ConfirmPaymentResponse>() {
                         @Override
-                        public void onSuccess(final String clientSecretId) {
-                            signal.countDown();
-                            final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams(
-                                    customer.getUuid(),
-                                    clientSecretId,
-                                    getNon3DSCard(),
-                                    true
+                        public void onSuccess(final ConfirmPaymentResponse confirmPaymentResponse) {
+                            Assert.assertEquals(PaymentStatus.APPROVED, confirmPaymentResponse.getStatus());
+                            monri.getMonriApi().customers().paymentMethods(
+                                    new CustomerPaymentMethodParams(
+                                            customer.getUuid(),
+                                            20,
+                                            0,
+                                            createAccessToken()
+                                    ),
+                                    new ResultCallback<CustomerPaymentMethodResponse>() {
+                                        @Override
+                                        public void onSuccess(final CustomerPaymentMethodResponse result) {
+                                            Assert.assertEquals("approved", result.getStatus());
+                                            Assert.assertNotNull(result.getCustomerPaymentMethod());
+
+                                            CustomerPaymentMethod firstCustomerPaymentMethod = result.getCustomerPaymentMethod().get(0);
+                                            Assert.assertEquals(customer.getUuid(), firstCustomerPaymentMethod.getCustomerUuid());
+                                            Assert.assertEquals("411111******1111", firstCustomerPaymentMethod.getMaskedPan());
+                                            Assert.assertNotNull(firstCustomerPaymentMethod.getToken());
+                                            Assert.assertFalse(firstCustomerPaymentMethod.isExpired());
+                                            Assert.assertEquals("2034-12-31", firstCustomerPaymentMethod.getExpirationDate());
+                                            Assert.assertEquals(confirmPaymentParams.getTransaction().get("customer_uuid"), firstCustomerPaymentMethod.getCustomerUuid());
+
+                                            signal.countDown();
+                                        }
+
+                                        @Override
+                                        public void onError(final Throwable throwable) {
+                                            signal.countDown();
+                                        }
+                                    }
                             );
-                            monri.getMonriApi().confirmPayment(confirmPaymentParams, new ResultCallback<ConfirmPaymentResponse>() {
-                                @Override
-                                public void onSuccess(final ConfirmPaymentResponse confirmPaymentResponse) {
-                                    Assert.assertEquals(PaymentStatus.APPROVED, confirmPaymentResponse.getStatus());
-                                    signal.countDown();
-                                    monri.getMonriApi().customers().paymentMethods(
-                                            new CustomerPaymentMethodParams(
-                                                    customer.getUuid(),
-                                                    20,
-                                                    0,
-                                                    createAccessToken()
-                                            ),
-                                            new ResultCallback<CustomerPaymentMethodResponse>() {
-                                                @Override
-                                                public void onSuccess(final CustomerPaymentMethodResponse result) {
-                                                    Assert.assertEquals("approved", result.getStatus());
-                                                    Assert.assertNotNull(result.getCustomerPaymentMethod());
-
-                                                    CustomerPaymentMethod firstCustomerPaymentMethod = result.getCustomerPaymentMethod().get(0);
-                                                    Assert.assertEquals(customer.getUuid(), firstCustomerPaymentMethod.getCustomerUuid());
-                                                    Assert.assertEquals("411111******1111", firstCustomerPaymentMethod.getMaskedPan());
-                                                    Assert.assertNotNull(firstCustomerPaymentMethod.getToken());
-                                                    Assert.assertFalse(firstCustomerPaymentMethod.isExpired());
-                                                    Assert.assertEquals("2034-12-31", firstCustomerPaymentMethod.getExpirationDate());
-                                                    Assert.assertEquals(confirmPaymentParams.getTransaction().get("customer_uuid"), firstCustomerPaymentMethod.getCustomerUuid());
-
-                                                    signal.countDown();
-                                                }
-
-                                                @Override
-                                                public void onError(final Throwable throwable) {
-                                                    signal.countDown();
-                                                }
-                                            }
-                                    );
-                                }
-
-                                @Override
-                                public void onError(final Throwable throwable) {
-                                    Assert.fail("confirmPaymentFailed");
-                                    signal.countDown();
-                                }
-                            });
-
                         }
 
                         @Override
                         public void onError(final Throwable throwable) {
-                            Assert.fail("client secret failed");
+                            Assert.fail("confirmPaymentFailed");
+                        }
+                    });
+                });
+
+            });
+        });
+
+        Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testCreateCustomerTwiceWithSameId() throws InterruptedException {
+        CountDownLatch signal = new CountDownLatch(1);
+        String merchantCustomerId = UUID.randomUUID().toString();
+
+        createAccessToken(accessToken -> {
+            createCustomer(accessToken, new ResultCallback<Customer>() {
+                @Override
+                public void onSuccess(final Customer customer) {
+                    CustomerData customerData = getCustomerData();
+
+                    Assert.assertNotNull(customer.getUuid());
+                    Assert.assertEquals("approved", customer.getStatus());
+                    Assert.assertEquals(merchantCustomerId, customer.getMerchantCustomerId());
+                    Assert.assertNotNull(customer.getDescription());
+                    Assert.assertEquals(customerData.getEmail(), customer.getEmail());
+                    Assert.assertEquals(customerData.getName(), customer.getName());
+                    Assert.assertEquals(customerData.getPhone(), customer.getPhone());
+                    Assert.assertEquals(customerData.getMetadata(), customer.getMetadata());
+                    Assert.assertEquals(customerData.getZipCode(), customer.getZipCode());
+                    Assert.assertEquals(customerData.getCity(), customer.getCity());
+                    Assert.assertEquals(customerData.getAddress(), customer.getAddress());
+                    Assert.assertEquals(customerData.getCountry(), customer.getCountry());
+                    Assert.assertFalse(customer.getDeleted());
+
+                    createCustomer(accessToken, new ResultCallback<Customer>() {
+                        @Override
+                        public void onSuccess(final Customer customer) {
+                            Assert.fail("Customer created twice with same merchant UUID");
                             signal.countDown();
                         }
-                    }
-            );
+
+                        @Override
+                        public void onError(final Throwable throwable) {
+                            Assert.assertNotNull(throwable.getMessage());
+                            signal.countDown();
+                        }
+                    }, merchantCustomerId);
+                }
+
+                @Override
+                public void onError(final Throwable throwable) {
+                    Assert.fail("client secret failed");
+                    signal.countDown();
+                }
+            }, merchantCustomerId);
         });
 
         Assert.assertTrue(signal.await(30, TimeUnit.SECONDS));

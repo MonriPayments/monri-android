@@ -96,7 +96,15 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
             //now read response
             try {
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                int responseCode = urlConnection.getResponseCode();
+                InputStream inputStream;
+                if (responseCode >= 200 && responseCode < 300) {
+                    inputStream = urlConnection.getInputStream();
+                } else {
+                    inputStream = urlConnection.getErrorStream();
+                }
+
+                InputStream in = new BufferedInputStream(inputStream);
                 BufferedReader r = new BufferedReader(new InputStreamReader(in));
                 StringBuilder jsonStringResponse = new StringBuilder();
                 for (String line; (line = r.readLine()) != null; ) {
@@ -105,13 +113,16 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
                 JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-                //todo what if backend return response without data e.g. 401, 403, 404 etc.
-                return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
+                if (responseCode >= 200 && responseCode < 300) {
+                    return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
+                } else {
+                    String errorMessage = jsonResponse.has("message") ? jsonResponse.getString("message") : jsonResponse.toString();
+                    return MonriHttpResult.failed(MonriHttpException.create(errorMessage, MonriHttpExceptionCode.REQUEST_FAILED));
+                }
 
             } finally {
                 urlConnection.disconnect();
             }
-
 
         } catch (Exception e) {
             if (urlConnection != null) {
@@ -131,16 +142,29 @@ class MonriHttpApiImpl implements MonriHttpApi {
             urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.GET, additionalHeader);
 
             try {
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                int responseCode = urlConnection.getResponseCode();
+                InputStream inputStream;
+                if (responseCode >= 200 && responseCode < 300) {
+                    inputStream = urlConnection.getInputStream();
+                } else {
+                    inputStream = urlConnection.getErrorStream();
+                }
+
+                InputStream in = new BufferedInputStream(inputStream);
                 BufferedReader r = new BufferedReader(new InputStreamReader(in));
                 StringBuilder jsonStringResponse = new StringBuilder();
                 for (String line; (line = r.readLine()) != null; ) {
                     jsonStringResponse.append(line).append('\n');
                 }
 
-                final JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
+                JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-                return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
+                if (responseCode >= 200 && responseCode < 300) {
+                    return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
+                } else {
+                    String errorMessage = jsonResponse.has("message") ? jsonResponse.getString("message") : jsonResponse.toString();
+                    return MonriHttpResult.failed(MonriHttpException.create(errorMessage, MonriHttpExceptionCode.REQUEST_FAILED));
+                }
 
             } finally {
                 urlConnection.disconnect();
@@ -164,16 +188,29 @@ class MonriHttpApiImpl implements MonriHttpApi {
             urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.DELETE, additionalHeader);
 
             try {
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                int responseCode = urlConnection.getResponseCode();
+                InputStream inputStream;
+                if (responseCode >= 200 && responseCode < 300) {
+                    inputStream = urlConnection.getInputStream();
+                } else {
+                    inputStream = urlConnection.getErrorStream();
+                }
+
+                InputStream in = new BufferedInputStream(inputStream);
                 BufferedReader r = new BufferedReader(new InputStreamReader(in));
                 StringBuilder jsonStringResponse = new StringBuilder();
                 for (String line; (line = r.readLine()) != null; ) {
                     jsonStringResponse.append(line).append('\n');
                 }
 
-                final JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
+                JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-                return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
+                if (responseCode >= 200 && responseCode < 300) {
+                    return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
+                } else {
+                    String errorMessage = jsonResponse.has("message") ? jsonResponse.getString("message") : jsonResponse.toString();
+                    return MonriHttpResult.failed(MonriHttpException.create(errorMessage, MonriHttpExceptionCode.REQUEST_FAILED));
+                }
 
             } finally {
                 urlConnection.disconnect();
@@ -202,7 +239,11 @@ class MonriHttpApiImpl implements MonriHttpApi {
                     confirmPaymentParamsToJSON(confirmPaymentParams),
                     new HashMap<>()
             );
-            return MonriHttpResult.success(ConfirmPaymentResponse.fromJSON(response.getResult()), response.getResponseCode());
+            if (response.getCause() == null) {
+                return MonriHttpResult.success(ConfirmPaymentResponse.fromJSON(response.getResult()), response.getResponseCode());
+            } else {
+                return MonriHttpResult.failed(response.getCause());
+            }
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
@@ -214,11 +255,12 @@ class MonriHttpApiImpl implements MonriHttpApi {
         final MonriHttpResult<JSONObject> response = httpsGET(baseUrl + "/v2/payment/" + id + "/status", new HashMap<>());
 
         try {
-            if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+            if (response.getCause() == null) {
                 return MonriHttpResult.success(PaymentStatusResponse.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
+            }else {
+                return MonriHttpResult.failed(response.getCause());
             }
+
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
@@ -231,11 +273,15 @@ class MonriHttpApiImpl implements MonriHttpApi {
             final MonriHttpResult<JSONObject> response = httpsPOST(
                     baseUrl + "/v2/customers",
                     createCustomerParams.getCustomer().toJSON(),
-                    new HashMap<>(){{
+                    new HashMap<>() {{
                         put("authorization", createCustomerParams.getAccessToken());
                     }}
             );
-            return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
+            if (response.getCause() == null) {
+                return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
+            } else {
+                return MonriHttpResult.failed(response.getCause());
+            }
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
@@ -245,16 +291,16 @@ class MonriHttpApiImpl implements MonriHttpApi {
     public MonriHttpResult<Customer> retrieveCustomer(final GetCustomerParams retrieveCustomerParams) {
         final MonriHttpResult<JSONObject> response = httpsGET(
                 baseUrl + "/v2/customers/" + retrieveCustomerParams.getCustomerUuid(),
-                new HashMap<>(){{
+                new HashMap<>() {{
                     put("authorization", retrieveCustomerParams.getAccessToken());
                 }}
         );
 
         try {
-            if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+            if (response.getCause() == null) {
                 return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
             } else {
-                return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
+                return MonriHttpResult.failed(response.getCause());
             }
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
@@ -265,16 +311,16 @@ class MonriHttpApiImpl implements MonriHttpApi {
     public MonriHttpResult<Customer> retrieveCustomerViaMerchantCustomerId(final RetrieveCustomerViaMerchantCustomerUuidParams retrieveCustomerViaMerchantCustomerUuidParams) {
         final MonriHttpResult<JSONObject> response = httpsGET(
                 baseUrl + "/v2/merchants/customers/" + retrieveCustomerViaMerchantCustomerUuidParams.getMerchantCustomerUuid(),
-                new HashMap<>(){{
+                new HashMap<>() {{
                     put("authorization", retrieveCustomerViaMerchantCustomerUuidParams.getAccessToken());
                 }}
         );
 
         try {
-            if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+            if (response.getCause() == null) {
                 return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
             } else {
-                return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
+                return MonriHttpResult.failed(response.getCause());
             }
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
@@ -287,11 +333,16 @@ class MonriHttpApiImpl implements MonriHttpApi {
             final MonriHttpResult<JSONObject> response = httpsPOST(
                     baseUrl + "/v2/customers/" + updateCustomerParams.getCustomerUuid(),
                     updateCustomerParams.getCustomer().toJSON(),
-                    new HashMap<>(){{
+                    new HashMap<>() {{
                         put("authorization", updateCustomerParams.getAccessToken());
                     }}
             );
-            return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
+
+            if (response.getCause() == null) {
+                return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
+            } else {
+                return MonriHttpResult.failed(response.getCause());
+            }
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
@@ -301,16 +352,16 @@ class MonriHttpApiImpl implements MonriHttpApi {
     public MonriHttpResult<DeleteCustomerResponse> deleteCustomer(final DeleteCustomerParams deleteCustomerParams) {
         final MonriHttpResult<JSONObject> response = httpsDELETE(
                 baseUrl + "/v2/customers/" + deleteCustomerParams.getCustomerUuid(),
-                new HashMap<>(){{
+                new HashMap<>() {{
                     put("authorization", deleteCustomerParams.getAccessToken());
                 }}
         );
 
         try {
-            if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+            if (response.getCause() == null) {
                 return MonriHttpResult.success(DeleteCustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
             } else {
-                return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
+                return MonriHttpResult.failed(response.getCause());
             }
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
@@ -321,17 +372,17 @@ class MonriHttpApiImpl implements MonriHttpApi {
     public MonriHttpResult<MerchantCustomers> retrieveAllCustomers(final String accessToken) {
         final MonriHttpResult<JSONObject> response = httpsGET(
                 baseUrl + "/v2/customers",
-                new HashMap<>(){{
+                new HashMap<>() {{
                     put("authorization", accessToken);
                 }}
         );
 
         try {
-            if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+            if (response.getCause() == null) {
                 final MerchantCustomers merchantCustomers = MerchantCustomers.fromJSON(response.getResult());
                 return MonriHttpResult.success(merchantCustomers, response.getResponseCode());
             } else {
-                return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
+                return MonriHttpResult.failed(response.getCause());
             }
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
@@ -348,17 +399,18 @@ class MonriHttpApiImpl implements MonriHttpApi {
                         customerPaymentMethodParams.getLimit() +
                         "&offset="
                         + customerPaymentMethodParams.getOffset(),
-                new HashMap<>(){{
+                new HashMap<>() {{
                     put("authorization", customerPaymentMethodParams.getAccessToken());
                 }}
         );
 
         try {
-            if (response.getResponseCode() >= 200 && response.getResponseCode() < 300) {
+            if (response.getCause() == null) {
                 return MonriHttpResult.success(CustomerPaymentMethodResponse.fromJSON(response.getResult()), response.getResponseCode());
             } else {
-                return MonriHttpResult.failed(MonriHttpException.create(response.getResult().toString(), MonriHttpExceptionCode.REQUEST_FAILED));
+                return MonriHttpResult.failed(response.getCause());
             }
+
         } catch (JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }

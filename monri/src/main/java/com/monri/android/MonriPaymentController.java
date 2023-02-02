@@ -3,6 +3,8 @@ package com.monri.android;
 import android.app.Activity;
 import android.content.Intent;
 
+import androidx.activity.result.ActivityResultLauncher;
+
 import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
@@ -18,14 +20,34 @@ final class MonriPaymentController implements PaymentController {
     private final int AUTHENTICATE_PAYMENT_REQUEST_CODE = 10001;
 
     private final MonriApiOptions monriApiOptions;
+    private final ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult;
+    ActionResultConsumer<PaymentResult> delegatedCallback;
 
     MonriPaymentController(MonriApiOptions monriApiOptions) {
         this.monriApiOptions = monriApiOptions;
+        registeredForActivityResult = null;
     }
 
+    MonriPaymentController(MonriApiOptions monriApiOptions, ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult) {
+        this.monriApiOptions = monriApiOptions;
+        this.registeredForActivityResult = registeredForActivityResult;
+    }
+
+    /**
+     * @deprecated use {@link #confirmPayment(ConfirmPaymentParams, ActionResultConsumer)}
+     */
     @Override
     public void confirmPayment(Activity activity, ConfirmPaymentParams params) {
         activity.startActivityForResult(ConfirmPaymentActivity.createIntent(activity, params, monriApiOptions), PAYMENT_REQUEST_CODE);
+    }
+
+    @Override
+    public void confirmPayment(ConfirmPaymentParams params, ActionResultConsumer<PaymentResult> resultCallback) {
+        if(registeredForActivityResult == null){
+            throw new NullPointerException("In Monri constructor you didn't provide activityResultCaller, registeredForActivityResult in null.");
+        }
+        this.delegatedCallback = resultCallback;
+        registeredForActivityResult.launch(new ConfirmPaymentActivity.Request(params, monriApiOptions));
     }
 
     @Override
@@ -53,4 +75,12 @@ final class MonriPaymentController implements PaymentController {
 
     }
 
+    @Override
+    public void acceptResult(PaymentResult result, Throwable throwable) {
+        if (delegatedCallback == null) {
+             throw new NullPointerException("delegatedCallback is null");
+        } else {
+            delegatedCallback.accept(result, throwable);
+        }
+    }
 }

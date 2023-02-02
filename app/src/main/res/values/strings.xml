@@ -26,6 +26,7 @@
     <string name="btn_retrieve_customer_via_merchant_id">Retrieve customer via merchant id</string>
     <string name="btn_customer_activity">Customer activity</string>
     <string name="btn_retrieve_saved_cards_from_customer">Retrieve saved cards from customer</string>
+    <string name="btn_confirm_payment_customer_uuid">Confirm payment customer uuid</string>
     <string name="btn_retrieve_saved_cards_from_merchant">Retrieve saved cards from merchant</string>
     <string name="btn_delete_customer">Delete customer</string>
 </resources>

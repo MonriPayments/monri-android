@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCaller;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Supplier;
@@ -84,7 +85,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
         setContentView(R.layout.activity_payment_picker);
 
         orderRepository = new OrderRepository(this, this);
-        monri = new Monri(this.getApplicationContext(), MonriApiOptions.create(orderRepository.authenticityToken(), true));
+        monri = new Monri(((ActivityResultCaller) this), MonriApiOptions.create(orderRepository.authenticityToken(), true));
 
         Intent intent = getIntent();
         boolean newCardPayment = intent.getBooleanExtra("NEW_CARD_PAYMENT", true);
@@ -183,13 +184,21 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                         .setCountry("BA")
                         .setEmail("tester+android_sdk@monri.com");
 
-                monri.confirmPayment(this, ConfirmPaymentParams.create(
+                monri.confirmPayment(ConfirmPaymentParams.create(
                         newPaymentResponse.getClientSecret(),
                         paymentMethodParamsSupplier.get(),
                         TransactionParams.create()
                                 .set("order_info", "Android SDK payment session")
                                 .set(customerParams)
-                ));
+                ), (result, throwable) -> {
+                    if (throwable != null) {
+                        txtViewResult.setText(String.format("%s\n\n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
+                        Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, String.format("Transaction processed with result %s", result.getStatus()), Toast.LENGTH_LONG).show();
+                        txtViewResult.setText(result.toString());
+                    }
+                });
 
             }
         };
@@ -201,15 +210,6 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
 
     PaymentMethodParams threeDsCard() {
         return new Card("4341 7920 0000 0044", 12, 2024, "123").toPaymentMethodParams();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        ResultCallback<PaymentResult> callback = this;
-        final boolean monriPaymentResult = monri.onPaymentResult(requestCode, data, callback);
-        if (!monriPaymentResult) {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
     }
 
     @Override
