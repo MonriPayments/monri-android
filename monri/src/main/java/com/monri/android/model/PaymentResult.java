@@ -3,6 +3,7 @@ package com.monri.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
@@ -115,6 +116,7 @@ public class PaymentResult implements Parcelable {
         return errors;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "PaymentResult{" +
@@ -160,7 +162,7 @@ public class PaymentResult implements Parcelable {
         this.errors = in.createStringArrayList();
     }
 
-    public static final Creator<PaymentResult> CREATOR = new Creator<PaymentResult>() {
+    public static final Creator<PaymentResult> CREATOR = new Creator<>() {
         @Override
         public PaymentResult createFromParcel(Parcel source) {
             return new PaymentResult(source);
@@ -190,7 +192,7 @@ public class PaymentResult implements Parcelable {
 
         SavedCardPaymentMethod savedCardPaymentMethod = null;
 
-        if (paymentResultJSON.has("payment_method")) {
+        if (paymentResultJSON.has("payment_method") && !paymentResultJSON.isNull("payment_method")) {
             final JSONObject paymentStatusPaymentMethodJSON = paymentResultJSON.getJSONObject("payment_method");
             final String paymentStatusPaymentMethodType = paymentStatusPaymentMethodJSON.getString("type");
             final JSONObject pmData = paymentStatusPaymentMethodJSON.getJSONObject("data");
@@ -211,16 +213,15 @@ public class PaymentResult implements Parcelable {
 
         if (paymentResultJSON.has("errors")) {
             paymentStatusErrors = new ArrayList<>();
-            JSONArray jsonArray = paymentResultJSON.getJSONArray("errors");
-            if (jsonArray != null) {
-                int len = jsonArray.length();
-                for (int i = 0; i < len; i++) {
+            if (!paymentResultJSON.isNull("errors")) {
+                final JSONArray jsonArray = paymentResultJSON.getJSONArray("errors");
+                for (int i = 0; i < jsonArray.length(); i++) {
                     paymentStatusErrors.add(jsonArray.get(i).toString());
                 }
             }
         }
 
-        PaymentResult paymentResult = new PaymentResult(
+        return new PaymentResult(
                 paymentStatusResult,
                 paymentStatusCurrency,
                 paymentStatusAmount,
@@ -231,7 +232,5 @@ public class PaymentResult implements Parcelable {
                 savedCardPaymentMethod,
                 paymentStatusErrors
         );
-
-        return paymentResult;
     }
 }

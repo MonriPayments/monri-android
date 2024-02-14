@@ -10,14 +10,7 @@ public abstract class PaymentMethod {
 
     public static final String TYPE_CARD = "card";
     public static final String TYPE_SAVED_CARD = "saved_card";
-
-
-    public PaymentMethod() {
-    }
-
-    public static PaymentMethod savedCard(String panToken, String cvv) {
-        return new SavedCard(panToken, cvv);
-    }
+    public static final String TYPE_DIRECT_PAYMENT = "direct_payment";
 
     public abstract String paymentMethodType();
 
@@ -26,6 +19,4 @@ public abstract class PaymentMethod {
     public PaymentMethodParams toPaymentMethodParams() {
         return new PaymentMethodParams(paymentMethodType(), data());
     }
-
-
 }

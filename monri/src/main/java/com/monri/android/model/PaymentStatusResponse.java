@@ -15,14 +15,10 @@ import org.json.JSONObject;
  */
 public class PaymentStatusResponse implements Parcelable {
 
-    private PaymentStatus paymentStatus;
-    private String status;
+    private final PaymentStatus paymentStatus;
+    private final String status;
     @Nullable
-    private PaymentResult paymentResult;
-
-
-    public PaymentStatusResponse() {
-    }
+    private final PaymentResult paymentResult;
 
     public PaymentStatusResponse(final PaymentStatus paymentStatus, final String status, @Nullable final PaymentResult paymentResult) {
         this.paymentStatus = paymentStatus;
@@ -35,6 +31,10 @@ public class PaymentStatusResponse implements Parcelable {
         return paymentResult;
     }
 
+    @Nullable
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
 
     @Override
     public int describeContents() {
@@ -55,7 +55,7 @@ public class PaymentStatusResponse implements Parcelable {
         this.paymentResult = in.readParcelable(PaymentResult.class.getClassLoader());
     }
 
-    public static final Creator<PaymentStatusResponse> CREATOR = new Creator<PaymentStatusResponse>() {
+    public static final Creator<PaymentStatusResponse> CREATOR = new Creator<>() {
         @Override
         public PaymentStatusResponse createFromParcel(Parcel source) {
             return new PaymentStatusResponse(source);

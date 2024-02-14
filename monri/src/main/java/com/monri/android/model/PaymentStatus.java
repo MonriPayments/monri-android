@@ -1,8 +1,5 @@
 package com.monri.android.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
@@ -12,18 +9,10 @@ public enum PaymentStatus {
     APPROVED("approved"),
     EXECUTED("executed"),
     DECLINED("declined"),
-    ACTION_REQUIRED("action_required"); // pending
+    ACTION_REQUIRED("action_required"), // pending
+    PAYMENT_METHOD_REQUIRED("payment_method_required");
 
     private final String status;
-
-    private static Map<String, PaymentStatus> namesMap = new HashMap<String, PaymentStatus>(3);
-
-    static {
-        namesMap.put("approved", APPROVED);
-        namesMap.put("executed", EXECUTED);
-        namesMap.put("declined", DECLINED);
-        namesMap.put("action_required", ACTION_REQUIRED);
-    }
 
     PaymentStatus(String status) {
         this.status = status;
@@ -33,21 +22,18 @@ public enum PaymentStatus {
         return status;
     }
 
-    public static PaymentStatus forValue(String value) {
+    public static PaymentStatus forValue(final String value) {
         if (value == null) {
             return null;
         }
-        return namesMap.get(value.toLowerCase());
-    }
 
-    public String toValue() {
-        for (Map.Entry<String, PaymentStatus> entry : namesMap.entrySet()) {
-            if (entry.getValue() == this)
-                return entry.getKey();
+        final PaymentStatus[] paymentStatusValues = values();
+        for (final PaymentStatus paymentStatusCandidate : paymentStatusValues) {
+            if (paymentStatusCandidate.getStatus().equals(value)) {
+                return paymentStatusCandidate;
+            }
         }
 
-        return null; // or fail
+        return null;
     }
-
-
 }

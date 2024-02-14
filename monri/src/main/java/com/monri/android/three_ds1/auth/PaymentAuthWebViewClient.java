@@ -2,7 +2,6 @@ package com.monri.android.three_ds1.auth;
 
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -32,8 +31,6 @@ public class PaymentAuthWebViewClient extends WebViewClient {
 
     private final Delegate delegate;
 
-    private String acsHost;
-
     private static final MonriLogger logger = MonriLoggerFactory.get("PaymentAuthWebViewClient");
 
     public PaymentAuthWebViewClient(Delegate delegate) {
@@ -42,16 +39,9 @@ public class PaymentAuthWebViewClient extends WebViewClient {
 
     @Override
     public void onPageFinished(WebView view, String url) {
-
         logger.trace(String.format("onPageFinished url [%s]", url));
-        if (url.contains(acsHost)) {
-//            delegate.acsLoadFinished();
-        }
-
         super.onPageFinished(view, url);
     }
-
-
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Nullable
@@ -81,17 +71,11 @@ public class PaymentAuthWebViewClient extends WebViewClient {
         return super.shouldOverrideUrlLoading(view, url);
     }
 
-    public void setAcsUrl(String acsHost) {
-        this.acsHost = acsHost;
-    }
-
-
     private void loadingUrlChange(Uri uri, boolean interceptedRequest) {
         final String url = uri.toString();
 
-
         if (!validateHost(url)) {
-            Log.d("PaymentAuthWebClient", "Host validation failed");
+            logger.trace(String.format("Host validation failed, url: [%s]", url));
             return;
         }
 
@@ -103,13 +87,12 @@ public class PaymentAuthWebViewClient extends WebViewClient {
                 delegate.acsAuthenticationFinished();
             }
         } else {
-            logger.trace(String.format("shouldOverrideUrlLoading url = [%s]",  url));
+            logger.trace(String.format("shouldOverrideUrlLoading url = [%s]", url));
             if (url.contains("v2/payment/hooks/3ds1")) {
                 delegate.threeDs1Result(uri.getQueryParameter("status"), uri.getQueryParameter("client_secret"));
             }
         }
     }
-
 
     private boolean validateHost(String url) {
 
@@ -132,6 +115,5 @@ public class PaymentAuthWebViewClient extends WebViewClient {
         void redirectingToAcs();
 
         void acsAuthenticationFinished();
-
     }
 }
