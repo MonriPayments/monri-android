@@ -26,11 +26,15 @@ import com.monri.android.model.PaymentResult;
 import com.monri.android.three_ds1.auth.PaymentAuthWebView;
 
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class ConfirmPaymentActivity extends ComponentActivity implements UiDelegate {
 
     private static final String CONFIRM_PAYMENT_PARAMS_BUNDLE = "CONFIRM_PAYMENT_PARAMS_BUNDLE";
     private static final String MONRI_API_OPTIONS = "MONRI_API_OPTIONS";
+
+    private final ScheduledExecutorService backgroundThreadExecutor = Executors.newScheduledThreadPool(5);
 
     Monri monri;
 
@@ -114,7 +118,7 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
     }
 
     private void confirmDirectPayment(final ConfirmPaymentParams confirmPaymentParams, final MonriApiOptions apiOptions) {
-        final ConfirmDirectPaymentFlow confirmDirectPaymentFlow = ConfirmDirectPaymentFlow.create(this, monri.getMonriApi(), confirmPaymentParams, apiOptions);
+        final ConfirmDirectPaymentFlow confirmDirectPaymentFlow = ConfirmDirectPaymentFlow.create(backgroundThreadExecutor, this, monri.getMonriApi(), confirmPaymentParams, apiOptions);
         confirmDirectPaymentFlow.execute();
     }
 

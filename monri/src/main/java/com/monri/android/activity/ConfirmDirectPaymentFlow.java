@@ -13,7 +13,6 @@ import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
 
 import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -22,18 +21,19 @@ final class ConfirmDirectPaymentFlow implements ResultCallback<PaymentStatusResp
     private static final long CHECK_FOR_PAYMENT_STATUS_DELAY_MILLIS = 1_000L;
     private static final String DIRECT_PAYMENT_REDIRECTION_ENDPOINT = "/v2/direct-payment/pay-cek-hr/%s/redirect-to-payment-url";
 
-    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(5);
-
+    private final ScheduledExecutorService backgroundThreadExecutor;
     private final MonriApi monriApi;
     private final UiDelegate uiDelegate;
     private final ConfirmPaymentParams confirmPaymentParams;
     private final MonriApiOptions apiOptions;
     private final PaymentErrorFlow paymentErrorFlow;
 
-    private ConfirmDirectPaymentFlow(final MonriApi monriApi,
+    private ConfirmDirectPaymentFlow(final ScheduledExecutorService backgroundThreadExecutor,
+                                     final MonriApi monriApi,
                                      final UiDelegate uiDelegate,
                                      final ConfirmPaymentParams confirmPaymentParams,
                                      final MonriApiOptions apiOptions) {
+        this.backgroundThreadExecutor = backgroundThreadExecutor;
         this.monriApi = monriApi;
         this.uiDelegate = uiDelegate;
         this.confirmPaymentParams = confirmPaymentParams;
@@ -45,17 +45,19 @@ final class ConfirmDirectPaymentFlow implements ResultCallback<PaymentStatusResp
         uiDelegate.initializeWebView(client);
     }
 
-    public static ConfirmDirectPaymentFlow create(final UiDelegate uiDelegate,
+    public static ConfirmDirectPaymentFlow create(final ScheduledExecutorService backgroundThreadExecutor,
+                                                  final UiDelegate uiDelegate,
                                                   final MonriApi monriApi,
                                                   final ConfirmPaymentParams confirmPaymentParams,
                                                   final MonriApiOptions apiOptions
     ) {
+        Objects.requireNonNull(backgroundThreadExecutor, "ScheduledExecutorService == null");
         Objects.requireNonNull(uiDelegate, "UiDelegate == null");
         Objects.requireNonNull(monriApi, "MonriApi == null");
         Objects.requireNonNull(confirmPaymentParams, "ConfirmPaymentParams == null");
         Objects.requireNonNull(apiOptions, "MonriApiOptions == null");
 
-        return new ConfirmDirectPaymentFlow(monriApi, uiDelegate, confirmPaymentParams, apiOptions);
+        return new ConfirmDirectPaymentFlow(backgroundThreadExecutor, monriApi, uiDelegate, confirmPaymentParams, apiOptions);
     }
 
     public void execute() {
@@ -67,7 +69,7 @@ final class ConfirmDirectPaymentFlow implements ResultCallback<PaymentStatusResp
     }
 
     private void checkForPaymentStatus() {
-        executor.schedule(
+        backgroundThreadExecutor.schedule(
                 () -> monriApi.paymentStatus(new PaymentStatusParams(confirmPaymentParams.getPaymentId()), this),
                 CHECK_FOR_PAYMENT_STATUS_DELAY_MILLIS,
                 TimeUnit.MILLISECONDS
