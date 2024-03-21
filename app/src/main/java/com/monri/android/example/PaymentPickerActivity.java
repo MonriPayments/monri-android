@@ -175,7 +175,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
         findViewById(R.id.btn_crypto_payment).setOnClickListener(v -> {
 
             final Disposable subscribe = orderRepository.createPayment(addPaymentMethodScenario)
-                    .subscribe(handlePaymentSessionResponse(() -> new DirectPayment().toPaymentMethodParams()));
+                    .subscribe(handlePaymentSessionResponse(() -> new DirectPayment(DirectPayment.Provider.PAY_CEK_HR).toPaymentMethodParams()));
 
             compositeDisposable.add(subscribe);
         });

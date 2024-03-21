@@ -96,7 +96,7 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
 
         initBackNavigation();
 
-        if (PaymentMethod.TYPE_DIRECT_PAYMENT.equals(confirmPaymentParams.getPaymentMethod().getType())) {
+        if (PaymentMethod.DIRECT_PAYMENT_METHODS.contains(confirmPaymentParams.getPaymentMethod().getType())) {
             confirmDirectPayment(confirmPaymentParams, apiOptions);
 
         } else {

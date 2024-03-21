@@ -8,6 +8,7 @@ import com.monri.android.direct_payment.DirectPaymentWebViewClient;
 import com.monri.android.flows.PaymentErrorFlow;
 import com.monri.android.flows.PaymentErrorFlowImpl;
 import com.monri.android.model.ConfirmPaymentParams;
+import com.monri.android.model.DirectPayment;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
@@ -19,7 +20,10 @@ import java.util.concurrent.TimeUnit;
 final class ConfirmDirectPaymentFlow implements ResultCallback<PaymentStatusResponse>, DirectPaymentWebViewClient.Delegate {
 
     private static final long CHECK_FOR_PAYMENT_STATUS_DELAY_MILLIS = 1_000L;
-    private static final String DIRECT_PAYMENT_REDIRECTION_ENDPOINT = "/v2/direct-payment/pay-cek-hr/%s/redirect-to-payment-url";
+    private static final String PAY_CEK_HR_ENDPOINT = "pay-cek-hr";
+
+    // /v2/direct-payment/{payment_provider_endpoint}/{payment_id}/redirect-to-payment-url
+    private static final String DIRECT_PAYMENT_REDIRECTION_ENDPOINT = "/v2/direct-payment/%s/%s/redirect-to-payment-url";
 
     private final ScheduledExecutorService backgroundThreadExecutor;
     private final MonriApi monriApi;
@@ -63,9 +67,23 @@ final class ConfirmDirectPaymentFlow implements ResultCallback<PaymentStatusResp
     public void execute() {
         uiDelegate.showLoading();
         uiDelegate.showWebView();
-        uiDelegate.loadWebViewUrl(apiOptions.url() + String.format(DIRECT_PAYMENT_REDIRECTION_ENDPOINT, confirmPaymentParams.getPaymentId()));
+
+        final String paymentProviderEndpoint = getPaymentProviderEndpoint();
+
+        uiDelegate.loadWebViewUrl(apiOptions.url() + String.format(DIRECT_PAYMENT_REDIRECTION_ENDPOINT, paymentProviderEndpoint, confirmPaymentParams.getPaymentId()));
 
         checkForPaymentStatus();
+    }
+
+    private String getPaymentProviderEndpoint() {
+        final String paymentProviderPaymentMethod = confirmPaymentParams.getPaymentMethod().getType();
+
+        if (DirectPayment.Provider.PAY_CEK_HR.paymentMethod.equals(paymentProviderPaymentMethod)) {
+            return PAY_CEK_HR_ENDPOINT;
+
+        } else {
+            throw new IllegalArgumentException(String.format("Payment provider %s not supported", paymentProviderPaymentMethod));
+        }
     }
 
     private void checkForPaymentStatus() {

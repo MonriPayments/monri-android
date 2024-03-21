@@ -29,7 +29,7 @@ public class ConfirmDirectPaymentFlowTest {
         final FakeScheduledExecutorService backgroundThreadExecutor = new FakeScheduledExecutorService();
         final FakeUiDelegate uiDelegate = new FakeUiDelegate();
         final FakeMonriApi monriApi = new FakeMonriApi(null);
-        final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment().toPaymentMethodParams(), new TransactionParams());
+        final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment(DirectPayment.Provider.PAY_CEK_HR).toPaymentMethodParams(), new TransactionParams());
         final MonriApiOptions monriApiOptions = new MonriApiOptions(AUTHENTICITY_TOKEN, true);
 
         // When
@@ -53,7 +53,7 @@ public class ConfirmDirectPaymentFlowTest {
         final FakeScheduledExecutorService backgroundThreadExecutor = new FakeScheduledExecutorService();
         final FakeUiDelegate uiDelegate = new FakeUiDelegate();
         final FakeMonriApi monriApi = new FakeMonriApi(null);
-        final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment().toPaymentMethodParams(), new TransactionParams());
+        final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment(DirectPayment.Provider.PAY_CEK_HR).toPaymentMethodParams(), new TransactionParams());
         final MonriApiOptions monriApiOptions = new MonriApiOptions(AUTHENTICITY_TOKEN, true);
 
         ConfirmDirectPaymentFlow confirmDirectPaymentFlow;
@@ -73,7 +73,7 @@ public class ConfirmDirectPaymentFlowTest {
                 new FakeScheduledExecutorService(),
                 uiDelegate,
                 new FakeMonriApi(null),
-                ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment().toPaymentMethodParams(), new TransactionParams()),
+                ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment(DirectPayment.Provider.PAY_CEK_HR).toPaymentMethodParams(), new TransactionParams()),
                 new MonriApiOptions(AUTHENTICITY_TOKEN, true)
         );
 
@@ -112,7 +112,7 @@ public class ConfirmDirectPaymentFlowTest {
                 new FakeScheduledExecutorService(),
                 uiDelegate,
                 fakeMonriApi,
-                ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment().toPaymentMethodParams(), new TransactionParams()),
+                ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment(DirectPayment.Provider.PAY_CEK_HR).toPaymentMethodParams(), new TransactionParams()),
                 new MonriApiOptions(AUTHENTICITY_TOKEN, true)
         );
 
@@ -135,7 +135,7 @@ public class ConfirmDirectPaymentFlowTest {
                 new FakeScheduledExecutorService(),
                 uiDelegate,
                 new FakeMonriApi(paymentStatusHandler),
-                ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment().toPaymentMethodParams(), new TransactionParams()),
+                ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment(DirectPayment.Provider.PAY_CEK_HR).toPaymentMethodParams(), new TransactionParams()),
                 new MonriApiOptions(AUTHENTICITY_TOKEN, true)
         );
 
@@ -157,7 +157,7 @@ public class ConfirmDirectPaymentFlowTest {
                 new FakeScheduledExecutorService(),
                 uiDelegate,
                 new FakeMonriApi(paymentStatusHandler),
-                ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment().toPaymentMethodParams(), new TransactionParams()),
+                ConfirmPaymentParams.create(PAYMENT_ID, new DirectPayment(DirectPayment.Provider.PAY_CEK_HR).toPaymentMethodParams(), new TransactionParams()),
                 new MonriApiOptions(AUTHENTICITY_TOKEN, true)
         );
 

@@ -29,7 +29,7 @@
     <string name="btn_confirm_payment_customer_uuid">Confirm payment customer uuid</string>
     <string name="btn_retrieve_saved_cards_from_merchant">Retrieve saved cards from merchant</string>
     <string name="btn_delete_customer">Delete customer</string>
-    <string name="direct_payment">Direct payment</string>
+    <string name="direct_payment">Direct payment (pay-cek-hr)</string>
     <string name="or">OR</string>
     <string name="enter_cvv">Enter CVV</string>
 </resources>
