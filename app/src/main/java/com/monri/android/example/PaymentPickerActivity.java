@@ -10,7 +10,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCaller;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Supplier;
 
@@ -19,6 +18,7 @@ import com.monri.android.ResultCallback;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
+import com.monri.android.model.DirectPayment;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentResult;
@@ -98,6 +98,8 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
         } else {
             savedCardPaymentViewSetup(intent);
         }
+
+        directPaymentViewSetup();
     }
 
     private void savedCardPaymentViewSetup(Intent intent) {
@@ -143,7 +145,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
             Supplier<PaymentMethodParams> paymentMethodParamsSupplier;
 
             if (threeDsCard) {
-                paymentMethodParamsSupplier = this::threeDsCard;
+                paymentMethodParamsSupplier = this::getThreeDsCardParams;
             } else {
                 paymentMethodParamsSupplier = this::nonThreeDsCard;
             }
@@ -166,6 +168,16 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
 
                 compositeDisposable.add(subscribe);
             }
+        });
+    }
+
+    private void directPaymentViewSetup() {
+        findViewById(R.id.btn_crypto_payment).setOnClickListener(v -> {
+
+            final Disposable subscribe = orderRepository.createPayment(addPaymentMethodScenario)
+                    .subscribe(handlePaymentSessionResponse(() -> new DirectPayment(DirectPayment.Provider.PAY_CEK_HR).toPaymentMethodParams()));
+
+            compositeDisposable.add(subscribe);
         });
     }
 
@@ -192,14 +204,13 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                                 .set(customerParams)
                 ), (result, throwable) -> {
                     if (throwable != null) {
-                        txtViewResult.setText(String.format("%s\n\n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
+                        txtViewResult.setText(String.format("%s%n%n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
                         Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(this, String.format("Transaction processed with result %s", result.getStatus()), Toast.LENGTH_LONG).show();
                         txtViewResult.setText(result.toString());
                     }
                 });
-
             }
         };
     }
@@ -208,7 +219,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
         return new Card("4111 1111 1111 1111", 12, 2024, "123").toPaymentMethodParams();
     }
 
-    PaymentMethodParams threeDsCard() {
+    PaymentMethodParams getThreeDsCardParams() {
         return new Card("4341 7920 0000 0044", 12, 2024, "123").toPaymentMethodParams();
     }
 
@@ -220,7 +231,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
 
     @Override
     public void onError(Throwable throwable) {
-        txtViewResult.setText(String.format("%s\n\n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
+        txtViewResult.setText(String.format("%s%n%n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
         Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
     }
 

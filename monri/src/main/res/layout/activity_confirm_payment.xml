@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     tools:context=".activity.ConfirmPaymentActivity">
 
-
     <com.monri.android.three_ds1.auth.PaymentAuthWebView
         android:id="@+id/web_view_confirm_payment"
         android:layout_width="match_parent"
@@ -22,6 +21,4 @@
             android:layout_height="40dp"
             android:layout_gravity="center" />
     </FrameLayout>
-
-
 </FrameLayout>

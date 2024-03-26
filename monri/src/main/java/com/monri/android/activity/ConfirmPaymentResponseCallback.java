@@ -1,8 +1,5 @@
 package com.monri.android.activity;
 
-import android.app.Activity;
-import android.widget.ProgressBar;
-
 import com.monri.android.MonriApi;
 import com.monri.android.ResultCallback;
 import com.monri.android.flows.ActionRequiredFlow;
@@ -15,15 +12,13 @@ import com.monri.android.flows.PaymentErrorFlow;
 import com.monri.android.flows.PaymentErrorFlowImpl;
 import com.monri.android.flows.UnknownFlow;
 import com.monri.android.flows.UnknownFlowImpl;
-import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
-import com.monri.android.three_ds1.auth.PaymentAuthWebView;
 
 /**
  * Created by jasminsuljic on 2019-12-09.
  * MonriAndroid
  */
- final class ConfirmPaymentResponseCallback implements ResultCallback<ConfirmPaymentResponse> {
+final class ConfirmPaymentResponseCallback implements ResultCallback<ConfirmPaymentResponse> {
 
     private final ActionRequiredFlow actionRequiredFlow;
     private final PaymentApprovedFlow paymentApprovedFlow;
@@ -39,16 +34,13 @@ import com.monri.android.three_ds1.auth.PaymentAuthWebView;
         this.paymentErrorFlow = paymentErrorFlow;
     }
 
-    public static ConfirmPaymentResponseCallback create(Activity activity,
-                                                        PaymentAuthWebView webView,
-                                                        ProgressBar progressBar,
-                                                        ConfirmPaymentParams params, MonriApi monriApi) {
+    public static ConfirmPaymentResponseCallback create(UiDelegate uiDelegate, MonriApi monriApi) {
         return new ConfirmPaymentResponseCallback(
-                new ActivityActionRequiredFlow(activity, webView, progressBar, monriApi),
-                new ActivityPaymentApprovedFlow(activity, webView, progressBar, params),
-                new ActivityPaymentDeclinedFlow(activity, webView, progressBar),
+                new ActivityActionRequiredFlow(uiDelegate, monriApi),
+                new ActivityPaymentApprovedFlow(uiDelegate),
+                new ActivityPaymentDeclinedFlow(uiDelegate),
                 new UnknownFlowImpl(),
-                new PaymentErrorFlowImpl(activity, params)
+                new PaymentErrorFlowImpl(uiDelegate)
         );
     }
 
