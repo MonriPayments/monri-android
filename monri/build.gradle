@@ -41,19 +41,10 @@ android {
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'androidx.appcompat:appcompat:1.6.1'
-    androidTestImplementation 'androidx.test:core:1.5.0'
-    androidTestImplementation 'androidx.test:runner:1.5.2'
-    androidTestImplementation 'androidx.test:rules:1.5.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-web:3.5.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-
-    api 'androidx.annotation:annotation:1.7.1'
-
-    api "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
-    api "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    api 'androidx.annotation:annotation:1.8.0'
+    api "androidx.appcompat:appcompat:1.6.1"
     // Api for this import because we use reflection to alter TextInputLayout
-    api "com.android.support:design:${rootProject.ext.supportLibVersion}"
+    api "com.google.android.material:material:1.12.0"
 
     compileOnly "javax.annotation:jsr250-api:${rootProject.ext.javaAnnotationVersion}"
 
@@ -61,6 +52,11 @@ dependencies {
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"
     testImplementation "org.robolectric:robolectric:${rootProject.ext.robolectricVersion}"
 
+    androidTestImplementation 'androidx.test:core:1.6.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-web:3.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
 afterEvaluate {
