@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:layout_marginTop="30dp"
     tools:context=".ExamplesActivity">
 
     <Button
