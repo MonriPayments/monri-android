@@ -16,9 +16,6 @@ public interface ExampleApi {
     @POST("examples/prepare-transaction")
     Single<PrepareTransactionResponse> prepareTransaction();
 
-    @POST("examples/create-payment-session")
-    Single<NewPaymentResponse> createPaymentSession(@Body NewPaymentRequest request);
-
     @GET("examples/access_token")
     Single<AccessTokenResponse> createAccessToken();
 }

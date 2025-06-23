@@ -343,7 +343,7 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
                 .subscribe(response -> {
                     final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams(
                             customerUuid,
-                            response.clientSecret,
+                            response.getClientSecret(),
                             getNon3DSCard(),
                             true
                     );
