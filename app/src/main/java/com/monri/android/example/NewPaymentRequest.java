@@ -8,24 +8,48 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class NewPaymentRequest {
     @JsonProperty("amount")
-    int amount;
+    private int amount;
 
     @JsonProperty("order_number")
-    String orderNumber;
+    private String orderNumber;
 
     @JsonProperty("currency")
-    String currency;
+    private String currency;
 
     @JsonProperty("transaction_type")
-    String transactionType;
+    private String transactionType;
 
     @JsonProperty("order_info")
-    String orderInfo;
+    private String orderInfo;
 
     @JsonProperty("scenario")
-    String scenario;
+    private String scenario;
 
-    public NewPaymentRequest(int amount, String orderNumber, String currency, String transactionType, String orderInfo, String scenario) {
+    public int getAmount() {
+        return amount;
+    }
+
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public String getOrderInfo() {
+        return orderInfo;
+    }
+
+    public String getScenario() {
+        return scenario;
+    }
+
+    public NewPaymentRequest(final int amount, final String orderNumber, final String currency, final String transactionType, final String orderInfo, final String scenario) {
         this.amount = amount;
         this.orderNumber = orderNumber;
         this.currency = currency;
