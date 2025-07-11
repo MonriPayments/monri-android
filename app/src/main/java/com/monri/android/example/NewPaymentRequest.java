@@ -7,14 +7,54 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * MonriAndroid
  */
 public class NewPaymentRequest {
-    @JsonProperty("add_payment_method")
-    boolean addPaymentMethod;
+    @JsonProperty("amount")
+    private int amount;
 
-    public NewPaymentRequest(boolean addPaymentMethod) {
-        this.addPaymentMethod = addPaymentMethod;
+    @JsonProperty("order_number")
+    private String orderNumber;
+
+    @JsonProperty("currency")
+    private String currency;
+
+    @JsonProperty("transaction_type")
+    private String transactionType;
+
+    @JsonProperty("order_info")
+    private String orderInfo;
+
+    @JsonProperty("scenario")
+    private String scenario;
+
+    public int getAmount() {
+        return amount;
     }
 
-    public NewPaymentRequest() {
+    public String getOrderNumber() {
+        return orderNumber;
+    }
 
+    public String getCurrency() {
+        return currency;
+    }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public String getOrderInfo() {
+        return orderInfo;
+    }
+
+    public String getScenario() {
+        return scenario;
+    }
+
+    public NewPaymentRequest(final int amount, final String orderNumber, final String currency, final String transactionType, final String orderInfo, final String scenario) {
+        this.amount = amount;
+        this.orderNumber = orderNumber;
+        this.currency = currency;
+        this.scenario = scenario;
+        this.transactionType = transactionType;
+        this.orderInfo = orderInfo;
     }
 }

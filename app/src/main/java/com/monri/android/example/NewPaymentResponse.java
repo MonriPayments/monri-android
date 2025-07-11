@@ -7,22 +7,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * MonriAndroid
  */
 class NewPaymentResponse {
-    @JsonProperty("client_secret")
-    String clientSecret;
+    private String clientSecret;
+    private String status;
+    private String id;
 
-    @JsonProperty("status")
-    String status;
-
-    public NewPaymentResponse(String clientSecret) {
+    public NewPaymentResponse(
+            @JsonProperty("status") String status,
+            @JsonProperty("id") String id,
+            @JsonProperty("client_secret") String clientSecret
+    ) {
         this.clientSecret = clientSecret;
-    }
-
-    public NewPaymentResponse(String clientSecret, String status) {
-        this.clientSecret = clientSecret;
+        this.id = id;
         this.status = status;
-    }
-
-    public NewPaymentResponse() {
     }
 
     public String getClientSecret() {
@@ -31,5 +27,9 @@ class NewPaymentResponse {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getId() {
+        return id;
     }
 }

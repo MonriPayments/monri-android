@@ -17,16 +17,11 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-/**
- * Created by jasminsuljic on 2019-10-30.
- * MonriAndroid
- */
-class ExampleModule {
-
+public class WebPayModule {
 
     private final String baseUrl;
 
-    ExampleModule(String baseUrl) {
+    public WebPayModule(String baseUrl) {
         this.baseUrl = baseUrl;
     }
 
@@ -39,7 +34,7 @@ class ExampleModule {
 
     }
 
-    private Retrofit provideRetrofit() {
+    private Retrofit provideWebPayRetrofit() {
         return new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(converterFactory(objectMapper(new SimpleModule())))
@@ -48,8 +43,8 @@ class ExampleModule {
                 .build();
     }
 
-    ExampleApi publicApi() {
-        return provideRetrofit().create(ExampleApi.class);
+    WebPayApi webPayApi() {
+        return provideWebPayRetrofit().create(WebPayApi.class);
     }
 
     private CallAdapter.Factory callAdapterFactory() {
@@ -89,7 +84,7 @@ class ExampleModule {
         HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
         httpLoggingInterceptor.setLevel(BuildConfig.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
 
-        return Collections.<Interceptor>singletonList(
+        return Collections.singletonList(
                 httpLoggingInterceptor
         );
     }

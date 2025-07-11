@@ -200,7 +200,6 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                         newPaymentResponse.getClientSecret(),
                         paymentMethodParamsSupplier.get(),
                         TransactionParams.create()
-                                .set("order_info", "Android SDK payment session")
                                 .set(customerParams)
                 ), (result, throwable) -> {
                     if (throwable != null) {
