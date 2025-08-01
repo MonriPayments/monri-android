@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,8 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     private final String baseUrl;
     private final Map<String, String> headers;
+
+    private final String CONTENT_LENGTH_HEADER = "Content-Length";
 
     private HttpURLConnection createHttpURLConnection(
             final String endpoint,
@@ -47,18 +50,30 @@ class MonriHttpApiImpl implements MonriHttpApi {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestMethod(monriHttpMethod.getValue());
 
-        switch (monriHttpMethod) {
-            case GET:
-                break;
-            case POST:
-                urlConnection.setDoInput(true);//Allow Inputs
-                urlConnection.setDoOutput(true);//Allow Outputs
-                urlConnection.setChunkedStreamingMode(0);
-                urlConnection.setUseCaches(false);//Don't use a cached Copy
-                break;
-            default:
-        }
+       addHeadersToConnection(urlConnection, additionalHeader);
 
+        return urlConnection;
+
+    }
+
+    private HttpURLConnection createHttpPOSTURLConnection(
+            final String endpoint,
+            final Map<String, String> additionalHeader
+    ) throws IOException {
+        URL url = new URL(endpoint);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod(MonriHttpMethod.POST.getValue());
+
+        urlConnection.setDoInput(true);//Allow Inputs
+        urlConnection.setDoOutput(true);//Allow Outputs
+        urlConnection.setUseCaches(false);//Don't use a cached Copy
+
+        addHeadersToConnection(urlConnection, additionalHeader);
+
+        return urlConnection;
+    }
+
+    private void addHeadersToConnection(final HttpURLConnection urlConnection, final Map<String, String> additionalHeader) {
         for (String key : headers.keySet()) {
             urlConnection.setRequestProperty(key, headers.get(key));
         }
@@ -66,20 +81,26 @@ class MonriHttpApiImpl implements MonriHttpApi {
         for (String key : additionalHeader.keySet()) {
             urlConnection.setRequestProperty(key, additionalHeader.get(key));
         }
-
-        return urlConnection;
-
     }
 
     private MonriHttpResult<JSONObject> httpsPOST(
             final String endpoint,
             final JSONObject body,
-            final Map<String, String> additionalHeader
+            final Map<String, String> additionalHeader,
+            final Boolean useChunkedStreamingMode
     ) {
         HttpURLConnection urlConnection = null;
 
         try {
-            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.POST, additionalHeader);
+            urlConnection = createHttpPOSTURLConnection(endpoint, additionalHeader);
+
+            if (useChunkedStreamingMode) {
+                urlConnection.setChunkedStreamingMode(0);
+            } else {
+                final int contentLength = body.toString().getBytes(StandardCharsets.UTF_8).length;
+                urlConnection.setFixedLengthStreamingMode(contentLength);
+                urlConnection.addRequestProperty(CONTENT_LENGTH_HEADER, String.valueOf(contentLength));
+            }
 
             OutputStreamWriter wr = null;
 
@@ -237,7 +258,8 @@ class MonriHttpApiImpl implements MonriHttpApi {
             final MonriHttpResult<JSONObject> response = httpsPOST(
                     baseUrl + "/v2/payment/" + confirmPaymentParams.getPaymentId() + "/confirm",
                     confirmPaymentParamsToJSON(confirmPaymentParams),
-                    new HashMap<>()
+                    new HashMap<>(),
+                    false
             );
             if (response.getCause() == null) {
                 return MonriHttpResult.success(ConfirmPaymentResponse.fromJSON(response.getResult()), response.getResponseCode());
@@ -275,7 +297,8 @@ class MonriHttpApiImpl implements MonriHttpApi {
                     createCustomerParams.getCustomer().toJSON(),
                     new HashMap<>() {{
                         put("authorization", createCustomerParams.getAccessToken());
-                    }}
+                    }},
+                    true
             );
             if (response.getCause() == null) {
                 return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
@@ -335,7 +358,8 @@ class MonriHttpApiImpl implements MonriHttpApi {
                     updateCustomerParams.getCustomer().toJSON(),
                     new HashMap<>() {{
                         put("authorization", updateCustomerParams.getAccessToken());
-                    }}
+                    }},
+                    true
             );
 
             if (response.getCause() == null) {
