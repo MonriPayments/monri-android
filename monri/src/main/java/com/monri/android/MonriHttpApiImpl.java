@@ -87,7 +87,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
             final String endpoint,
             final JSONObject body,
             final Map<String, String> additionalHeader,
-            final Boolean useChunkedStreamingMode
+            final boolean useChunkedStreamingMode
     ) {
         HttpURLConnection urlConnection = null;
 
