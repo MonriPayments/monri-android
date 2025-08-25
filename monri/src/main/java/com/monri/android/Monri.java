@@ -6,13 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
-import androidx.activity.result.ActivityResultCaller;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-
 import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.exception.MonriException;
 import com.monri.android.model.ConfirmPaymentParams;
@@ -25,6 +18,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import androidx.activity.result.ActivityResultCaller;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import static com.monri.android.MonriConfig.PROD_ENV_HOST;
 import static com.monri.android.MonriConfig.TEST_ENV_HOST;
 
@@ -33,10 +33,14 @@ import static com.monri.android.MonriConfig.TEST_ENV_HOST;
  * MonriAndroidSDK
  */
 public final class Monri {
-    private final String authenticityToken;
-    private final MonriApiOptions apiOptions;
-    private final MonriApi monriApi;
+
+    public static final String AUTHORIZATION_HEADER_TEMPLATE = "WP3-v2-Client %s";
+
+    private String authenticityToken;
+    private MonriApiOptions apiOptions;
+    private MonriApi monriApi;
     private PaymentController paymentController;
+    private final ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult;
     @VisibleForTesting
     private
     TokenCreator mTokenCreator = (apiOptions, tokenParams, executor, callback) -> {
@@ -71,29 +75,12 @@ public final class Monri {
 
     @Deprecated
     public Monri(Context context, MonriApiOptions monriApiOptions) {
-        this.authenticityToken = monriApiOptions.getAuthenticityToken();
-        this.apiOptions = monriApiOptions;
-
-        String url = monriApiOptions.isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
-
-        final String authorizationHeader = String.format("WP3-v2-Client %s", apiOptions.getAuthenticityToken());
-
-        this.monriApi = new MonriApiImpl(getMonriHttpApi(url, getHttpHeaders(authorizationHeader)));
-
-        paymentController = new MonriPaymentController(monriApiOptions);
+        registeredForActivityResult = null;
+        setMonriApiOptions(monriApiOptions);
     }
 
-    public Monri(ActivityResultCaller activityResultCaller, MonriApiOptions monriApiOptions) {
-        this.authenticityToken = monriApiOptions.getAuthenticityToken();
-        this.apiOptions = monriApiOptions;
-
-        String url = monriApiOptions.isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
-
-        final String authorizationHeader = String.format("WP3-v2-Client %s", apiOptions.getAuthenticityToken());
-
-        this.monriApi = new MonriApiImpl(getMonriHttpApi(url, getHttpHeaders(authorizationHeader)));
-
-        ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult = activityResultCaller.<ConfirmPaymentActivity.Request, ConfirmPaymentActivity.Response>registerForActivityResult(new ActivityResultContract<>() {
+    public Monri(final ActivityResultCaller activityResultCaller) {
+        registeredForActivityResult = activityResultCaller.<ConfirmPaymentActivity.Request, ConfirmPaymentActivity.Response>registerForActivityResult(new ActivityResultContract<>() {
             @NonNull
             @Override
             public Intent createIntent(@NonNull Context context, ConfirmPaymentActivity.Request input) {
@@ -107,6 +94,22 @@ public final class Monri {
         }, result -> {
             paymentController.acceptResult(result.getPaymentResult(), null);
         });
+    }
+
+    public Monri(ActivityResultCaller activityResultCaller, final MonriApiOptions monriApiOptions) {
+        this(activityResultCaller);
+
+        setMonriApiOptions(monriApiOptions);
+    }
+
+    public void setMonriApiOptions(final MonriApiOptions monriApiOptions) {
+        authenticityToken = monriApiOptions.getAuthenticityToken();
+        apiOptions = monriApiOptions;
+
+        final String url = monriApiOptions.isDevelopmentMode() ? TEST_ENV_HOST : PROD_ENV_HOST;
+        final String authorizationHeader = String.format(AUTHORIZATION_HEADER_TEMPLATE, apiOptions.getAuthenticityToken());
+
+        monriApi = new MonriApiImpl(getMonriHttpApi(url, getHttpHeaders(authorizationHeader)));
         paymentController = new MonriPaymentController(monriApiOptions, registeredForActivityResult);
     }
 
