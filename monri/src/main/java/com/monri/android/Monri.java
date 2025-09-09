@@ -39,8 +39,8 @@ public final class Monri {
     private String authenticityToken;
     private MonriApiOptions apiOptions;
     private MonriApi monriApi;
-    private PaymentController paymentController;
     private final ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult;
+    private PaymentController paymentController;
     @VisibleForTesting
     private
     TokenCreator mTokenCreator = (apiOptions, tokenParams, executor, callback) -> {

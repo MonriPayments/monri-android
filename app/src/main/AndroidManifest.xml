@@ -48,6 +48,7 @@
                     android:scheme="monriapp" />
             </intent-filter>
         </activity>
+        <activity android:name=".GooglePayActivity"/>
     </application>
 
 </manifest>

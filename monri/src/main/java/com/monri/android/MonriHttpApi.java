@@ -11,6 +11,7 @@ import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.Customer;
 import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
 import com.monri.android.model.GetCustomerParams;
+import com.monri.android.model.StartGooglePayResponse;
 import com.monri.android.model.UpdateCustomerParams;
 import com.monri.android.model.PaymentStatusResponse;
 
@@ -27,6 +28,8 @@ interface MonriHttpApi {
 
     //post v2/payment/{id}/confirm
     MonriHttpResult<ConfirmPaymentResponse> confirmPayment(ConfirmPaymentParams confirmPaymentParams);
+
+    MonriHttpResult<StartGooglePayResponse> startGooglePayPayment(final String PaymentId);
 
     //get v2/payment/{id}/status
     MonriHttpResult<PaymentStatusResponse> paymentStatus(String id);

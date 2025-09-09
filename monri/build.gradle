@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 35
         versionCode 1
         versionName rootProject.ext.monriSdkVersion
@@ -56,6 +56,8 @@ dependencies {
     api "com.google.android.material:material:1.12.0"
 
     compileOnly "javax.annotation:jsr250-api:${rootProject.ext.javaAnnotationVersion}"
+
+    implementation "com.google.android.gms:play-services-wallet:$googlePlayServicesWalletVersion"
 
     testImplementation "junit:junit:${rootProject.ext.junitVersion}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"

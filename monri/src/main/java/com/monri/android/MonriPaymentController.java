@@ -43,7 +43,7 @@ final class MonriPaymentController implements PaymentController {
 
     @Override
     public void confirmPayment(ConfirmPaymentParams params, ActionResultConsumer<PaymentResult> resultCallback) {
-        if(registeredForActivityResult == null){
+        if (registeredForActivityResult == null) {
             throw new NullPointerException("In Monri constructor you didn't provide activityResultCaller, registeredForActivityResult in null.");
         }
         this.delegatedCallback = resultCallback;

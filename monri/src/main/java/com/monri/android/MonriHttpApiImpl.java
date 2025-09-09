@@ -5,6 +5,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
+import com.monri.android.model.GooglePayPayment;
 import com.monri.android.model.MerchantCustomers;
 import com.monri.android.model.DeleteCustomerParams;
 import com.monri.android.model.DeleteCustomerResponse;
@@ -14,14 +15,13 @@ import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.Customer;
 import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
 import com.monri.android.model.GetCustomerParams;
+import com.monri.android.model.StartGooglePayResponse;
 import com.monri.android.model.UpdateCustomerParams;
 import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentStatusResponse;
 import com.monri.android.model.TransactionParams;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,213 +38,12 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     private final String baseUrl;
     private final Map<String, String> headers;
-
     private final String CONTENT_LENGTH_HEADER = "Content-Length";
-
-    private HttpURLConnection createHttpURLConnection(
-            final String endpoint,
-            final MonriHttpMethod monriHttpMethod,
-            final Map<String, String> additionalHeader
-    ) throws IOException {
-        URL url = new URL(endpoint);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod(monriHttpMethod.getValue());
-
-       addHeadersToConnection(urlConnection, additionalHeader);
-
-        return urlConnection;
-
-    }
-
-    private HttpURLConnection createHttpPOSTURLConnection(
-            final String endpoint,
-            final Map<String, String> additionalHeader
-    ) throws IOException {
-        URL url = new URL(endpoint);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod(MonriHttpMethod.POST.getValue());
-
-        urlConnection.setDoInput(true);//Allow Inputs
-        urlConnection.setDoOutput(true);//Allow Outputs
-        urlConnection.setUseCaches(false);//Don't use a cached Copy
-
-        addHeadersToConnection(urlConnection, additionalHeader);
-
-        return urlConnection;
-    }
-
-    private void addHeadersToConnection(final HttpURLConnection urlConnection, final Map<String, String> additionalHeader) {
-        for (String key : headers.keySet()) {
-            urlConnection.setRequestProperty(key, headers.get(key));
-        }
-
-        for (String key : additionalHeader.keySet()) {
-            urlConnection.setRequestProperty(key, additionalHeader.get(key));
-        }
-    }
-
-    private MonriHttpResult<JSONObject> httpsPOST(
-            final String endpoint,
-            final JSONObject body,
-            final Map<String, String> additionalHeader,
-            final boolean useChunkedStreamingMode
-    ) {
-        HttpURLConnection urlConnection = null;
-
-        try {
-            urlConnection = createHttpPOSTURLConnection(endpoint, additionalHeader);
-
-            if (useChunkedStreamingMode) {
-                urlConnection.setChunkedStreamingMode(0);
-            } else {
-                final int contentLength = body.toString().getBytes(StandardCharsets.UTF_8).length;
-                urlConnection.setFixedLengthStreamingMode(contentLength);
-                urlConnection.addRequestProperty(CONTENT_LENGTH_HEADER, String.valueOf(contentLength));
-            }
-
-            OutputStreamWriter wr = null;
-
-            try {
-                wr = new OutputStreamWriter(urlConnection.getOutputStream());
-                wr.write(body.toString());
-                wr.flush();
-
-            } finally {
-                if (wr != null) {
-                    wr.close();
-                }
-            }
-
-            //now read response
-            try {
-                int responseCode = urlConnection.getResponseCode();
-                InputStream inputStream;
-                if (responseCode >= 200 && responseCode < 300) {
-                    inputStream = urlConnection.getInputStream();
-                } else {
-                    inputStream = urlConnection.getErrorStream();
-                }
-
-                InputStream in = new BufferedInputStream(inputStream);
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                StringBuilder jsonStringResponse = new StringBuilder();
-                for (String line; (line = r.readLine()) != null; ) {
-                    jsonStringResponse.append(line).append('\n');
-                }
-
-                JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
-
-                if (responseCode >= 200 && responseCode < 300) {
-                    return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
-                } else {
-                    String errorMessage = jsonResponse.has("message") ? jsonResponse.getString("message") : jsonResponse.toString();
-                    return MonriHttpResult.failed(MonriHttpException.create(errorMessage, MonriHttpExceptionCode.REQUEST_FAILED));
-                }
-
-            } finally {
-                urlConnection.disconnect();
-            }
-
-        } catch (Exception e) {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
-
-    }
-
-    private MonriHttpResult<JSONObject> httpsGET(
-            final String endpoint,
-            final Map<String, String> additionalHeader
-    ) {
-        HttpURLConnection urlConnection = null;
-        try {
-            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.GET, additionalHeader);
-
-            try {
-                int responseCode = urlConnection.getResponseCode();
-                InputStream inputStream;
-                if (responseCode >= 200 && responseCode < 300) {
-                    inputStream = urlConnection.getInputStream();
-                } else {
-                    inputStream = urlConnection.getErrorStream();
-                }
-
-                InputStream in = new BufferedInputStream(inputStream);
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                StringBuilder jsonStringResponse = new StringBuilder();
-                for (String line; (line = r.readLine()) != null; ) {
-                    jsonStringResponse.append(line).append('\n');
-                }
-
-                JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
-
-                if (responseCode >= 200 && responseCode < 300) {
-                    return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
-                } else {
-                    String errorMessage = jsonResponse.has("message") ? jsonResponse.getString("message") : jsonResponse.toString();
-                    return MonriHttpResult.failed(MonriHttpException.create(errorMessage, MonriHttpExceptionCode.REQUEST_FAILED));
-                }
-
-            } finally {
-                urlConnection.disconnect();
-            }
-
-        } catch (Exception e) {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
-
-    }
-
-    private MonriHttpResult<JSONObject> httpsDELETE(
-            final String endpoint,
-            final Map<String, String> additionalHeader
-    ) {
-        HttpURLConnection urlConnection = null;
-        try {
-            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.DELETE, additionalHeader);
-
-            try {
-                int responseCode = urlConnection.getResponseCode();
-                InputStream inputStream;
-                if (responseCode >= 200 && responseCode < 300) {
-                    inputStream = urlConnection.getInputStream();
-                } else {
-                    inputStream = urlConnection.getErrorStream();
-                }
-
-                InputStream in = new BufferedInputStream(inputStream);
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                StringBuilder jsonStringResponse = new StringBuilder();
-                for (String line; (line = r.readLine()) != null; ) {
-                    jsonStringResponse.append(line).append('\n');
-                }
-
-                JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
-
-                if (responseCode >= 200 && responseCode < 300) {
-                    return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
-                } else {
-                    String errorMessage = jsonResponse.has("message") ? jsonResponse.getString("message") : jsonResponse.toString();
-                    return MonriHttpResult.failed(MonriHttpException.create(errorMessage, MonriHttpExceptionCode.REQUEST_FAILED));
-                }
-
-            } finally {
-                urlConnection.disconnect();
-            }
-
-        } catch (Exception e) {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
-
-    }
+    private final String RESPONSE_ERROR_MESSAGE_KEY = "message";
+    private static final String GOOGLE_PAY_TOKENIZATION_DATA_KEY = "tokenizationData";
+    private static final String GOOGLE_PAY_TOKEN_KEY = "token";
+    private static final String PAYMENT_METHOD_DATA_KEY = "data";
+    private static final String PAYMENT_METHOD_TYPE_KEY = "type";
 
     public MonriHttpApiImpl(final String baseUrl, final Map<String, String> headers) {
         this.baseUrl = baseUrl;
@@ -267,6 +66,23 @@ class MonriHttpApiImpl implements MonriHttpApi {
                 return MonriHttpResult.failed(response.getCause());
             }
         } catch (JSONException e) {
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+    }
+
+    @Override
+    public MonriHttpResult<StartGooglePayResponse> startGooglePayPayment(final String paymentId) {
+        try {
+            final MonriHttpResult<JSONObject> response = httpsPOST(
+                    baseUrl + "/v2/google-pay/" + paymentId + "/start-payment",
+                    new HashMap<>()
+            );
+            if (response.getCause() == null) {
+                return MonriHttpResult.success(StartGooglePayResponse.fromJSON(response.getResult()), response.getResponseCode());
+            } else {
+                return MonriHttpResult.failed(response.getCause());
+            }
+        } catch (Exception e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
     }
@@ -447,22 +263,28 @@ class MonriHttpApiImpl implements MonriHttpApi {
         final String type = paymentMethodParams.getType();
         final Map<String, String> data = paymentMethodParams.getData();
 
-        JSONObject dataMapJSON = new JSONObject();
-
-        for (String key : data.keySet()) {
-            dataMapJSON.put(key, data.get(key));
-        }
-
         JSONObject paymentMethodJSON = new JSONObject();
+        paymentMethodJSON.put(PAYMENT_METHOD_TYPE_KEY, type);
 
-        paymentMethodJSON.put("type", type);
-        paymentMethodJSON.put("data", dataMapJSON);
+        if (type.equals(GooglePayPayment.TYPE_GOOGLE_PAY)) {
+            final JSONObject googlePaymentMethodObject = new JSONObject(data.get(GooglePayPayment.GOOGLE_PAYMENT_METHOD_DATA_KEY));
+            final JSONObject tokenDataObject = new JSONObject(googlePaymentMethodObject.getJSONObject(GOOGLE_PAY_TOKENIZATION_DATA_KEY).getString(GOOGLE_PAY_TOKEN_KEY));
+
+            paymentMethodJSON.put(PAYMENT_METHOD_DATA_KEY, tokenDataObject);
+        } else {
+            JSONObject dataMapJSON = new JSONObject();
+
+            for (String key : data.keySet()) {
+                dataMapJSON.put(key, data.get(key));
+            }
+
+            paymentMethodJSON.put(PAYMENT_METHOD_DATA_KEY, dataMapJSON);
+        }
 
         //converting transactionParams to JSON
         final TransactionParams transaction = confirmPaymentParams.getTransaction();
         final Map<String, Object> transactionData = pruneTransactionDataSetMetaData(transaction.getData());
         JSONObject dataTransactionMapJSON = new JSONObject();
-
 
         for (String key : transactionData.keySet()) {
             dataTransactionMapJSON.put(key, transactionData.get(key));
@@ -495,4 +317,173 @@ class MonriHttpApiImpl implements MonriHttpApi {
         return returnValue;
     }
 
+    private void addHeadersToConnection(final HttpURLConnection urlConnection, final Map<String, String> additionalHeader) {
+        for (String key : headers.keySet()) {
+            urlConnection.setRequestProperty(key, headers.get(key));
+        }
+
+        for (String key : additionalHeader.keySet()) {
+            urlConnection.setRequestProperty(key, additionalHeader.get(key));
+        }
+    }
+
+    private MonriHttpResult<JSONObject> httpsPOST(
+            final String endpoint,
+            final JSONObject body,
+            final Map<String, String> additionalHeader,
+            final boolean useChunkedStreamingMode
+    ) {
+        HttpURLConnection urlConnection = null;
+
+        try {
+            urlConnection = createHttpPOSTURLConnection(endpoint, additionalHeader);
+
+            if (useChunkedStreamingMode) {
+                urlConnection.setChunkedStreamingMode(0);
+            } else {
+                final int contentLength = body.toString().getBytes(StandardCharsets.UTF_8).length;
+                urlConnection.setFixedLengthStreamingMode(contentLength);
+                urlConnection.addRequestProperty(CONTENT_LENGTH_HEADER, String.valueOf(contentLength));
+            }
+
+            writeToOutputStream(urlConnection, body);
+
+            return readResponseFromInputStream(urlConnection);
+
+        } catch (Exception e) {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+    }
+
+    private MonriHttpResult<JSONObject> httpsPOST(final String endpoint, final Map<String, String> additionalHeader) {
+        HttpURLConnection urlConnection = null;
+
+        try {
+            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.POST, additionalHeader);
+
+            return readResponseFromInputStream(urlConnection);
+        } catch (Exception e) {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+    }
+
+    private MonriHttpResult<JSONObject> httpsGET(
+            final String endpoint,
+            final Map<String, String> additionalHeader
+    ) {
+        HttpURLConnection urlConnection = null;
+        try {
+            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.GET, additionalHeader);
+
+            return readResponseFromInputStream(urlConnection);
+
+        } catch (Exception e) {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+    }
+
+    private MonriHttpResult<JSONObject> httpsDELETE(
+            final String endpoint,
+            final Map<String, String> additionalHeader
+    ) {
+        HttpURLConnection urlConnection = null;
+        try {
+            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.DELETE, additionalHeader);
+
+            return readResponseFromInputStream(urlConnection);
+
+        } catch (Exception e) {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
+        }
+
+    }
+
+    private HttpURLConnection createHttpURLConnection(
+            final String endpoint,
+            final MonriHttpMethod monriHttpMethod,
+            final Map<String, String> additionalHeader
+    ) throws IOException {
+        URL url = new URL(endpoint);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod(monriHttpMethod.getValue());
+
+        addHeadersToConnection(urlConnection, additionalHeader);
+
+        return urlConnection;
+    }
+
+    private HttpURLConnection createHttpPOSTURLConnection(
+            final String endpoint,
+            final Map<String, String> additionalHeader
+    ) throws IOException {
+        URL url = new URL(endpoint);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod(MonriHttpMethod.POST.getValue());
+
+        urlConnection.setDoInput(true);
+        urlConnection.setDoOutput(true);
+        urlConnection.setUseCaches(false);
+
+        addHeadersToConnection(urlConnection, additionalHeader);
+
+        return urlConnection;
+    }
+
+    private void writeToOutputStream(final HttpURLConnection urlConnection, final JSONObject body) throws IOException {
+        OutputStreamWriter wr = null;
+
+        try {
+            wr = new OutputStreamWriter(urlConnection.getOutputStream());
+            wr.write(body.toString());
+            wr.flush();
+
+        } finally {
+            if (wr != null) {
+                wr.close();
+            }
+        }
+    }
+
+    private MonriHttpResult<JSONObject> readResponseFromInputStream(final HttpURLConnection urlConnection) throws IOException, JSONException {
+        try {
+            int responseCode = urlConnection.getResponseCode();
+            InputStream inputStream;
+            if (responseCode >= 200 && responseCode < 300) {
+                inputStream = urlConnection.getInputStream();
+            } else {
+                inputStream = urlConnection.getErrorStream();
+            }
+
+            InputStream in = new BufferedInputStream(inputStream);
+            BufferedReader r = new BufferedReader(new InputStreamReader(in));
+            StringBuilder jsonStringResponse = new StringBuilder();
+            for (String line; (line = r.readLine()) != null; ) {
+                jsonStringResponse.append(line).append('\n');
+            }
+
+            JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
+
+            if (responseCode >= 200 && responseCode < 300) {
+                return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
+            } else {
+                String errorMessage = jsonResponse.has(RESPONSE_ERROR_MESSAGE_KEY) ? jsonResponse.getString(RESPONSE_ERROR_MESSAGE_KEY) : jsonResponse.toString();
+                return MonriHttpResult.failed(MonriHttpException.create(errorMessage, MonriHttpExceptionCode.REQUEST_FAILED));
+            }
+
+        } finally {
+            urlConnection.disconnect();
+        }
+    }
 }

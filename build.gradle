@@ -29,4 +29,6 @@ ext {
     mockitoCoreVersion = "3.9.0"
     robolectricVersion = '4.9.2'
     monriSdkVersion = '3.0.2'
+
+    googlePlayServicesWalletVersion = '19.4.0'
 }

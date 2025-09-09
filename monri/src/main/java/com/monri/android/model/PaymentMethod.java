@@ -13,6 +13,7 @@ public abstract class PaymentMethod {
     public static final String TYPE_CARD = "card";
     public static final String TYPE_SAVED_CARD = "saved_card";
     public static final String TYPE_PAY_CEK_HR = "pay_cek_hr";
+    public static final String TYPE_GOOGLE_PAY = "google-pay";
 
     public static final List<String> DIRECT_PAYMENT_METHODS = Collections.singletonList(TYPE_PAY_CEK_HR);
 
