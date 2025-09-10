@@ -15,7 +15,6 @@ import com.monri.android.model.CustomerPaymentMethodResponse;
 import com.monri.android.model.Customer;
 import com.monri.android.model.RetrieveCustomerViaMerchantCustomerUuidParams;
 import com.monri.android.model.GetCustomerParams;
-import com.monri.android.model.StartGooglePayResponse;
 import com.monri.android.model.UpdateCustomerParams;
 import com.monri.android.model.PaymentMethodParams;
 import com.monri.android.model.PaymentStatusResponse;
@@ -71,14 +70,14 @@ class MonriHttpApiImpl implements MonriHttpApi {
     }
 
     @Override
-    public MonriHttpResult<StartGooglePayResponse> startGooglePayPayment(final String paymentId) {
+    public MonriHttpResult<JSONObject> startGooglePayPayment(final String paymentId) {
         try {
             final MonriHttpResult<JSONObject> response = httpsPOST(
                     baseUrl + "/v2/google-pay/" + paymentId + "/start-payment",
                     new HashMap<>()
             );
             if (response.getCause() == null) {
-                return MonriHttpResult.success(StartGooglePayResponse.fromJSON(response.getResult()), response.getResponseCode());
+                return MonriHttpResult.success((response.getResult()), response.getResponseCode());
             } else {
                 return MonriHttpResult.failed(response.getCause());
             }

@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 
 import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.exception.MonriException;
+import com.monri.android.google_pay.GooglePaymentSessionManager;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;
@@ -41,6 +42,8 @@ public final class Monri {
     private MonriApi monriApi;
     private final ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult;
     private PaymentController paymentController;
+    private GooglePaymentSessionManager googlePaymentSessionManager;
+
     @VisibleForTesting
     private
     TokenCreator mTokenCreator = (apiOptions, tokenParams, executor, callback) -> {
@@ -80,20 +83,10 @@ public final class Monri {
     }
 
     public Monri(final ActivityResultCaller activityResultCaller) {
-        registeredForActivityResult = activityResultCaller.<ConfirmPaymentActivity.Request, ConfirmPaymentActivity.Response>registerForActivityResult(new ActivityResultContract<>() {
-            @NonNull
-            @Override
-            public Intent createIntent(@NonNull Context context, ConfirmPaymentActivity.Request input) {
-                return ConfirmPaymentActivity.createIntent(context, input);
-            }
-
-            @Override
-            public ConfirmPaymentActivity.Response parseResult(int resultCode, @Nullable Intent intent) {
-                return ConfirmPaymentActivity.parseResponse(resultCode, intent);
-            }
-        }, result -> {
-            paymentController.acceptResult(result.getPaymentResult(), null);
-        });
+        registeredForActivityResult = activityResultCaller.registerForActivityResult(
+                new ConfirmPaymentActivityResultContract(),
+                result -> paymentController.acceptResult(result.getPaymentResult(), null)
+        );
     }
 
     public Monri(ActivityResultCaller activityResultCaller, final MonriApiOptions monriApiOptions) {
@@ -176,6 +169,20 @@ public final class Monri {
         return monriApi;
     }
 
+    public void initializeGooglePaymentSessionManager(final int apiVersion, final int apiVersionMinor) {
+        googlePaymentSessionManager = new GooglePaymentSessionManager(apiVersion, apiVersionMinor);
+    }
+
+
+    public void startGooglePayPayment(final String paymentSessionId) {
+
+    }
+
+
+    public void isReadyToPayWithGooglePay() {
+
+    }
+
     @Deprecated
     public boolean onPaymentResult(int requestCode, Intent data, ResultCallback<PaymentResult> callback) {
 
@@ -193,6 +200,19 @@ public final class Monri {
         void create(MonriApiOptions apiOptions, Map<String, Object> params,
                     Executor executor,
                     TokenCallback callback);
+    }
+
+    private class ConfirmPaymentActivityResultContract extends ActivityResultContract<ConfirmPaymentActivity.Request, ConfirmPaymentActivity.Response> {
+        @NonNull
+        @Override
+        public Intent createIntent(@NonNull Context context, ConfirmPaymentActivity.Request input) {
+            return ConfirmPaymentActivity.createIntent(context, input);
+        }
+
+        @Override
+        public ConfirmPaymentActivity.Response parseResult(int resultCode, @Nullable Intent intent) {
+            return ConfirmPaymentActivity.parseResponse(resultCode, intent);
+        }
     }
 
     private static class ResponseWrapper {

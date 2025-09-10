@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultCaller;
 import androidx.activity.result.ActivityResultLauncher;
@@ -25,12 +26,12 @@ import com.google.android.gms.wallet.button.PayButton;
 import com.google.android.gms.wallet.contract.TaskResultContracts;
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
+import com.monri.android.google_pay.GooglePaymentSessionManager;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
 import com.monri.android.model.GooglePayPayment;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentResult;
-import com.monri.android.model.StartGooglePayResponse;
 import com.monri.android.model.TransactionParams;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,9 +48,13 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     private Monri monri;
     private PaymentsClient googlePaymentsClient;
     private PayButton googlePayButton;
+    private ProgressBar progressBar;
     private JSONObject googlePaymentMethodData;
     private TextView resultTextView;
     private NewPaymentResponse newPaymentResponse;
+    private GooglePaymentSessionManager googlePaymentSessionManager;
+    private final int apiVersion = 2;
+    private final int apiVersionMinor = 0;
 
     private final ActivityResultLauncher<Task<PaymentData>> paymentDataLauncher =
             registerForActivityResult(new TaskResultContracts.GetPaymentDataResult(), result -> {
@@ -78,11 +83,13 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_google_pay);
+
         resultTextView = findViewById(R.id.google_pay_result_textview);
+        progressBar = findViewById(R.id.progress_bar);
 
         initializeMonriSdkObjects();
-        initializeGooglePayButton();
         initializeGooglePaymentsClient();
     }
 
@@ -92,10 +99,75 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     }
 
     private void initializeGooglePaymentsClient() {
+        // todo move to sdk?
         final Wallet.WalletOptions walletOptions = new Wallet.WalletOptions.Builder().setEnvironment(WalletConstants.ENVIRONMENT_TEST).build();
         googlePaymentsClient = Wallet.getPaymentsClient(this, walletOptions);
 
-        isReadyToPayWithGoogle();
+        createPaymentSession();
+    }
+
+    private void createPaymentSession() {
+        final Disposable createPaymentResponseObservable = orderRepository.createPayment(false)
+                                                                          .subscribeOn(Schedulers.io())
+                                                                          .observeOn(AndroidSchedulers.mainThread())
+                                                                          .subscribe(this::processCreatePaymentSessionResponse,
+                                                                                     this::processCreatePaymentSessionError);
+        compositeDisposable.add(createPaymentResponseObservable);
+    }
+
+    private void processCreatePaymentSessionResponse(final NewPaymentResponse response) {
+        if (!response.getStatus().equals("approved")) {
+            resultTextView.setText(String.format("Create payment session rejected: %s", response.getStatus()));
+        } else {
+            newPaymentResponse = response;
+
+            // call monri sdk to start the google pay payment
+            startGooglePayPayment();
+        }
+    }
+
+    private void processCreatePaymentSessionError(final Throwable error) {
+        progressBar.setVisibility(View.GONE);
+        resultTextView.setText(String.format("Create payment session error: %s", error));
+    }
+
+    private void startGooglePayPayment() {
+        monri.getMonriApi().startGooglePayPayment(newPaymentResponse.getId(), new ResultCallback<>() {
+
+            @Override
+            public void onSuccess(final JSONObject googlePaySessionParameters) {
+                googlePaymentSessionManager = new GooglePaymentSessionManager(apiVersion, apiVersionMinor);
+                googlePaymentSessionManager.setGooglePaySessionParameters(googlePaySessionParameters);
+
+                initializeButtonAndCheckIfReadyToPayWithGoogle();
+            }
+
+            @Override
+            public void onError(final Throwable throwable) {
+                progressBar.setVisibility(View.GONE);
+                resultTextView.setText(String.format("Start google pay payment error: %s", throwable));
+            }
+        });
+    }
+
+    private void initializeButtonAndCheckIfReadyToPayWithGoogle() {
+        initializeGooglePayButton();
+
+        IsReadyToPayRequest isReadyToPayRequest = null;
+
+        try {
+            isReadyToPayRequest = googlePaymentSessionManager.getIsReadyToPayRequest();
+        } catch (JSONException e) {
+            resultTextView.setText("Error initializing creating isReadyToPayRequest from response");
+        }
+
+        if (isReadyToPayRequest != null) {
+            googlePaymentsClient.isReadyToPay(isReadyToPayRequest)
+                                .addOnSuccessListener(this::showGooglePayButton)
+                                .addOnFailureListener(this::processOnReadyToPayFailure);
+        } else {
+            resultTextView.setText("Error: isReadyToPayRequest is null");
+        }
     }
 
     private void initializeGooglePayButton() {
@@ -105,32 +177,16 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
             googlePayButton.initialize(ButtonOptions.newBuilder()
                                                     .setButtonTheme(ButtonConstants.ButtonTheme.DARK)
                                                     .setButtonType(ButtonConstants.ButtonType.PAY)
-                                                    .setAllowedPaymentMethods(GoogleApiRequestBuilderUtil.getAllowedPaymentMethods().toString())
+                                                    .setAllowedPaymentMethods(googlePaymentSessionManager.getAllowedPaymentMethods().toString())
                                                     .build()
 
             );
-            googlePayButton.setOnClickListener((v) -> createPaymentSession());
+            googlePayButton.setOnClickListener((v) -> requestPayment());
         } catch (Exception e) {
             resultTextView.setText(String.format("Error initializing pay button: %s", e.getMessage()));
         }
-    }
 
-    private void isReadyToPayWithGoogle() {
-        IsReadyToPayRequest isReadyToPayRequest = null;
-
-        try {
-            isReadyToPayRequest = IsReadyToPayRequest.fromJson(GoogleApiRequestBuilderUtil.getIsReadyToPayRequest().toString());
-        } catch (JSONException e) {
-            resultTextView.setText(String.format("Error isReadyToPay: %s", e.getMessage()));
-        }
-
-        if (isReadyToPayRequest != null) {
-            googlePaymentsClient.isReadyToPay(isReadyToPayRequest)
-                                                     .addOnSuccessListener(this::showGooglePayButton)
-                                                     .addOnFailureListener(this::processOnReadyToPayFailure);
-        } else {
-            resultTextView.setText("Error initializing pay button: request is null");
-        }
+        progressBar.setVisibility(View.GONE);
     }
 
     private void showGooglePayButton(final Boolean isReadyToPay) {
@@ -146,47 +202,14 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
         resultTextView.setText(String.format("IsReadyToPay returned a failure %s", error));
     }
 
-    private void createPaymentSession() {
-        final Disposable createPaymentResponseObservable = orderRepository.createPayment(false)
-                                                                          .subscribeOn(Schedulers.io())
-                                                                          .observeOn(AndroidSchedulers.mainThread())
-                                                                          .subscribe(this::processCreatePaymentSessionResponse,
-                                                                                     this::processCreatePaymentSessionError);
-        compositeDisposable.add(createPaymentResponseObservable);
-    }
-
-
-    private void processCreatePaymentSessionResponse(final NewPaymentResponse response) {
-        if (!response.getStatus().equals("approved")) {
-            resultTextView.setText(String.format("Create payment session rejected: %s", response.getStatus()));
-        } else {
-            newPaymentResponse = response;
-
-            startGooglePayPayment();
-        }
-    }
-
-    private void startGooglePayPayment() {
-        monri.getMonriApi().startGooglePayPayment(newPaymentResponse.getId(), new ResultCallback<>() {
-            @Override
-            public void onSuccess(StartGooglePayResponse result) {
-                // based on response?
-                requestPayment();
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                resultTextView.setText(String.format("Start google pay payment error: %s", throwable));
-            }
-        });
-    }
-
-    private void processCreatePaymentSessionError(final Throwable error) {
-        resultTextView.setText(String.format("Create payment session error: %s", error));
-    }
-
     private void requestPayment() {
-        final JSONObject paymentRequestObject = GoogleApiRequestBuilderUtil.getPaymentDataRequest();
+        final JSONObject paymentRequestObject;
+
+        try {
+            paymentRequestObject = googlePaymentSessionManager.getPaymentDataRequest();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
         PaymentDataRequest request = PaymentDataRequest.fromJson(paymentRequestObject.toString());
         googlePaymentsClient.loadPaymentData(request)
