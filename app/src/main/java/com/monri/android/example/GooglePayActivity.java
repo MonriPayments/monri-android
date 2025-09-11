@@ -26,7 +26,7 @@ import com.google.android.gms.wallet.button.PayButton;
 import com.google.android.gms.wallet.contract.TaskResultContracts;
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
-import com.monri.android.google_pay.GooglePaymentSessionManager;
+import com.monri.android.google_pay.MonriGooglePaymentRequestHelper;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
 import com.monri.android.model.GooglePayPayment;
@@ -52,7 +52,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     private JSONObject googlePaymentMethodData;
     private TextView resultTextView;
     private NewPaymentResponse newPaymentResponse;
-    private GooglePaymentSessionManager googlePaymentSessionManager;
+    private MonriGooglePaymentRequestHelper monriGooglePaymentRequestHelper;
     private final int apiVersion = 2;
     private final int apiVersionMinor = 0;
 
@@ -99,7 +99,6 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     }
 
     private void initializeGooglePaymentsClient() {
-        // todo move to sdk?
         final Wallet.WalletOptions walletOptions = new Wallet.WalletOptions.Builder().setEnvironment(WalletConstants.ENVIRONMENT_TEST).build();
         googlePaymentsClient = Wallet.getPaymentsClient(this, walletOptions);
 
@@ -121,7 +120,6 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
         } else {
             newPaymentResponse = response;
 
-            // call monri sdk to start the google pay payment
             startGooglePayPayment();
         }
     }
@@ -136,8 +134,8 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
 
             @Override
             public void onSuccess(final JSONObject googlePaySessionParameters) {
-                googlePaymentSessionManager = new GooglePaymentSessionManager(apiVersion, apiVersionMinor);
-                googlePaymentSessionManager.setGooglePaySessionParameters(googlePaySessionParameters);
+                monriGooglePaymentRequestHelper = new MonriGooglePaymentRequestHelper(apiVersion, apiVersionMinor);
+                monriGooglePaymentRequestHelper.setGooglePaySessionParameters(googlePaySessionParameters);
 
                 initializeButtonAndCheckIfReadyToPayWithGoogle();
             }
@@ -156,7 +154,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
         IsReadyToPayRequest isReadyToPayRequest = null;
 
         try {
-            isReadyToPayRequest = googlePaymentSessionManager.getIsReadyToPayRequest();
+            isReadyToPayRequest = monriGooglePaymentRequestHelper.getIsReadyToPayRequest();
         } catch (JSONException e) {
             resultTextView.setText("Error initializing creating isReadyToPayRequest from response");
         }
@@ -177,7 +175,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
             googlePayButton.initialize(ButtonOptions.newBuilder()
                                                     .setButtonTheme(ButtonConstants.ButtonTheme.DARK)
                                                     .setButtonType(ButtonConstants.ButtonType.PAY)
-                                                    .setAllowedPaymentMethods(googlePaymentSessionManager.getAllowedPaymentMethods().toString())
+                                                    .setAllowedPaymentMethods(monriGooglePaymentRequestHelper.getAllowedPaymentMethods().toString())
                                                     .build()
 
             );
@@ -206,7 +204,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
         final JSONObject paymentRequestObject;
 
         try {
-            paymentRequestObject = googlePaymentSessionManager.getPaymentDataRequest();
+            paymentRequestObject = monriGooglePaymentRequestHelper.getPaymentDataRequest();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

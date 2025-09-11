@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 
 import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.exception.MonriException;
-import com.monri.android.google_pay.GooglePaymentSessionManager;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;
@@ -42,7 +41,6 @@ public final class Monri {
     private MonriApi monriApi;
     private final ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult;
     private PaymentController paymentController;
-    private GooglePaymentSessionManager googlePaymentSessionManager;
 
     @VisibleForTesting
     private
@@ -167,20 +165,6 @@ public final class Monri {
 
     public MonriApi getMonriApi() {
         return monriApi;
-    }
-
-    public void initializeGooglePaymentSessionManager(final int apiVersion, final int apiVersionMinor) {
-        googlePaymentSessionManager = new GooglePaymentSessionManager(apiVersion, apiVersionMinor);
-    }
-
-
-    public void startGooglePayPayment(final String paymentSessionId) {
-
-    }
-
-
-    public void isReadyToPayWithGooglePay() {
-
     }
 
     @Deprecated
