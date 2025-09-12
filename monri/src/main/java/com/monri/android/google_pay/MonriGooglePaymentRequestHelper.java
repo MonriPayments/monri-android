@@ -1,6 +1,7 @@
 package com.monri.android.google_pay;
 
 import com.google.android.gms.wallet.IsReadyToPayRequest;
+import com.google.android.gms.wallet.PaymentDataRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,7 +43,7 @@ public class MonriGooglePaymentRequestHelper {
         return IsReadyToPayRequest.fromJson(isReadyToPayRequestJson.toString());
     }
 
-    public JSONObject getPaymentDataRequest() throws JSONException {
+    public PaymentDataRequest getPaymentDataRequest() throws JSONException {
 
         JSONObject paymentDataRequest = getBaseRequest()
                 .put(ALLOWED_PAYMENT_METHODS_KEY, getAllowedPaymentMethods())
@@ -53,7 +54,7 @@ public class MonriGooglePaymentRequestHelper {
 
         paymentDataRequest.put(TRANSACTION_INFO_KEY, transactionInfoObject);
 
-        return paymentDataRequest;
+        return PaymentDataRequest.fromJson(paymentDataRequest.toString());
     }
 
     public JSONArray getAllowedPaymentMethods() throws JSONException {

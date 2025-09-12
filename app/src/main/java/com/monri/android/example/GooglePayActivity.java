@@ -202,16 +202,15 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     }
 
     private void requestPayment() {
-        final JSONObject paymentRequestObject;
+        final PaymentDataRequest paymentDataRequest;
 
         try {
-            paymentRequestObject = monriGooglePaymentRequestHelper.getPaymentDataRequest();
+            paymentDataRequest = monriGooglePaymentRequestHelper.getPaymentDataRequest();
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
 
-        PaymentDataRequest request = PaymentDataRequest.fromJson(paymentRequestObject.toString());
-        googlePaymentsClient.loadPaymentData(request)
+        googlePaymentsClient.loadPaymentData(paymentDataRequest)
                             .addOnCompleteListener(paymentDataLauncher::launch);
     }
 
