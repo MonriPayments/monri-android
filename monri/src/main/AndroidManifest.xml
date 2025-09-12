@@ -6,9 +6,6 @@
     <application>
         <activity android:name=".activity.ConfirmPaymentActivity"
             android:theme="@style/Theme.AppCompat.Light"/>
-        <meta-data
-            android:name="com.google.android.gms.wallet.api.enabled"
-            android:value="true"/>
     </application>
 
 </manifest>
