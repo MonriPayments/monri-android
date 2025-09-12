@@ -96,6 +96,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     private void initializeMonriSdkObjects() {
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(((ActivityResultCaller) this), MonriApiOptions.create(orderRepository.authenticityToken(), true));
+        monriGooglePaymentRequestHelper = new MonriGooglePaymentRequestHelper(apiVersion, apiVersionMinor);
     }
 
     private void initializeGooglePaymentsClient() {
@@ -134,8 +135,8 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
 
             @Override
             public void onSuccess(final JSONObject googlePaySessionParameters) {
-                monriGooglePaymentRequestHelper = new MonriGooglePaymentRequestHelper(apiVersion, apiVersionMinor);
-                monriGooglePaymentRequestHelper.setGooglePaySessionParameters(googlePaySessionParameters);
+                monriGooglePaymentRequestHelper.setMonriGooglePaySessionParameters(googlePaySessionParameters);
+                monriGooglePaymentRequestHelper.setTotalPriceLabel("Total price");
 
                 initializeButtonAndCheckIfReadyToPayWithGoogle();
             }
