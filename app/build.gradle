@@ -35,6 +35,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+
+    lintOptions {
+        // suppress missing translation warning for test app
+        disable 'MissingTranslation'
+    }
 }
 
 dependencies {

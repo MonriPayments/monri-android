@@ -49,6 +49,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".GooglePayActivity"/>
+        <activity
+            android:name=".GooglePayActivitySimple"
+            android:windowSoftInputMode="adjustPan"/>
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"
             android:value="true"/>

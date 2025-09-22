@@ -26,7 +26,7 @@ class MonriApiImpl implements MonriApi {
     public void startGooglePayPayment(final String paymentId, final ResultCallback<JSONObject> callback) {
         taskRunner.executeAsync(
                 () -> {
-                    MonriHttpResult<JSONObject> result = monriHttpApi.startGooglePayPayment(paymentId);
+                    final MonriHttpResult<JSONObject> result = monriHttpApi.startGooglePayPayment(paymentId);
                     if (result.getCause() != null) {
                         throw result.getCause();
                     } else {

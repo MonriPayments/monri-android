@@ -14,6 +14,7 @@
     <string name="btn_add_payment_method_example">New Payment Method</string>
     <string name="btn_add_payment_method_example_3ds1">New Payment Method - 3DS1</string>
     <string name="btn_payment_google_pay">Google pay payment</string>
+    <string name="btn_payment_google_pay_simple">Google pay payment (alternative)</string>
     <string name="title_activity_payment_picker">PaymentPickerActivity</string>
     <string name="continue_with_3ds_enrolled_card">Continue with 3ds enrolled card</string>
     <string name="continue_with_non_3ds_enrolled_card">Continue with not enrolled 3DS card</string>
@@ -33,4 +34,18 @@
     <string name="direct_payment">Direct payment (pay-cek-hr)</string>
     <string name="or">OR</string>
     <string name="enter_cvv">Enter CVV</string>
+    <string name="card_is_not_valid">Card is not valid</string>
+
+    <string name="google_pay_activity_create_payment_session_rejected">Create payment session rejected: %1$s</string>
+    <string name="google_pay_activity_create_payment_session_error">Create payment session error: %1$s</string>
+    <string name="google_pay_activity_total_price_label">Total price</string>
+    <string name="google_pay_activity_start_google_pay_payment_error">Start google pay payment error: %1$s</string>
+    <string name="google_pay_activity_error_initializing_is_ready_to_pay_request">Error initializing isReadyToPayRequest from response</string>
+    <string name="google_pay_activity_error_initializing_pay_button">Error initializing pay button: %1$s</string>
+    <string name="google_pay_activity_error_not_ready_to_pay">Error: not ready to pay</string>
+    <string name="google_pay_activity_is_ready_to_pay_returned_a_failure">IsReadyToPay returned a failure %1$s</string>
+    <string name="google_pay_activity_error_parsing_payment_data_from_request_payment_method">Error parsing paymentData from requestPayment method: %1$s</string>
+    <string name="google_pay_activity_request_payment_method_failure">RequestPayment method failure: %1$d %2$s</string>
+    <string name="google_pay_activity_confirm_payment_error">Confirm payment error: %1$s</string>
+    <string name="google_pay_activity_confirm_payment_result">Confirm payment result: %1$s</string>
 </resources>

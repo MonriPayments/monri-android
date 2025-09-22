@@ -1,6 +1,7 @@
 package com.monri.android.google_pay;
 
 import com.google.android.gms.wallet.IsReadyToPayRequest;
+import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +18,7 @@ public class MonriGooglePaymentRequestHelper {
     private static final String TRANSACTION_INFO_KEY = "transactionInfo";
     private static final String MERCHANT_INFO_KEY = "merchantInfo";
     private static final String TOTAL_PRICE_LABEL_KEY = "totalPriceLabel";
+    private static final String PAYMENT_METHOD_DATA_KEY = "paymentMethodData";
 
     public MonriGooglePaymentRequestHelper(final int apiVersion, final int apiVersionMinor) {
         this.apiVersion = apiVersion;
@@ -45,11 +47,11 @@ public class MonriGooglePaymentRequestHelper {
 
     public PaymentDataRequest getPaymentDataRequest() throws JSONException {
 
-        JSONObject paymentDataRequest = getBaseRequest()
+        final JSONObject paymentDataRequest = getBaseRequest()
                 .put(ALLOWED_PAYMENT_METHODS_KEY, getAllowedPaymentMethods())
                 .put(MERCHANT_INFO_KEY, monriGooglePaySessionParameters.getJSONObject(MERCHANT_INFO_KEY));
 
-        JSONObject transactionInfoObject = monriGooglePaySessionParameters.getJSONObject(TRANSACTION_INFO_KEY);
+        final JSONObject transactionInfoObject = monriGooglePaySessionParameters.getJSONObject(TRANSACTION_INFO_KEY);
         if (totalPriceLabel != null) transactionInfoObject.put(TOTAL_PRICE_LABEL_KEY, totalPriceLabel);
 
         paymentDataRequest.put(TRANSACTION_INFO_KEY, transactionInfoObject);
@@ -59,5 +61,11 @@ public class MonriGooglePaymentRequestHelper {
 
     public JSONArray getAllowedPaymentMethods() throws JSONException {
         return new JSONArray().put(monriGooglePaySessionParameters.getJSONObject(ALLOWED_PAYMENT_METHODS_KEY));
+    }
+
+    public JSONObject getPaymentMethodDataFromPaymentData(final PaymentData paymentData) throws JSONException {
+        final String paymentInfo = paymentData.toJson();
+
+        return new JSONObject(paymentInfo).getJSONObject(PAYMENT_METHOD_DATA_KEY);
     }
 }

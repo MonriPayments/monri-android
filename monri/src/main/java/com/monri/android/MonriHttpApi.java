@@ -30,7 +30,7 @@ interface MonriHttpApi {
     //post v2/payment/{id}/confirm
     MonriHttpResult<ConfirmPaymentResponse> confirmPayment(ConfirmPaymentParams confirmPaymentParams);
 
-    MonriHttpResult<JSONObject> startGooglePayPayment(final String PaymentId);
+    MonriHttpResult<JSONObject> startGooglePayPayment(String PaymentId);
 
     //get v2/payment/{id}/status
     MonriHttpResult<PaymentStatusResponse> paymentStatus(String id);

@@ -262,7 +262,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
         final String type = paymentMethodParams.getType();
         final Map<String, String> data = paymentMethodParams.getData();
 
-        JSONObject paymentMethodJSON = new JSONObject();
+        final JSONObject paymentMethodJSON = new JSONObject();
         paymentMethodJSON.put(PAYMENT_METHOD_TYPE_KEY, type);
 
         if (type.equals(GooglePayPayment.TYPE_GOOGLE_PAY)) {
@@ -271,7 +271,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
             paymentMethodJSON.put(PAYMENT_METHOD_DATA_KEY, tokenDataObject);
         } else {
-            JSONObject dataMapJSON = new JSONObject();
+            final JSONObject dataMapJSON = new JSONObject();
 
             for (String key : data.keySet()) {
                 dataMapJSON.put(key, data.get(key));

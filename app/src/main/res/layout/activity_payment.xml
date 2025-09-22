@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:layout_marginTop="30dp"
+    android:orientation="vertical"
     tools:context=".PaymentActivity">
 
     <Button
@@ -53,16 +53,22 @@
         android:id="@+id/btn_google_pay_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/btn_payment_google_pay"/>
+        android:text="@string/btn_payment_google_pay" />
+
+    <Button
+        android:id="@+id/btn_google_pay_activity_simple"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_payment_google_pay_simple" />
 
     <TextView
-        android:layout_width="match_parent"
         android:id="@+id/txt_result_payment_example"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="20dp"
         android:gravity="center"
-        tools:text="jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text"
-        android:layout_height="0dp"/>
+        android:padding="20dp"
+        tools:text="jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text jako dugi text" />
 
 
 </LinearLayout>
