@@ -142,24 +142,24 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
 
     @Override
     public void onError(final GooglePayHandlerException googlePayHandlerException) {
-        resultTextView.setText(String.format("GooglePayHandlerException %s", googlePayHandlerException.getErrorCode()));
+        resultTextView.setText(getString(R.string.google_pay_activity_google_pay_handler_exception, googlePayHandlerException.getErrorCode()));
     }
 
     @Override
     public void onNotReadyToPayWithGooglePay() {
-        resultTextView.setText("On not ready to pay with google pay called");
+        resultTextView.setText(getString(R.string.google_pay_activity_on_not_ready_to_pay_with_google_pay_called));
     }
 
     @Override
     public void onGooglePayButtonReady(final PayButton payButton) {
-        resultTextView.setText("On pay button ready called");
         progressBar.setVisibility(View.GONE);
+
         googlePayButtonContainer.addView(payButton);
     }
 
     @Override
     public void onGetPaymentMethodDataFromUserFailed(final int statusCode) {
-        resultTextView.setText(String.format("Failed to get payment method data from user, status code: %s", statusCode));
+        resultTextView.setText(getString(R.string.google_pay_activity_failed_to_get_payment_method_data_from_user, statusCode));
     }
 
     @Override
