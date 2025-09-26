@@ -7,11 +7,11 @@ public interface GooglePayHandlerCallbacks {
 
     void onNotReadyToPayWithGooglePay();
 
-    void onGooglePayButtonReady(final PayButton payButton);
+    void onGooglePayButtonReady(PayButton payButton);
 
-    void onGetPaymentMethodDataFromUserFailed(final int statusCode);
+    void onGetPaymentMethodDataFromUserFailed(int statusCode);
 
-    void onConfirmPaymentResult(final PaymentResult result, final Throwable cause);
+    void onConfirmPaymentResult(PaymentResult result, Throwable cause);
 
-    void onError(final GooglePayHandlerException googlePayHandlerException);
+    void onError(GooglePayHandlerException googlePayHandlerException);
 }

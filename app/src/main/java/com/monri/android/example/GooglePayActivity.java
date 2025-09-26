@@ -52,9 +52,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     private TextView resultTextView;
     private NewPaymentResponse newPaymentResponse;
     private MonriGooglePaymentRequestHelper monriGooglePaymentRequestHelper;
-    private final int apiVersion = 2;
-    private final int apiVersionMinor = 0;
-    final CustomerParams testCustomerParams = new CustomerParams()
+    private final CustomerParams testCustomerParams = new CustomerParams()
             .setAddress("Adresa")
             .setFullName("Tester Testerovic")
             .setCity("Sarajevo")
@@ -103,7 +101,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     private void initializeMonriSdkObjects() {
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(((ActivityResultCaller) this), MonriApiOptions.create(orderRepository.authenticityToken(), true));
-        monriGooglePaymentRequestHelper = new MonriGooglePaymentRequestHelper(apiVersion, apiVersionMinor);
+        monriGooglePaymentRequestHelper = new MonriGooglePaymentRequestHelper();
     }
 
     private void initializeGooglePaymentsClient() {
@@ -123,9 +121,9 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     }
 
     private void processCreatePaymentSessionResponse(final NewPaymentResponse response) {
-        final String status = response.getStatus();
+        final Status status = response.getStatus();
 
-        if (!OrderRepository.CREATE_PAYMENT_SESSION_APPROVED.equals(status)) {
+        if (Status.APPROVED != status) {
             resultTextView.setText(getString(R.string.google_pay_activity_create_payment_session_rejected, status));
         } else {
             newPaymentResponse = response;

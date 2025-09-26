@@ -40,8 +40,6 @@ public class GooglePayHandler {
     private final ActivityResultCaller activityResultCaller;
     private ActivityResultLauncher<Task<PaymentData>> paymentMethodLauncher;
     private final ButtonOptions.Builder buttonOptionsBuilder;
-    private static final int API_VERSION = 2;
-    private static final int API_VERSION_MINOR = 0;
 
     public GooglePayHandler(
             final ActivityResultCaller paymentMethodActivityResultCaller, final Activity activity, final int walletEnvironment, final Monri monri,
@@ -57,7 +55,7 @@ public class GooglePayHandler {
 
         final Wallet.WalletOptions walletOptions = new Wallet.WalletOptions.Builder().setEnvironment(walletEnvironment).build();
         googlePaymentsClient = Wallet.getPaymentsClient(activity, walletOptions);
-        monriGooglePaymentRequestHelper = new MonriGooglePaymentRequestHelper(API_VERSION, API_VERSION_MINOR);
+        monriGooglePaymentRequestHelper = new MonriGooglePaymentRequestHelper();
     }
 
     private void initPaymentMethodDataLauncher(final ActivityResultCaller activityResultCaller) {
@@ -84,10 +82,7 @@ public class GooglePayHandler {
             final IsReadyToPayRequest isReadyToPayRequest = monriGooglePaymentRequestHelper.getIsReadyToPayRequest();
             googlePaymentsClient.isReadyToPay(isReadyToPayRequest)
                                 .addOnSuccessListener(this::processIsReadyToPayRequest)
-                                .addOnFailureListener(e ->
-                                                              googlePayHandlerCallbacks.onError(
-                                                                      new GooglePayHandlerException(IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR)
-                                                              ));
+                                .addOnFailureListener(e -> googlePayHandlerCallbacks.onError(new GooglePayHandlerException(IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR)));
         } catch (JSONException e) {
             googlePayHandlerCallbacks.onError(new GooglePayHandlerException(PREPARE_IS_READY_TO_PAY_REQ_ERROR));
         }
@@ -128,15 +123,13 @@ public class GooglePayHandler {
     }
 
     private void preparePaymentMethodDataForConfirmPayment(final PaymentData paymentData) {
-        JSONObject googlePaymentMethodData = null;
-
         try {
-            googlePaymentMethodData = monriGooglePaymentRequestHelper.getPaymentMethodDataFromPaymentData(paymentData);
+            final JSONObject googlePaymentMethodData = monriGooglePaymentRequestHelper.getPaymentMethodDataFromPaymentData(paymentData);
+
+            confirmGooglePayPayment(googlePaymentMethodData);
         } catch (Exception e) {
             googlePayHandlerCallbacks.onError(new GooglePayHandlerException(PARSE_PAYMENT_METHOD_DATA_JSON_ERROR));
         }
-
-        confirmGooglePayPayment(googlePaymentMethodData);
     }
 
     private void confirmGooglePayPayment(final JSONObject googlePaymentMethodData) {

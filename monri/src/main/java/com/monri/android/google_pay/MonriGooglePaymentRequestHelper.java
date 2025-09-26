@@ -8,8 +8,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MonriGooglePaymentRequestHelper {
-    private int apiVersion;
-    private int apiVersionMinor;
+    private static final int API_VERSION = 2;
+    private static final int API_VERSION_MINOR = 0;
     private String totalPriceLabel;
     private JSONObject monriGooglePaySessionParameters;
     private static final String API_VERSION_KEY = "apiVersion";
@@ -19,11 +19,6 @@ public class MonriGooglePaymentRequestHelper {
     private static final String MERCHANT_INFO_KEY = "merchantInfo";
     private static final String TOTAL_PRICE_LABEL_KEY = "totalPriceLabel";
     private static final String PAYMENT_METHOD_DATA_KEY = "paymentMethodData";
-
-    public MonriGooglePaymentRequestHelper(final int apiVersion, final int apiVersionMinor) {
-        this.apiVersion = apiVersion;
-        this.apiVersionMinor = apiVersionMinor;
-    }
 
     public void setMonriGooglePaySessionParameters(final JSONObject monriGooglePaySessionParameters) {
         this.monriGooglePaySessionParameters = monriGooglePaySessionParameters;
@@ -35,8 +30,8 @@ public class MonriGooglePaymentRequestHelper {
 
     private JSONObject getBaseRequest() throws JSONException {
         return new JSONObject()
-                .put(API_VERSION_KEY, apiVersion)
-                .put(API_VERSION_MINOR_KEY, apiVersionMinor);
+                .put(API_VERSION_KEY, API_VERSION)
+                .put(API_VERSION_MINOR_KEY, API_VERSION_MINOR);
     }
 
     public IsReadyToPayRequest getIsReadyToPayRequest() throws JSONException {

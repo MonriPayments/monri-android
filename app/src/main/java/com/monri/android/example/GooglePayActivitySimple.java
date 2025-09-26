@@ -104,7 +104,7 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
     }
 
     private void processCreatePaymentSessionResponse(final NewPaymentResponse response) {
-        if (!OrderRepository.CREATE_PAYMENT_SESSION_APPROVED.equals(response.getStatus())) {
+        if (Status.APPROVED != response.getStatus()) {
             progressBar.setVisibility(View.GONE);
             resultTextView.setText(getString(R.string.google_pay_activity_create_payment_session_rejected, response.getStatus()));
         } else {
@@ -163,7 +163,7 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
     }
 
     @Override
-    public void onConfirmPaymentResult(PaymentResult result, Throwable cause) {
+    public void onConfirmPaymentResult(final PaymentResult result, final Throwable cause) {
         final String paymentResultText;
 
         if (cause != null) {
