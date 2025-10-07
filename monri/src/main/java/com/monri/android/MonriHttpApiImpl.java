@@ -21,15 +21,7 @@ import com.monri.android.model.PaymentStatusResponse;
 import com.monri.android.model.TransactionParams;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,8 +29,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     private final String baseUrl;
     private final Map<String, String> headers;
-    private final String CONTENT_LENGTH_HEADER = "Content-Length";
-    private final String RESPONSE_ERROR_MESSAGE_KEY = "message";
+    private final HttpsClient httpsClient;
     private static final String GOOGLE_PAY_TOKENIZATION_DATA_KEY = "tokenizationData";
     private static final String GOOGLE_PAY_TOKEN_KEY = "token";
     private static final String PAYMENT_METHOD_DATA_KEY = "data";
@@ -47,16 +38,17 @@ class MonriHttpApiImpl implements MonriHttpApi {
     public MonriHttpApiImpl(final String baseUrl, final Map<String, String> headers) {
         this.baseUrl = baseUrl;
         this.headers = headers;
+        this.httpsClient = new HttpsClient();
     }
 
     //post v2/payment/{id}/confirm
     @Override
     public MonriHttpResult<ConfirmPaymentResponse> confirmPayment(@NonNull ConfirmPaymentParams confirmPaymentParams) {
         try {
-            final MonriHttpResult<JSONObject> response = httpsPOST(
+            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
                     baseUrl + "/v2/payment/" + confirmPaymentParams.getPaymentId() + "/confirm",
                     confirmPaymentParamsToJSON(confirmPaymentParams),
-                    new HashMap<>(),
+                    headers,
                     false
             );
             if (response.getCause() == null) {
@@ -72,9 +64,9 @@ class MonriHttpApiImpl implements MonriHttpApi {
     @Override
     public MonriHttpResult<JSONObject> startGooglePayPayment(final String paymentId) {
         try {
-            final MonriHttpResult<JSONObject> response = httpsPOST(
+            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
                     baseUrl + "/v2/google-pay/" + paymentId + "/start-payment",
-                    new HashMap<>()
+                    headers
             );
             if (response.getCause() == null) {
                 return MonriHttpResult.success((response.getResult()), response.getResponseCode());
@@ -89,7 +81,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
     //get v2/payment/{id}/status
     @Override
     public MonriHttpResult<PaymentStatusResponse> paymentStatus(String id) {
-        final MonriHttpResult<JSONObject> response = httpsGET(baseUrl + "/v2/payment/" + id + "/status", new HashMap<>());
+        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(baseUrl + "/v2/payment/" + id + "/status", new HashMap<>());
 
         try {
             if (response.getCause() == null) {
@@ -107,7 +99,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
     @Override
     public MonriHttpResult<Customer> createCustomer(@NonNull final CreateCustomerParams createCustomerParams) {
         try {
-            final MonriHttpResult<JSONObject> response = httpsPOST(
+            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
                     baseUrl + "/v2/customers",
                     createCustomerParams.getCustomer().toJSON(),
                     new HashMap<>() {{
@@ -127,7 +119,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     @Override
     public MonriHttpResult<Customer> retrieveCustomer(final GetCustomerParams retrieveCustomerParams) {
-        final MonriHttpResult<JSONObject> response = httpsGET(
+        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(
                 baseUrl + "/v2/customers/" + retrieveCustomerParams.getCustomerUuid(),
                 new HashMap<>() {{
                     put("authorization", retrieveCustomerParams.getAccessToken());
@@ -147,7 +139,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     @Override
     public MonriHttpResult<Customer> retrieveCustomerViaMerchantCustomerId(final RetrieveCustomerViaMerchantCustomerUuidParams retrieveCustomerViaMerchantCustomerUuidParams) {
-        final MonriHttpResult<JSONObject> response = httpsGET(
+        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(
                 baseUrl + "/v2/merchants/customers/" + retrieveCustomerViaMerchantCustomerUuidParams.getMerchantCustomerUuid(),
                 new HashMap<>() {{
                     put("authorization", retrieveCustomerViaMerchantCustomerUuidParams.getAccessToken());
@@ -168,7 +160,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
     @Override
     public MonriHttpResult<Customer> updateCustomer(@NonNull final UpdateCustomerParams updateCustomerParams) {
         try {
-            final MonriHttpResult<JSONObject> response = httpsPOST(
+            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
                     baseUrl + "/v2/customers/" + updateCustomerParams.getCustomerUuid(),
                     updateCustomerParams.getCustomer().toJSON(),
                     new HashMap<>() {{
@@ -189,7 +181,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     @Override
     public MonriHttpResult<DeleteCustomerResponse> deleteCustomer(final DeleteCustomerParams deleteCustomerParams) {
-        final MonriHttpResult<JSONObject> response = httpsDELETE(
+        final MonriHttpResult<JSONObject> response = httpsClient.httpsDELETE(
                 baseUrl + "/v2/customers/" + deleteCustomerParams.getCustomerUuid(),
                 new HashMap<>() {{
                     put("authorization", deleteCustomerParams.getAccessToken());
@@ -209,7 +201,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     @Override
     public MonriHttpResult<MerchantCustomers> retrieveAllCustomers(final String accessToken) {
-        final MonriHttpResult<JSONObject> response = httpsGET(
+        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(
                 baseUrl + "/v2/customers",
                 new HashMap<>() {{
                     put("authorization", accessToken);
@@ -230,7 +222,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
     @Override
     public MonriHttpResult<CustomerPaymentMethodResponse> getPaymentMethodsForCustomer(final CustomerPaymentMethodParams customerPaymentMethodParams) {
-        final MonriHttpResult<JSONObject> response = httpsGET(
+        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(
                 baseUrl +
                         "/v2/customers/" +
                         customerPaymentMethodParams.getCustomerUuid() +
@@ -314,175 +306,5 @@ class MonriHttpApiImpl implements MonriHttpApi {
         }
 
         return returnValue;
-    }
-
-    private void addHeadersToConnection(final HttpURLConnection urlConnection, final Map<String, String> additionalHeader) {
-        for (String key : headers.keySet()) {
-            urlConnection.setRequestProperty(key, headers.get(key));
-        }
-
-        for (String key : additionalHeader.keySet()) {
-            urlConnection.setRequestProperty(key, additionalHeader.get(key));
-        }
-    }
-
-    private MonriHttpResult<JSONObject> httpsPOST(
-            final String endpoint,
-            final JSONObject body,
-            final Map<String, String> additionalHeader,
-            final boolean useChunkedStreamingMode
-    ) {
-        HttpURLConnection urlConnection = null;
-
-        try {
-            urlConnection = createHttpPOSTURLConnection(endpoint, additionalHeader);
-
-            if (useChunkedStreamingMode) {
-                urlConnection.setChunkedStreamingMode(0);
-            } else {
-                final int contentLength = body.toString().getBytes(StandardCharsets.UTF_8).length;
-                urlConnection.setFixedLengthStreamingMode(contentLength);
-                urlConnection.addRequestProperty(CONTENT_LENGTH_HEADER, String.valueOf(contentLength));
-            }
-
-            writeToOutputStream(urlConnection, body);
-
-            return readResponseFromInputStream(urlConnection);
-
-        } catch (Exception e) {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
-    }
-
-    private MonriHttpResult<JSONObject> httpsPOST(final String endpoint, final Map<String, String> additionalHeader) {
-        HttpURLConnection urlConnection = null;
-
-        try {
-            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.POST, additionalHeader);
-
-            return readResponseFromInputStream(urlConnection);
-        } catch (Exception e) {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
-    }
-
-    private MonriHttpResult<JSONObject> httpsGET(
-            final String endpoint,
-            final Map<String, String> additionalHeader
-    ) {
-        HttpURLConnection urlConnection = null;
-        try {
-            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.GET, additionalHeader);
-
-            return readResponseFromInputStream(urlConnection);
-
-        } catch (Exception e) {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
-    }
-
-    private MonriHttpResult<JSONObject> httpsDELETE(
-            final String endpoint,
-            final Map<String, String> additionalHeader
-    ) {
-        HttpURLConnection urlConnection = null;
-        try {
-            urlConnection = createHttpURLConnection(endpoint, MonriHttpMethod.DELETE, additionalHeader);
-
-            return readResponseFromInputStream(urlConnection);
-
-        } catch (Exception e) {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
-
-    }
-
-    private HttpURLConnection createHttpURLConnection(
-            final String endpoint,
-            final MonriHttpMethod monriHttpMethod,
-            final Map<String, String> additionalHeader
-    ) throws IOException {
-        URL url = new URL(endpoint);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod(monriHttpMethod.getValue());
-
-        addHeadersToConnection(urlConnection, additionalHeader);
-
-        return urlConnection;
-    }
-
-    private HttpURLConnection createHttpPOSTURLConnection(
-            final String endpoint,
-            final Map<String, String> additionalHeader
-    ) throws IOException {
-        URL url = new URL(endpoint);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod(MonriHttpMethod.POST.getValue());
-
-        urlConnection.setDoInput(true);
-        urlConnection.setDoOutput(true);
-        urlConnection.setUseCaches(false);
-
-        addHeadersToConnection(urlConnection, additionalHeader);
-
-        return urlConnection;
-    }
-
-    private void writeToOutputStream(final HttpURLConnection urlConnection, final JSONObject body) throws IOException {
-        OutputStreamWriter wr = null;
-
-        try {
-            wr = new OutputStreamWriter(urlConnection.getOutputStream());
-            wr.write(body.toString());
-            wr.flush();
-
-        } finally {
-            if (wr != null) {
-                wr.close();
-            }
-        }
-    }
-
-    private MonriHttpResult<JSONObject> readResponseFromInputStream(final HttpURLConnection urlConnection) throws IOException, JSONException {
-        try {
-            int responseCode = urlConnection.getResponseCode();
-            InputStream inputStream;
-            if (responseCode >= 200 && responseCode < 300) {
-                inputStream = urlConnection.getInputStream();
-            } else {
-                inputStream = urlConnection.getErrorStream();
-            }
-
-            InputStream in = new BufferedInputStream(inputStream);
-            BufferedReader r = new BufferedReader(new InputStreamReader(in));
-            StringBuilder jsonStringResponse = new StringBuilder();
-            for (String line; (line = r.readLine()) != null; ) {
-                jsonStringResponse.append(line).append('\n');
-            }
-
-            JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
-
-            if (responseCode >= 200 && responseCode < 300) {
-                return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
-            } else {
-                String errorMessage = jsonResponse.has(RESPONSE_ERROR_MESSAGE_KEY) ? jsonResponse.getString(RESPONSE_ERROR_MESSAGE_KEY) : jsonResponse.toString();
-                return MonriHttpResult.failed(MonriHttpException.create(errorMessage, MonriHttpExceptionCode.REQUEST_FAILED));
-            }
-
-        } finally {
-            urlConnection.disconnect();
-        }
     }
 }
