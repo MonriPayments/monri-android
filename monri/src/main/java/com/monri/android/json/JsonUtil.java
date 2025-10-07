@@ -2,6 +2,10 @@ package com.monri.android.json;
 
 import androidx.annotation.Nullable;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,4 +49,13 @@ public class JsonUtil {
         }
     }
 
+    public static List<String> toList(final JSONArray jsonArray) throws JSONException {
+        final List<String> list = new ArrayList<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            list.add(jsonArray.getString(i));
+        }
+
+        return list;
+    }
 }
