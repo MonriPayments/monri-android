@@ -183,7 +183,7 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
 
     Consumer<NewPaymentResponse> handlePaymentSessionResponse(Supplier<PaymentMethodParams> paymentMethodParamsSupplier) {
         return newPaymentResponse -> {
-            if (!"approved".equals(newPaymentResponse.getStatus())) {
+            if (Status.APPROVED != newPaymentResponse.getStatus()) {
                 Toast.makeText(this, "Payment session create failed", Toast.LENGTH_LONG).show();
             } else {
 

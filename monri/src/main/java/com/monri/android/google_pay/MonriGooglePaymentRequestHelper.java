@@ -1,14 +1,15 @@
 package com.monri.android.google_pay;
 
 import com.google.android.gms.wallet.IsReadyToPayRequest;
+import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MonriGooglePaymentRequestHelper {
-    private int apiVersion;
-    private int apiVersionMinor;
+    private static final int API_VERSION = 2;
+    private static final int API_VERSION_MINOR = 0;
     private String totalPriceLabel;
     private JSONObject monriGooglePaySessionParameters;
     private static final String API_VERSION_KEY = "apiVersion";
@@ -17,11 +18,7 @@ public class MonriGooglePaymentRequestHelper {
     private static final String TRANSACTION_INFO_KEY = "transactionInfo";
     private static final String MERCHANT_INFO_KEY = "merchantInfo";
     private static final String TOTAL_PRICE_LABEL_KEY = "totalPriceLabel";
-
-    public MonriGooglePaymentRequestHelper(final int apiVersion, final int apiVersionMinor) {
-        this.apiVersion = apiVersion;
-        this.apiVersionMinor = apiVersionMinor;
-    }
+    private static final String PAYMENT_METHOD_DATA_KEY = "paymentMethodData";
 
     public void setMonriGooglePaySessionParameters(final JSONObject monriGooglePaySessionParameters) {
         this.monriGooglePaySessionParameters = monriGooglePaySessionParameters;
@@ -33,8 +30,8 @@ public class MonriGooglePaymentRequestHelper {
 
     private JSONObject getBaseRequest() throws JSONException {
         return new JSONObject()
-                .put(API_VERSION_KEY, apiVersion)
-                .put(API_VERSION_MINOR_KEY, apiVersionMinor);
+                .put(API_VERSION_KEY, API_VERSION)
+                .put(API_VERSION_MINOR_KEY, API_VERSION_MINOR);
     }
 
     public IsReadyToPayRequest getIsReadyToPayRequest() throws JSONException {
@@ -45,11 +42,11 @@ public class MonriGooglePaymentRequestHelper {
 
     public PaymentDataRequest getPaymentDataRequest() throws JSONException {
 
-        JSONObject paymentDataRequest = getBaseRequest()
+        final JSONObject paymentDataRequest = getBaseRequest()
                 .put(ALLOWED_PAYMENT_METHODS_KEY, getAllowedPaymentMethods())
                 .put(MERCHANT_INFO_KEY, monriGooglePaySessionParameters.getJSONObject(MERCHANT_INFO_KEY));
 
-        JSONObject transactionInfoObject = monriGooglePaySessionParameters.getJSONObject(TRANSACTION_INFO_KEY);
+        final JSONObject transactionInfoObject = monriGooglePaySessionParameters.getJSONObject(TRANSACTION_INFO_KEY);
         if (totalPriceLabel != null) transactionInfoObject.put(TOTAL_PRICE_LABEL_KEY, totalPriceLabel);
 
         paymentDataRequest.put(TRANSACTION_INFO_KEY, transactionInfoObject);
@@ -59,5 +56,11 @@ public class MonriGooglePaymentRequestHelper {
 
     public JSONArray getAllowedPaymentMethods() throws JSONException {
         return new JSONArray().put(monriGooglePaySessionParameters.getJSONObject(ALLOWED_PAYMENT_METHODS_KEY));
+    }
+
+    public JSONObject getPaymentMethodDataFromPaymentData(final PaymentData paymentData) throws JSONException {
+        final String paymentInfo = paymentData.toJson();
+
+        return new JSONObject(paymentInfo).getJSONObject(PAYMENT_METHOD_DATA_KEY);
     }
 }

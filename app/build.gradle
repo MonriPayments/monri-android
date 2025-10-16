@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId "com.monri.android.example"
         minSdkVersion 21
-        targetSdkVersion 35
+        targetSdkVersion 36
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -34,6 +34,11 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
+    }
+
+    lintOptions {
+        // suppress missing translation warning for test app
+        disable 'MissingTranslation'
     }
 }
 

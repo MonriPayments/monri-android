@@ -24,7 +24,7 @@ public class GooglePayPayment extends PaymentMethod {
 
     @Override
     public Map<String, String> data() {
-        Map<String, String> data = new HashMap<>();
+        final Map<String, String> data = new HashMap<>();
 
         data.put(GOOGLE_PAYMENT_METHOD_DATA_KEY, googlePaymentMethodData.toString());
 
