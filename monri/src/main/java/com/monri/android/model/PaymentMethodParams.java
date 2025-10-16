@@ -2,8 +2,6 @@ package com.monri.android.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +39,6 @@ public class PaymentMethodParams implements Parcelable {
         this.data = data;
         return this;
     }
-
 
     @Override
     public int describeContents() {

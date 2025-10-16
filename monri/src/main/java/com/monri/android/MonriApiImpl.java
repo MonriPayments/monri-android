@@ -5,6 +5,8 @@ import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
 
+import org.json.JSONObject;
+
 /**
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
@@ -18,6 +20,20 @@ class MonriApiImpl implements MonriApi {
     MonriApiImpl(final MonriHttpApi monriHttpApi) {
         this.monriHttpApi = monriHttpApi;
         this.taskRunner = new TaskRunner();
+    }
+
+    @Override
+    public void startGooglePayPayment(final String paymentId, final ResultCallback<JSONObject> callback) {
+        taskRunner.executeAsync(
+                () -> {
+                    final MonriHttpResult<JSONObject> result = monriHttpApi.startGooglePayPayment(paymentId);
+                    if (result.getCause() != null) {
+                        throw result.getCause();
+                    } else {
+                        return result.getResult();
+                    }
+                },
+                callback);
     }
 
     @Override

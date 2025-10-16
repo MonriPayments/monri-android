@@ -5,11 +5,15 @@ import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
 
+import org.json.JSONObject;
+
 /**
  * Created by jasminsuljic on 2019-12-05.
  * MonriAndroid
  */
 public interface MonriApi {
+
+    void startGooglePayPayment(String paymentId, ResultCallback<JSONObject> callback);
 
     void confirmPayment(ConfirmPaymentParams params, ResultCallback<ConfirmPaymentResponse> callback);
 

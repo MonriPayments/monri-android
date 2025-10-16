@@ -50,6 +50,8 @@ public class OrderRepository {
 
     private static final String CONTENT_TYPE = "application/json";
 
+    static final String CREATE_PAYMENT_SESSION_APPROVED = "approved";
+
     public OrderRepository(Context context, ViewDelegate viewDelegate) {
         this.context = context;
         this.viewDelegate = viewDelegate;

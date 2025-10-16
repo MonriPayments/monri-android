@@ -39,8 +39,9 @@ public final class Monri {
     private String authenticityToken;
     private MonriApiOptions apiOptions;
     private MonriApi monriApi;
-    private PaymentController paymentController;
     private final ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult;
+    private PaymentController paymentController;
+
     @VisibleForTesting
     private
     TokenCreator mTokenCreator = (apiOptions, tokenParams, executor, callback) -> {
@@ -80,20 +81,10 @@ public final class Monri {
     }
 
     public Monri(final ActivityResultCaller activityResultCaller) {
-        registeredForActivityResult = activityResultCaller.<ConfirmPaymentActivity.Request, ConfirmPaymentActivity.Response>registerForActivityResult(new ActivityResultContract<>() {
-            @NonNull
-            @Override
-            public Intent createIntent(@NonNull Context context, ConfirmPaymentActivity.Request input) {
-                return ConfirmPaymentActivity.createIntent(context, input);
-            }
-
-            @Override
-            public ConfirmPaymentActivity.Response parseResult(int resultCode, @Nullable Intent intent) {
-                return ConfirmPaymentActivity.parseResponse(resultCode, intent);
-            }
-        }, result -> {
-            paymentController.acceptResult(result.getPaymentResult(), null);
-        });
+        registeredForActivityResult = activityResultCaller.registerForActivityResult(
+                new ConfirmPaymentActivityResultContract(),
+                result -> paymentController.acceptResult(result.getPaymentResult(), null)
+        );
     }
 
     public Monri(ActivityResultCaller activityResultCaller, final MonriApiOptions monriApiOptions) {
@@ -193,6 +184,19 @@ public final class Monri {
         void create(MonriApiOptions apiOptions, Map<String, Object> params,
                     Executor executor,
                     TokenCallback callback);
+    }
+
+    private class ConfirmPaymentActivityResultContract extends ActivityResultContract<ConfirmPaymentActivity.Request, ConfirmPaymentActivity.Response> {
+        @NonNull
+        @Override
+        public Intent createIntent(@NonNull Context context, ConfirmPaymentActivity.Request input) {
+            return ConfirmPaymentActivity.createIntent(context, input);
+        }
+
+        @Override
+        public ConfirmPaymentActivity.Response parseResult(int resultCode, @Nullable Intent intent) {
+            return ConfirmPaymentActivity.parseResponse(resultCode, intent);
+        }
     }
 
     private static class ResponseWrapper {

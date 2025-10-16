@@ -8,11 +8,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 class NewPaymentResponse {
     private String clientSecret;
-    private String status;
+    private Status status;
     private String id;
 
     public NewPaymentResponse(
-            @JsonProperty("status") String status,
+            @JsonProperty("status") Status status,
             @JsonProperty("id") String id,
             @JsonProperty("client_secret") String clientSecret
     ) {
@@ -25,7 +25,7 @@ class NewPaymentResponse {
         return clientSecret;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 

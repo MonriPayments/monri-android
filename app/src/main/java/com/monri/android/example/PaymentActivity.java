@@ -34,7 +34,8 @@ public class PaymentActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_payment_example_saved_card_non_3ds).setOnClickListener(v -> savedCardPayment(false));
         findViewById(R.id.btn_payment_example_saved_card_3ds).setOnClickListener(v -> savedCardPayment(true));
-
+        findViewById(R.id.btn_google_pay_activity).setOnClickListener(v -> startGooglePayActivity());
+        findViewById(R.id.btn_google_pay_activity_simple).setOnClickListener(v -> startGooglePayActivitySimple());
     }
 
     private void addPaymentMethod(boolean threeDS) {
@@ -43,6 +44,14 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void newPayment(boolean threeDS, boolean saveCardForFuturePayments) {
         startActivity(PaymentPickerActivity.createIntent(this, threeDS, false, saveCardForFuturePayments));
+    }
+
+    private void startGooglePayActivity() {
+        startActivity(GooglePayActivity.createIntent(this));
+    }
+
+    private void startGooglePayActivitySimple() {
+        startActivity(GooglePayActivitySimple.createIntent(this));
     }
 
     private void savedCardPayment(boolean threeDS) {

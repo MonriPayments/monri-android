@@ -14,6 +14,8 @@ import com.monri.android.model.GetCustomerParams;
 import com.monri.android.model.UpdateCustomerParams;
 import com.monri.android.model.PaymentStatusResponse;
 
+import org.json.JSONObject;
+
 import java.util.Map;
 
 interface MonriHttpApi {
@@ -27,6 +29,8 @@ interface MonriHttpApi {
 
     //post v2/payment/{id}/confirm
     MonriHttpResult<ConfirmPaymentResponse> confirmPayment(ConfirmPaymentParams confirmPaymentParams);
+
+    MonriHttpResult<JSONObject> startGooglePayPayment(String PaymentId);
 
     //get v2/payment/{id}/status
     MonriHttpResult<PaymentStatusResponse> paymentStatus(String id);
