@@ -5,24 +5,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultCaller;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.gms.wallet.WalletConstants;
 import com.google.android.gms.wallet.button.ButtonConstants;
-import com.google.android.gms.wallet.button.ButtonOptions;
-import com.google.android.gms.wallet.button.PayButton;
 import com.monri.android.Monri;
-import com.monri.android.google_pay.GooglePayHandler;
-import com.monri.android.google_pay.GooglePayHandlerCallbacks;
-import com.monri.android.google_pay.GooglePayHandlerException;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
+import com.monri.android.model.GooglePayPayment;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.model.TransactionParams;
@@ -32,16 +26,15 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class GooglePayActivitySimple extends AppCompatActivity implements ViewDelegate, GooglePayHandlerCallbacks {
+public class GooglePayActivitySimple extends AppCompatActivity implements ViewDelegate {
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private OrderRepository orderRepository;
     private Monri monri;
     private ProgressBar progressBar;
     private TextView resultTextView;
-    private GooglePayHandler googlePayHandler;
     private Button regularPayButton;
-    private LinearLayout googlePayButtonContainer;
+    private Button proceedWithGooglePayButton;
     private String paymentId;
     private CardMultilineWidget cardMultilineWidget;
     final CustomerParams testCustomerParams = new CustomerParams()
@@ -67,9 +60,10 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
         progressBar = findViewById(R.id.progress_bar);
         regularPayButton = findViewById(R.id.payment_picker_pay_google_pay_activity);
         cardMultilineWidget = findViewById(R.id.payment_picker_card_google_pay_activity);
-        googlePayButtonContainer = findViewById(R.id.google_pay_button_container);
+        proceedWithGooglePayButton = findViewById(R.id.proceed_with_google_pay);
 
         regularPayButton.setOnClickListener(v -> regularConfirmPayment());
+        proceedWithGooglePayButton.setOnClickListener(v -> proceedWithGooglePay());
 
         initializeMonriSdkObjects();
     }
@@ -77,19 +71,6 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
     private void initializeMonriSdkObjects() {
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(((ActivityResultCaller) this), MonriApiOptions.create(orderRepository.authenticityToken(), true));
-
-        final ButtonOptions.Builder buttonOptionsBuilder = ButtonOptions.newBuilder()
-                                                                        .setButtonTheme(ButtonConstants.ButtonTheme.LIGHT)
-                                                                        .setButtonType(ButtonConstants.ButtonType.DONATE)
-                                                                        .setCornerRadius(5);
-        googlePayHandler = new GooglePayHandler(
-                this,
-                this,
-                WalletConstants.ENVIRONMENT_TEST,
-                monri,
-                this,
-                buttonOptionsBuilder
-        );
 
         createPaymentSession();
     }
@@ -109,12 +90,8 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
             resultTextView.setText(getString(R.string.google_pay_activity_create_payment_session_rejected, response.getStatus()));
         } else {
             paymentId = response.getClientSecret();
-            startGooglePayPayment(response.getClientSecret());
+            progressBar.setVisibility(View.GONE);
         }
-    }
-
-    private void startGooglePayPayment(final String clientSecret) {
-        googlePayHandler.startGooglePayPayment(TransactionParams.create().set(testCustomerParams), clientSecret);
     }
 
     private void processCreatePaymentSessionError(final Throwable error) {
@@ -139,37 +116,26 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
         }
     }
 
+    private void proceedWithGooglePay() {
+        final GooglePayPayment payment = new GooglePayPayment(GooglePayPayment.Provider.GOOGLE_PAY);
 
-    @Override
-    public void onError(final GooglePayHandlerException googlePayHandlerException) {
-        resultTextView.setText(getString(R.string.google_pay_activity_google_pay_handler_exception, googlePayHandlerException.getErrorCode()));
+        final ConfirmPaymentParams confirmPaymentParams;
+        confirmPaymentParams = ConfirmPaymentParams.create(
+                paymentId,
+                payment.toPaymentMethodParams(),
+                TransactionParams.create().set(testCustomerParams)
+        );
+
+        monri.confirmPayment(confirmPaymentParams, this::onConfirmPaymentResult);
     }
 
-    @Override
-    public void onNotReadyToPayWithGooglePay() {
-        resultTextView.setText(getString(R.string.google_pay_activity_on_not_ready_to_pay_with_google_pay_called));
-    }
-
-    @Override
-    public void onGooglePayButtonReady(final PayButton payButton) {
-        progressBar.setVisibility(View.GONE);
-
-        googlePayButtonContainer.addView(payButton);
-    }
-
-    @Override
-    public void onGetPaymentMethodDataFromUserFailed(final int statusCode) {
-        resultTextView.setText(getString(R.string.google_pay_activity_failed_to_get_payment_method_data_from_user, statusCode));
-    }
-
-    @Override
     public void onConfirmPaymentResult(final PaymentResult result, final Throwable cause) {
         final String paymentResultText;
 
         if (cause != null) {
             paymentResultText = getString(R.string.google_pay_activity_confirm_payment_error, cause);
         } else {
-            paymentResultText = getString(R.string.google_pay_activity_confirm_payment_result, result.getStatus());
+            paymentResultText = getString(R.string.google_pay_activity_confirm_payment_result, result.getStatus(), result.getErrors());
         }
 
         resultTextView.setText(paymentResultText);

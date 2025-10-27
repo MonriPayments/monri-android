@@ -144,6 +144,12 @@ public final class Monri {
         paymentController.confirmPayment(confirmPaymentParams, callback);
     }
 
+    public void confirmPayment(final ConfirmPaymentParams confirmPaymentParams, final ActionResultConsumer<PaymentResult> callback,
+                               final int googleButtonType, final int googleButtonTheme, final int googleButtonCornerRadius)
+    {
+        paymentController.confirmPayment(confirmPaymentParams, callback, googleButtonType, googleButtonTheme, googleButtonCornerRadius);
+    }
+
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
         if (result.token != null) {
             callback.onSuccess(result.token);

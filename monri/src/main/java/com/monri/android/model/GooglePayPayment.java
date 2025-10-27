@@ -8,13 +8,17 @@ public class GooglePayPayment extends PaymentMethod {
 
     private final Provider provider;
 
-    private final JSONObject googlePaymentMethodData;
+    private JSONObject googlePaymentMethodData;
 
     public final static String GOOGLE_PAYMENT_METHOD_DATA_KEY = "payment-method-data";
 
     public GooglePayPayment(final Provider provider, final JSONObject googlePaymentMethodData) {
         this.provider = provider;
         this.googlePaymentMethodData = googlePaymentMethodData;
+    }
+
+    public GooglePayPayment(final Provider provider) {
+        this.provider = provider;
     }
 
     @Override
@@ -26,7 +30,7 @@ public class GooglePayPayment extends PaymentMethod {
     public Map<String, String> data() {
         final Map<String, String> data = new HashMap<>();
 
-        data.put(GOOGLE_PAYMENT_METHOD_DATA_KEY, googlePaymentMethodData.toString());
+        if (googlePaymentMethodData != null) data.put(GOOGLE_PAYMENT_METHOD_DATA_KEY, googlePaymentMethodData.toString());
 
         return data;
     }

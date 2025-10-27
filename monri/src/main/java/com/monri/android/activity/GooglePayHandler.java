@@ -1,4 +1,4 @@
-package com.monri.android.google_pay;
+package com.monri.android.activity;
 
 import android.app.Activity;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -18,15 +18,14 @@ import com.monri.android.model.GooglePayPayment;
 import com.monri.android.model.TransactionParams;
 import org.json.JSONException;
 import org.json.JSONObject;
-import static com.monri.android.google_pay.GooglePayHandlerException.Error.GET_ALLOWED_PAYMENT_METHODS_ERROR;
-import static com.monri.android.google_pay.GooglePayHandlerException.Error.IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR;
-import static com.monri.android.google_pay.GooglePayHandlerException.Error.PARSE_PAYMENT_METHOD_DATA_JSON_ERROR;
-import static com.monri.android.google_pay.GooglePayHandlerException.Error.PREPARE_IS_READY_TO_PAY_REQ_ERROR;
-import static com.monri.android.google_pay.GooglePayHandlerException.Error.PREPARE_PAYMENT_DATA_REQUEST_ERROR;
-import static com.monri.android.google_pay.GooglePayHandlerException.Error.START_PAYMENT_SESSION_ERROR;
+import static com.monri.android.activity.GooglePayHandlerException.Error.GET_ALLOWED_PAYMENT_METHODS_ERROR;
+import static com.monri.android.activity.GooglePayHandlerException.Error.IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR;
+import static com.monri.android.activity.GooglePayHandlerException.Error.PARSE_PAYMENT_METHOD_DATA_JSON_ERROR;
+import static com.monri.android.activity.GooglePayHandlerException.Error.PREPARE_IS_READY_TO_PAY_REQ_ERROR;
+import static com.monri.android.activity.GooglePayHandlerException.Error.PREPARE_PAYMENT_DATA_REQUEST_ERROR;
+import static com.monri.android.activity.GooglePayHandlerException.Error.START_PAYMENT_SESSION_ERROR;
 import androidx.activity.result.ActivityResultCaller;
 import androidx.activity.result.ActivityResultLauncher;
-
 
 public class GooglePayHandler {
 
@@ -140,6 +139,7 @@ public class GooglePayHandler {
     }
 
     private class StartGooglePayPaymentResultCallback implements ResultCallback<JSONObject> {
+
         @Override
         public void onSuccess(final JSONObject result) {
             monriGooglePaymentRequestHelper.setMonriGooglePaySessionParameters(result);

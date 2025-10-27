@@ -1,4 +1,4 @@
-package com.monri.android.google_pay;
+package com.monri.android.activity;
 
 import com.google.android.gms.wallet.button.PayButton;
 import com.monri.android.model.PaymentResult;

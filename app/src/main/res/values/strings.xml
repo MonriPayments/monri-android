@@ -47,8 +47,9 @@
     <string name="google_pay_activity_error_parsing_payment_data_from_request_payment_method">Error parsing paymentData from requestPayment method: %1$s</string>
     <string name="google_pay_activity_request_payment_method_failure">RequestPayment method failure: %1$d %2$s</string>
     <string name="google_pay_activity_confirm_payment_error">Confirm payment error: %1$s</string>
-    <string name="google_pay_activity_confirm_payment_result">Confirm payment result: %1$s</string>
+    <string name="google_pay_activity_confirm_payment_result">Confirm payment result: %1$s %2$s</string>
     <string name="google_pay_activity_google_pay_handler_exception">GooglePayHandlerException: %1$d</string>
     <string name="google_pay_activity_on_not_ready_to_pay_with_google_pay_called">On not ready to pay with google pay called</string>
     <string name="google_pay_activity_failed_to_get_payment_method_data_from_user">Failed to get payment method data from user, status code: %1$d</string>
+    <string name="google_pay_activity_proceed_with_google_pay_button_text">Proceed with google pay</string>
 </resources>
