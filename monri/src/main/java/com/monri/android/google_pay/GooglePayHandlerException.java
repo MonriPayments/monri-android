@@ -1,4 +1,4 @@
-package com.monri.android.activity;
+package com.monri.android.google_pay;
 
 import android.annotation.SuppressLint;
 import androidx.annotation.NonNull;

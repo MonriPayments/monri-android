@@ -1,4 +1,4 @@
-package com.monri.android.activity;
+package com.monri.android.google_pay;
 
 import android.app.Activity;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -17,14 +17,14 @@ import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.GooglePayPayment;
 import org.json.JSONException;
 import org.json.JSONObject;
-import static com.monri.android.activity.GooglePayHandlerException.Error.ERROR_GETTING_PAYMENT_METHOD_FROM_USER;
-import static com.monri.android.activity.GooglePayHandlerException.Error.GET_ALLOWED_PAYMENT_METHODS_ERROR;
-import static com.monri.android.activity.GooglePayHandlerException.Error.IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR;
-import static com.monri.android.activity.GooglePayHandlerException.Error.NOT_READY_TO_PAY_WITH_GOOGLE_PAY_ERROR;
-import static com.monri.android.activity.GooglePayHandlerException.Error.PARSE_PAYMENT_METHOD_DATA_JSON_ERROR;
-import static com.monri.android.activity.GooglePayHandlerException.Error.PREPARE_IS_READY_TO_PAY_REQ_ERROR;
-import static com.monri.android.activity.GooglePayHandlerException.Error.PREPARE_PAYMENT_DATA_REQUEST_ERROR;
-import static com.monri.android.activity.GooglePayHandlerException.Error.START_PAYMENT_SESSION_ERROR;
+import static com.monri.android.google_pay.GooglePayHandlerException.Error.ERROR_GETTING_PAYMENT_METHOD_FROM_USER;
+import static com.monri.android.google_pay.GooglePayHandlerException.Error.GET_ALLOWED_PAYMENT_METHODS_ERROR;
+import static com.monri.android.google_pay.GooglePayHandlerException.Error.IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR;
+import static com.monri.android.google_pay.GooglePayHandlerException.Error.NOT_READY_TO_PAY_WITH_GOOGLE_PAY_ERROR;
+import static com.monri.android.google_pay.GooglePayHandlerException.Error.PARSE_PAYMENT_METHOD_DATA_JSON_ERROR;
+import static com.monri.android.google_pay.GooglePayHandlerException.Error.PREPARE_IS_READY_TO_PAY_REQ_ERROR;
+import static com.monri.android.google_pay.GooglePayHandlerException.Error.PREPARE_PAYMENT_DATA_REQUEST_ERROR;
+import static com.monri.android.google_pay.GooglePayHandlerException.Error.START_PAYMENT_SESSION_ERROR;
 import androidx.activity.result.ActivityResultCaller;
 import androidx.activity.result.ActivityResultLauncher;
 

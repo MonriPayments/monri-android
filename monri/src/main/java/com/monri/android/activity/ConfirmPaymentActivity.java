@@ -22,6 +22,9 @@ import com.monri.android.BuildConfig;
 import com.monri.android.Monri;
 import com.monri.android.MonriUtil;
 import com.monri.android.R;
+import com.monri.android.google_pay.GooglePayHandler;
+import com.monri.android.google_pay.GooglePayHandlerCallbacks;
+import com.monri.android.google_pay.GooglePayHandlerException;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;
@@ -29,6 +32,7 @@ import com.monri.android.model.PaymentResult;
 import com.monri.android.model.PaymentStatus;
 import com.monri.android.three_ds1.auth.PaymentAuthWebView;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,9 +41,9 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
 
     private static final String CONFIRM_PAYMENT_PARAMS_BUNDLE = "CONFIRM_PAYMENT_PARAMS_BUNDLE";
     private static final String MONRI_API_OPTIONS = "MONRI_API_OPTIONS";
-    private static final String GOOGLE_PAY_BUTTON_THEME = "GOOGLE_PAY_BUTTON_THEME";
-    private static final String GOOGLE_PAY_BUTTON_TYPE = "GOOGLE_PAY_BUTTON_TYPE";
-    private static final String GOOGLE_PAY_BUTTON_CORNER_RADIUS = "GOOGLE_PAY_BUTTON_CORNER_RADIUS";
+    private static final String GOOGLE_PAY_BUTTON_THEME_KEY = "GOOGLE_PAY_BUTTON_THEME";
+    private static final String GOOGLE_PAY_BUTTON_TYPE_KEY = "GOOGLE_PAY_BUTTON_TYPE";
+    private static final String GOOGLE_PAY_BUTTON_CORNER_RADIUS_KEY = "GOOGLE_PAY_BUTTON_CORNER_RADIUS";
     private final ScheduledExecutorService backgroundThreadExecutor = Executors.newScheduledThreadPool(5);
     Monri monri;
     PaymentAuthWebView webView;
@@ -82,9 +86,9 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
 
         intent.putExtra(CONFIRM_PAYMENT_PARAMS_BUNDLE, input.params);
         intent.putExtra(MONRI_API_OPTIONS, input.apiOptions);
-        intent.putExtra(GOOGLE_PAY_BUTTON_TYPE, input.googleButtonType);
-        intent.putExtra(GOOGLE_PAY_BUTTON_THEME, input.googleButtonTheme);
-        intent.putExtra(GOOGLE_PAY_BUTTON_CORNER_RADIUS, input.googleButtonCornerRadius);
+        intent.putExtra(GOOGLE_PAY_BUTTON_TYPE_KEY, input.googleButtonType);
+        intent.putExtra(GOOGLE_PAY_BUTTON_THEME_KEY, input.googleButtonTheme);
+        intent.putExtra(GOOGLE_PAY_BUTTON_CORNER_RADIUS_KEY, input.googleButtonCornerRadius);
 
         return intent;
     }
@@ -100,9 +104,9 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
         final ConfirmPaymentParams confirmPaymentParams = getIntent().getParcelableExtra(CONFIRM_PAYMENT_PARAMS_BUNDLE);
         final MonriApiOptions apiOptions = getIntent().getParcelableExtra(MONRI_API_OPTIONS);
 
-        googlePayButtonType = getIntent().getIntExtra(GOOGLE_PAY_BUTTON_TYPE, DEFAULT_GOOGLE_PAY_BUTTON_TYPE);
-        googlePayButtonTheme = getIntent().getIntExtra(GOOGLE_PAY_BUTTON_THEME, DEFAULT_GOOGLE_PAY_BUTTON_THEME);
-        googlePayButtonCornerRadius = getIntent().getIntExtra(GOOGLE_PAY_BUTTON_CORNER_RADIUS, DEFAULT_GOOGLE_PAY_BUTTON_CORNER_RADIUS);
+        googlePayButtonType = getIntent().getIntExtra(GOOGLE_PAY_BUTTON_TYPE_KEY, DEFAULT_GOOGLE_PAY_BUTTON_TYPE);
+        googlePayButtonTheme = getIntent().getIntExtra(GOOGLE_PAY_BUTTON_THEME_KEY, DEFAULT_GOOGLE_PAY_BUTTON_THEME);
+        googlePayButtonCornerRadius = getIntent().getIntExtra(GOOGLE_PAY_BUTTON_CORNER_RADIUS_KEY, DEFAULT_GOOGLE_PAY_BUTTON_CORNER_RADIUS);
 
         Objects.requireNonNull(confirmPaymentParams, "ConfirmPaymentParams == null");
         Objects.requireNonNull(apiOptions, "MonriApiOptions == null");
@@ -118,16 +122,12 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
         initBackNavigation();
 
         final String paymentMethodType = confirmPaymentParams.getPaymentMethod().getType();
+        final Map<String, String> paymentMethodData = confirmPaymentParams.getPaymentMethod().getData();
 
         if (PaymentMethod.DIRECT_PAYMENT_METHODS.contains(paymentMethodType)) {
             confirmDirectPayment(confirmPaymentParams, apiOptions);
-
-        } else if (PaymentMethod.TYPE_GOOGLE_PAY.equals(paymentMethodType)) {
-            if (confirmPaymentParams.getPaymentMethod().getData().isEmpty()) {
-                initializeGooglePayPayment(confirmPaymentParams, apiOptions);
-            } else {
-                confirmCardRelatedPayment(confirmPaymentParams);
-            }
+        } else if (PaymentMethod.TYPE_GOOGLE_PAY.equals(paymentMethodType) && paymentMethodData.isEmpty()) {
+            initializeGooglePayPayment(confirmPaymentParams, apiOptions);
         } else {
             confirmCardRelatedPayment(confirmPaymentParams);
         }
@@ -142,11 +142,11 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
     }
 
     @Override
-    public void onConfirmGooglePayPaymentDataReady(final ConfirmPaymentParams confirmPaymentParams) {
+    public void onConfirmGooglePayPaymentDataReady(final ConfirmPaymentParams googlePayConfirmPaymentParams) {
         googlePayButtonContainer.setVisibility(View.GONE);
         showLoading();
 
-        confirmCardRelatedPayment(confirmPaymentParams);
+        confirmCardRelatedPayment(googlePayConfirmPaymentParams);
     }
 
     @Override

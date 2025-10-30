@@ -25,7 +25,7 @@ import com.google.android.gms.wallet.button.PayButton;
 import com.google.android.gms.wallet.contract.TaskResultContracts;
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
-import com.monri.android.activity.MonriGooglePaymentRequestHelper;
+import com.monri.android.google_pay.MonriGooglePaymentRequestHelper;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
 import com.monri.android.model.GooglePayPayment;
@@ -175,6 +175,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
 
         try {
             googlePayButton.initialize(ButtonOptions.newBuilder()
+                                                    .setButtonTheme(ButtonConstants.ButtonTheme.LIGHT)
                                                     .setButtonType(ButtonConstants.ButtonType.BOOK)
                                                     .setAllowedPaymentMethods(monriGooglePaymentRequestHelper.getAllowedPaymentMethods().toString())
                                                     .build()
