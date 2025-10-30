@@ -1,6 +1,5 @@
 package com.monri.android.activity;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -14,42 +13,27 @@ import android.widget.ProgressBar;
 import androidx.activity.ComponentActivity;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultCaller;
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.wallet.IsReadyToPayRequest;
-import com.google.android.gms.wallet.PaymentData;
-import com.google.android.gms.wallet.PaymentDataRequest;
-import com.google.android.gms.wallet.PaymentsClient;
-import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
 import com.google.android.gms.wallet.button.ButtonConstants;
 import com.google.android.gms.wallet.button.ButtonOptions;
 import com.google.android.gms.wallet.button.PayButton;
-import com.google.android.gms.wallet.contract.TaskResultContracts;
 import com.monri.android.BuildConfig;
 import com.monri.android.Monri;
 import com.monri.android.MonriUtil;
 import com.monri.android.R;
-import com.monri.android.ResultCallback;
 import com.monri.android.model.ConfirmPaymentParams;
-import com.monri.android.model.GooglePayPayment;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.model.PaymentStatus;
 import com.monri.android.three_ds1.auth.PaymentAuthWebView;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class ConfirmPaymentActivity extends ComponentActivity implements UiDelegate {
+public class ConfirmPaymentActivity extends ComponentActivity implements UiDelegate, GooglePayHandlerCallbacks {
 
     private static final String CONFIRM_PAYMENT_PARAMS_BUNDLE = "CONFIRM_PAYMENT_PARAMS_BUNDLE";
     private static final String MONRI_API_OPTIONS = "MONRI_API_OPTIONS";
@@ -61,16 +45,13 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
     PaymentAuthWebView webView;
     ProgressBar progressBar;
     private LinearLayout googlePayButtonContainer;
-    private PaymentsClient googlePaymentsClient;
-    private MonriGooglePaymentRequestHelper monriGooglePaymentRequestHelper;
-    private ActivityResultLauncher<Task<PaymentData>> paymentMethodLauncher;
-    private ConfirmPaymentParams googlePayConfirmPaymentParams;
     private int googlePayButtonType;
     private int googlePayButtonTheme;
     private int googlePayButtonCornerRadius;
     private static final int DEFAULT_GOOGLE_PAY_BUTTON_THEME = ButtonConstants.ButtonTheme.DARK;
     private static final int DEFAULT_GOOGLE_PAY_BUTTON_TYPE = ButtonConstants.ButtonType.BUY;
     private static final int DEFAULT_GOOGLE_PAY_BUTTON_CORNER_RADIUS = 10;
+    private GooglePayHandler googlePayHandler;
 
     /**
      * @deprecated use {@link #createIntent(Context context, Request input)}
@@ -136,13 +117,13 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
 
         initBackNavigation();
 
-        if (PaymentMethod.DIRECT_PAYMENT_METHODS.contains(confirmPaymentParams.getPaymentMethod().getType())) {
+        final String paymentMethodType = confirmPaymentParams.getPaymentMethod().getType();
+
+        if (PaymentMethod.DIRECT_PAYMENT_METHODS.contains(paymentMethodType)) {
             confirmDirectPayment(confirmPaymentParams, apiOptions);
 
-        } else if (PaymentMethod.TYPE_GOOGLE_PAY.equals(confirmPaymentParams.getPaymentMethod().getType())) {
+        } else if (PaymentMethod.TYPE_GOOGLE_PAY.equals(paymentMethodType)) {
             if (confirmPaymentParams.getPaymentMethod().getData().isEmpty()) {
-                googlePayButtonContainer = findViewById(R.id.confirm_payment_google_pay_button_container);
-                googlePayConfirmPaymentParams = confirmPaymentParams;
                 initializeGooglePayPayment(confirmPaymentParams, apiOptions);
             } else {
                 confirmCardRelatedPayment(confirmPaymentParams);
@@ -150,6 +131,27 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
         } else {
             confirmCardRelatedPayment(confirmPaymentParams);
         }
+    }
+
+    @Override
+    public void onGooglePayButtonReady(final PayButton payButton) {
+        hideLoading();
+
+        googlePayButtonContainer.addView(payButton);
+        googlePayButtonContainer.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onConfirmGooglePayPaymentDataReady(final ConfirmPaymentParams confirmPaymentParams) {
+        googlePayButtonContainer.setVisibility(View.GONE);
+        showLoading();
+
+        confirmCardRelatedPayment(confirmPaymentParams);
+    }
+
+    @Override
+    public void onGooglePayError(final GooglePayHandlerException googlePayHandlerException) {
+        returnGooglePayErrorResponse(googlePayHandlerException);
     }
 
     private void initBackNavigation() {
@@ -170,114 +172,18 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
         confirmDirectPaymentFlow.execute();
     }
 
-    public void initializeGooglePayPayment(final ConfirmPaymentParams confirmPaymentParams, final MonriApiOptions apiOptions) {
+    private void initializeGooglePayPayment(final ConfirmPaymentParams confirmPaymentParams, final MonriApiOptions apiOptions) {
         final int walletEnvironment = (apiOptions.isDevelopmentMode()) ? WalletConstants.ENVIRONMENT_TEST : WalletConstants.ENVIRONMENT_PRODUCTION;
 
-        googlePayButtonContainer = findViewById(R.id.confirm_payment_google_pay_button_container);
-        googlePaymentsClient = Wallet.getPaymentsClient(this, new Wallet.WalletOptions.Builder().setEnvironment(walletEnvironment).build());
-        monriGooglePaymentRequestHelper = new MonriGooglePaymentRequestHelper();
-        initPaymentMethodDataLauncher(this);
-
-        monri.getMonriApi().startGooglePayPayment(confirmPaymentParams.getPaymentId(), new ResultCallback<>() {
-
-            @Override
-            public void onSuccess(final JSONObject result) {
-                monriGooglePaymentRequestHelper.setMonriGooglePaySessionParameters(result);
-                isReadyToPay();
-            }
-
-            @Override
-            public void onError(final Throwable throwable) {
-                returnGooglePayErrorResponse(GooglePayHandlerException.Error.START_PAYMENT_SESSION_ERROR);
-            }
-        });
-    }
-
-    private void initPaymentMethodDataLauncher(final ActivityResultCaller activityResultCaller) {
-        this.paymentMethodLauncher = activityResultCaller.registerForActivityResult(new TaskResultContracts.GetPaymentDataResult(), result -> {
-            int statusCode = result.getStatus().getStatusCode();
-
-            if (statusCode != CommonStatusCodes.SUCCESS) {
-                returnGooglePayErrorResponse(GooglePayHandlerException.Error.GET_ALLOWED_PAYMENT_METHODS_ERROR);
-            } else {
-                preparePaymentMethodDataForConfirmPayment(result.getResult());
-            }
-        });
-    }
-
-    private void isReadyToPay() {
-        try {
-            final IsReadyToPayRequest isReadyToPayRequest = monriGooglePaymentRequestHelper.getIsReadyToPayRequest();
-            googlePaymentsClient.isReadyToPay(isReadyToPayRequest)
-                    .addOnSuccessListener(this::processIsReadyToPayRequest)
-                    .addOnFailureListener(e -> returnGooglePayErrorResponse(GooglePayHandlerException.Error.IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR));
-        } catch (final JSONException e) {
-            returnGooglePayErrorResponse(GooglePayHandlerException.Error.PREPARE_IS_READY_TO_PAY_REQ_ERROR);
-        }
-    }
-
-    private void processIsReadyToPayRequest(final Boolean isReadyToPay) {
-        if (isReadyToPay) {
-            prepareGooglePayButton();
-        } else {
-            returnGooglePayErrorResponse(GooglePayHandlerException.Error.NOT_READY_TO_PAY_WITH_GOOGLE_PAY_ERROR);
-        }
-    }
-
-    private void prepareGooglePayButton() {
         final ButtonOptions.Builder buttonOptionsBuilder = ButtonOptions.newBuilder()
                 .setButtonTheme(googlePayButtonTheme)
                 .setButtonType(googlePayButtonType)
                 .setCornerRadius(googlePayButtonCornerRadius);
 
-        try {
-            final String allowedPaymentMethods = monriGooglePaymentRequestHelper.getAllowedPaymentMethods().toString();
-            final ButtonOptions buttonOptions = buttonOptionsBuilder.setAllowedPaymentMethods(allowedPaymentMethods).build();
+        googlePayButtonContainer = findViewById(R.id.confirm_payment_google_pay_button_container);
+        googlePayHandler = new GooglePayHandler(this, this, walletEnvironment, monri, buttonOptionsBuilder, this);
 
-            final PayButton payButton = new PayButton(this);
-            payButton.initialize(buttonOptions);
-            payButton.setOnClickListener((v) -> requestPayment());
-
-            showGooglePayButton(payButton);
-        } catch (final JSONException e) {
-            returnGooglePayErrorResponse(GooglePayHandlerException.Error.GET_ALLOWED_PAYMENT_METHODS_ERROR);
-        }
-    }
-
-    private void showGooglePayButton(final PayButton payButton) {
-        hideLoading();
-
-        googlePayButtonContainer.addView(payButton);
-        googlePayButtonContainer.setVisibility(View.VISIBLE);
-    }
-
-    private void requestPayment() {
-        try {
-            final PaymentDataRequest paymentDataRequest = monriGooglePaymentRequestHelper.getPaymentDataRequest();
-
-            googlePaymentsClient.loadPaymentData(paymentDataRequest)
-                    .addOnCompleteListener(paymentMethodLauncher::launch);
-        } catch (final JSONException e) {
-            returnGooglePayErrorResponse(GooglePayHandlerException.Error.PREPARE_PAYMENT_DATA_REQUEST_ERROR);
-        }
-    }
-
-    private void preparePaymentMethodDataForConfirmPayment(final PaymentData paymentData) {
-        try {
-            final JSONObject googlePaymentMethodData = monriGooglePaymentRequestHelper.getPaymentMethodDataFromPaymentData(paymentData);
-
-            confirmGooglePayPayment(googlePaymentMethodData);
-        } catch (Exception e) {
-            returnGooglePayErrorResponse(GooglePayHandlerException.Error.PARSE_PAYMENT_METHOD_DATA_JSON_ERROR);
-        }
-    }
-
-    private void confirmGooglePayPayment(final JSONObject googlePaymentMethodData) {
-        final GooglePayPayment googlePayPayment = new GooglePayPayment(GooglePayPayment.Provider.GOOGLE_PAY, googlePaymentMethodData);
-        final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(googlePayConfirmPaymentParams.getPaymentId(), googlePayPayment.toPaymentMethodParams(), googlePayConfirmPaymentParams.getTransaction());
-
-        googlePayButtonContainer.setVisibility(View.GONE);
-        confirmCardRelatedPayment(confirmPaymentParams);
+        googlePayHandler.startGooglePayPayment(confirmPaymentParams);
     }
 
     private void confirmCardRelatedPayment(final ConfirmPaymentParams confirmPaymentParams) {
@@ -322,10 +228,9 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
         webView.setVisibility(View.GONE);
     }
 
-    private void returnGooglePayErrorResponse(final GooglePayHandlerException.Error googlePayError) {
-        final List<String> errors = new ArrayList<>();
+    private void returnGooglePayErrorResponse(final GooglePayHandlerException googlePayHandlerException) {
+        final List<String> errors = List.of(googlePayHandlerException.toString());
 
-        errors.add(String.format("Google pay error with code: %d", googlePayError.getCode()));
         handlePaymentResult(new PaymentResult(PaymentStatus.GOOGLE_PAY_ERROR.getStatus(), errors));
     }
 

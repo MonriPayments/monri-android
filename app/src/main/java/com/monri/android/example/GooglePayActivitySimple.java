@@ -11,7 +11,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultCaller;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.gms.wallet.button.ButtonConstants;
 import com.monri.android.Monri;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
@@ -37,6 +36,7 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
     private Button proceedWithGooglePayButton;
     private String paymentId;
     private CardMultilineWidget cardMultilineWidget;
+
     final CustomerParams testCustomerParams = new CustomerParams()
             .setAddress("Adresa")
             .setFullName("Tester Testerovic")

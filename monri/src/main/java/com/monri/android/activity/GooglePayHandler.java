@@ -15,11 +15,12 @@ import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.GooglePayPayment;
-import com.monri.android.model.TransactionParams;
 import org.json.JSONException;
 import org.json.JSONObject;
+import static com.monri.android.activity.GooglePayHandlerException.Error.ERROR_GETTING_PAYMENT_METHOD_FROM_USER;
 import static com.monri.android.activity.GooglePayHandlerException.Error.GET_ALLOWED_PAYMENT_METHODS_ERROR;
 import static com.monri.android.activity.GooglePayHandlerException.Error.IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR;
+import static com.monri.android.activity.GooglePayHandlerException.Error.NOT_READY_TO_PAY_WITH_GOOGLE_PAY_ERROR;
 import static com.monri.android.activity.GooglePayHandlerException.Error.PARSE_PAYMENT_METHOD_DATA_JSON_ERROR;
 import static com.monri.android.activity.GooglePayHandlerException.Error.PREPARE_IS_READY_TO_PAY_REQ_ERROR;
 import static com.monri.android.activity.GooglePayHandlerException.Error.PREPARE_PAYMENT_DATA_REQUEST_ERROR;
@@ -29,25 +30,22 @@ import androidx.activity.result.ActivityResultLauncher;
 
 public class GooglePayHandler {
 
-    private PaymentsClient googlePaymentsClient;
-    private TransactionParams transactionParams;
-    private String paymentId;
-    private Activity activity;
-    private Monri monri;
-    private MonriGooglePaymentRequestHelper monriGooglePaymentRequestHelper;
-    private GooglePayHandlerCallbacks googlePayHandlerCallbacks;
-    private final ActivityResultCaller activityResultCaller;
+    private final PaymentsClient googlePaymentsClient;
+    private ConfirmPaymentParams confirmPaymentParams;
+    private final Activity activity;
+    private final Monri monri;
+    private final MonriGooglePaymentRequestHelper monriGooglePaymentRequestHelper;
+    private final GooglePayHandlerCallbacks googlePayHandlerCallbacks;
     private ActivityResultLauncher<Task<PaymentData>> paymentMethodLauncher;
     private final ButtonOptions.Builder buttonOptionsBuilder;
 
     public GooglePayHandler(
             final ActivityResultCaller paymentMethodActivityResultCaller, final Activity activity, final int walletEnvironment, final Monri monri,
-            final GooglePayHandlerCallbacks googlePayHandlerCallbacks, final ButtonOptions.Builder buttonOptionsBuilder
+            final ButtonOptions.Builder buttonOptionsBuilder, final GooglePayHandlerCallbacks googlePayHandlerCallbacks
     ) {
         this.monri = monri;
         this.googlePayHandlerCallbacks = googlePayHandlerCallbacks;
         this.activity = activity;
-        this.activityResultCaller = paymentMethodActivityResultCaller;
         this.buttonOptionsBuilder = buttonOptionsBuilder;
 
         initPaymentMethodDataLauncher(paymentMethodActivityResultCaller);
@@ -62,18 +60,17 @@ public class GooglePayHandler {
             int statusCode = result.getStatus().getStatusCode();
 
             if (statusCode != CommonStatusCodes.SUCCESS) {
-                googlePayHandlerCallbacks.onGetPaymentMethodDataFromUserFailed(statusCode);
+                googlePayHandlerCallbacks.onGooglePayError(new GooglePayHandlerException(ERROR_GETTING_PAYMENT_METHOD_FROM_USER, statusCode));
             } else {
                 preparePaymentMethodDataForConfirmPayment(result.getResult());
             }
         });
     }
 
-    public void startGooglePayPayment(final TransactionParams transactionParams, final String paymentId) {
-        this.transactionParams = transactionParams;
-        this.paymentId = paymentId;
+    public void startGooglePayPayment(final ConfirmPaymentParams confirmPaymentParams) {
+        this.confirmPaymentParams = confirmPaymentParams;
 
-        monri.getMonriApi().startGooglePayPayment(paymentId, new StartGooglePayPaymentResultCallback());
+        monri.getMonriApi().startGooglePayPayment(confirmPaymentParams.getPaymentId(), new StartGooglePayPaymentResultCallback());
     }
 
     private void isReadyToPay() {
@@ -81,9 +78,9 @@ public class GooglePayHandler {
             final IsReadyToPayRequest isReadyToPayRequest = monriGooglePaymentRequestHelper.getIsReadyToPayRequest();
             googlePaymentsClient.isReadyToPay(isReadyToPayRequest)
                                 .addOnSuccessListener(this::processIsReadyToPayRequest)
-                                .addOnFailureListener(e -> googlePayHandlerCallbacks.onError(new GooglePayHandlerException(IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR)));
+                                .addOnFailureListener(e -> googlePayHandlerCallbacks.onGooglePayError(new GooglePayHandlerException(IS_READY_TO_PAY_PAYMENTS_CLIENT_ERROR)));
         } catch (JSONException e) {
-            googlePayHandlerCallbacks.onError(new GooglePayHandlerException(PREPARE_IS_READY_TO_PAY_REQ_ERROR));
+            googlePayHandlerCallbacks.onGooglePayError(new GooglePayHandlerException(PREPARE_IS_READY_TO_PAY_REQ_ERROR));
         }
     }
 
@@ -91,7 +88,7 @@ public class GooglePayHandler {
         if (isReadyToPay) {
             prepareGooglePayButton();
         } else {
-            googlePayHandlerCallbacks.onNotReadyToPayWithGooglePay();
+            googlePayHandlerCallbacks.onGooglePayError(new GooglePayHandlerException(NOT_READY_TO_PAY_WITH_GOOGLE_PAY_ERROR));
         }
     }
 
@@ -106,7 +103,7 @@ public class GooglePayHandler {
 
             googlePayHandlerCallbacks.onGooglePayButtonReady(payButton);
         } catch (JSONException e) {
-            googlePayHandlerCallbacks.onError(new GooglePayHandlerException(GET_ALLOWED_PAYMENT_METHODS_ERROR));
+            googlePayHandlerCallbacks.onGooglePayError(new GooglePayHandlerException(GET_ALLOWED_PAYMENT_METHODS_ERROR));
         }
     }
 
@@ -117,7 +114,7 @@ public class GooglePayHandler {
             googlePaymentsClient.loadPaymentData(paymentDataRequest)
                                 .addOnCompleteListener(paymentMethodLauncher::launch);
         } catch (JSONException e) {
-            googlePayHandlerCallbacks.onError(new GooglePayHandlerException(PREPARE_PAYMENT_DATA_REQUEST_ERROR));
+            googlePayHandlerCallbacks.onGooglePayError(new GooglePayHandlerException(PREPARE_PAYMENT_DATA_REQUEST_ERROR));
         }
     }
 
@@ -125,17 +122,13 @@ public class GooglePayHandler {
         try {
             final JSONObject googlePaymentMethodData = monriGooglePaymentRequestHelper.getPaymentMethodDataFromPaymentData(paymentData);
 
-            confirmGooglePayPayment(googlePaymentMethodData);
+            final GooglePayPayment googlePayPayment = new GooglePayPayment(GooglePayPayment.Provider.GOOGLE_PAY, googlePaymentMethodData);
+            final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(this.confirmPaymentParams.getPaymentId(), googlePayPayment.toPaymentMethodParams(), this.confirmPaymentParams.getTransaction());
+
+            googlePayHandlerCallbacks.onConfirmGooglePayPaymentDataReady(confirmPaymentParams);
         } catch (Exception e) {
-            googlePayHandlerCallbacks.onError(new GooglePayHandlerException(PARSE_PAYMENT_METHOD_DATA_JSON_ERROR));
+            googlePayHandlerCallbacks.onGooglePayError(new GooglePayHandlerException(PARSE_PAYMENT_METHOD_DATA_JSON_ERROR));
         }
-    }
-
-    private void confirmGooglePayPayment(final JSONObject googlePaymentMethodData) {
-        final GooglePayPayment googlePayPayment = new GooglePayPayment(GooglePayPayment.Provider.GOOGLE_PAY, googlePaymentMethodData);
-        final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(paymentId, googlePayPayment.toPaymentMethodParams(), transactionParams);
-
-        monri.confirmPayment(confirmPaymentParams, googlePayHandlerCallbacks::onConfirmPaymentResult);
     }
 
     private class StartGooglePayPaymentResultCallback implements ResultCallback<JSONObject> {
@@ -148,7 +141,7 @@ public class GooglePayHandler {
 
         @Override
         public void onError(final Throwable throwable) {
-            googlePayHandlerCallbacks.onError(new GooglePayHandlerException(START_PAYMENT_SESSION_ERROR));
+            googlePayHandlerCallbacks.onGooglePayError(new GooglePayHandlerException(START_PAYMENT_SESSION_ERROR));
         }
     }
 }
