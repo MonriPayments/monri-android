@@ -15,13 +15,13 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultCaller;
 import androidx.annotation.Nullable;
 import com.google.android.gms.wallet.WalletConstants;
-import com.google.android.gms.wallet.button.ButtonConstants;
 import com.google.android.gms.wallet.button.ButtonOptions;
 import com.google.android.gms.wallet.button.PayButton;
 import com.monri.android.BuildConfig;
 import com.monri.android.Monri;
 import com.monri.android.MonriUtil;
 import com.monri.android.R;
+import com.monri.android.google_pay.GooglePayButtonOptions;
 import com.monri.android.google_pay.GooglePayHandler;
 import com.monri.android.google_pay.GooglePayHandlerCallbacks;
 import com.monri.android.google_pay.GooglePayHandlerException;
@@ -41,20 +41,13 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
 
     private static final String CONFIRM_PAYMENT_PARAMS_BUNDLE = "CONFIRM_PAYMENT_PARAMS_BUNDLE";
     private static final String MONRI_API_OPTIONS = "MONRI_API_OPTIONS";
-    private static final String GOOGLE_PAY_BUTTON_THEME_KEY = "GOOGLE_PAY_BUTTON_THEME";
-    private static final String GOOGLE_PAY_BUTTON_TYPE_KEY = "GOOGLE_PAY_BUTTON_TYPE";
-    private static final String GOOGLE_PAY_BUTTON_CORNER_RADIUS_KEY = "GOOGLE_PAY_BUTTON_CORNER_RADIUS";
+    private static final String GOOGLE_PAY_BUTTON_OPTIONS = "GOOGLE_PAY_BUTTON_OPTIONS";
     private final ScheduledExecutorService backgroundThreadExecutor = Executors.newScheduledThreadPool(5);
     Monri monri;
     PaymentAuthWebView webView;
     ProgressBar progressBar;
     private LinearLayout googlePayButtonContainer;
-    private int googlePayButtonType;
-    private int googlePayButtonTheme;
-    private int googlePayButtonCornerRadius;
-    private static final int DEFAULT_GOOGLE_PAY_BUTTON_THEME = ButtonConstants.ButtonTheme.DARK;
-    private static final int DEFAULT_GOOGLE_PAY_BUTTON_TYPE = ButtonConstants.ButtonType.BUY;
-    private static final int DEFAULT_GOOGLE_PAY_BUTTON_CORNER_RADIUS = 10;
+    private GooglePayButtonOptions googlePayButtonOptions;
     private GooglePayHandler googlePayHandler;
 
     /**
@@ -86,9 +79,7 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
 
         intent.putExtra(CONFIRM_PAYMENT_PARAMS_BUNDLE, input.params);
         intent.putExtra(MONRI_API_OPTIONS, input.apiOptions);
-        intent.putExtra(GOOGLE_PAY_BUTTON_TYPE_KEY, input.googleButtonType);
-        intent.putExtra(GOOGLE_PAY_BUTTON_THEME_KEY, input.googleButtonTheme);
-        intent.putExtra(GOOGLE_PAY_BUTTON_CORNER_RADIUS_KEY, input.googleButtonCornerRadius);
+        intent.putExtra(GOOGLE_PAY_BUTTON_OPTIONS, input.googlePayButtonOptions);
 
         return intent;
     }
@@ -103,10 +94,6 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
 
         final ConfirmPaymentParams confirmPaymentParams = getIntent().getParcelableExtra(CONFIRM_PAYMENT_PARAMS_BUNDLE);
         final MonriApiOptions apiOptions = getIntent().getParcelableExtra(MONRI_API_OPTIONS);
-
-        googlePayButtonType = getIntent().getIntExtra(GOOGLE_PAY_BUTTON_TYPE_KEY, DEFAULT_GOOGLE_PAY_BUTTON_TYPE);
-        googlePayButtonTheme = getIntent().getIntExtra(GOOGLE_PAY_BUTTON_THEME_KEY, DEFAULT_GOOGLE_PAY_BUTTON_THEME);
-        googlePayButtonCornerRadius = getIntent().getIntExtra(GOOGLE_PAY_BUTTON_CORNER_RADIUS_KEY, DEFAULT_GOOGLE_PAY_BUTTON_CORNER_RADIUS);
 
         Objects.requireNonNull(confirmPaymentParams, "ConfirmPaymentParams == null");
         Objects.requireNonNull(apiOptions, "MonriApiOptions == null");
@@ -127,6 +114,8 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
         if (PaymentMethod.DIRECT_PAYMENT_METHODS.contains(paymentMethodType)) {
             confirmDirectPayment(confirmPaymentParams, apiOptions);
         } else if (PaymentMethod.TYPE_GOOGLE_PAY.equals(paymentMethodType) && paymentMethodData.isEmpty()) {
+            googlePayButtonOptions = getIntent().getParcelableExtra(GOOGLE_PAY_BUTTON_OPTIONS);
+
             initializeGooglePayPayment(confirmPaymentParams, apiOptions);
         } else {
             confirmCardRelatedPayment(confirmPaymentParams);
@@ -175,10 +164,13 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
     private void initializeGooglePayPayment(final ConfirmPaymentParams confirmPaymentParams, final MonriApiOptions apiOptions) {
         final int walletEnvironment = (apiOptions.isDevelopmentMode()) ? WalletConstants.ENVIRONMENT_TEST : WalletConstants.ENVIRONMENT_PRODUCTION;
 
-        final ButtonOptions.Builder buttonOptionsBuilder = ButtonOptions.newBuilder()
-                .setButtonTheme(googlePayButtonTheme)
-                .setButtonType(googlePayButtonType)
-                .setCornerRadius(googlePayButtonCornerRadius);
+        final ButtonOptions.Builder buttonOptionsBuilder = ButtonOptions.newBuilder();
+
+        if (googlePayButtonOptions != null) {
+            buttonOptionsBuilder.setButtonTheme(googlePayButtonOptions.getButtonTheme())
+                                .setButtonType(googlePayButtonOptions.getButtonType())
+                                .setCornerRadius(googlePayButtonOptions.getCornerRadius());
+        }
 
         googlePayButtonContainer = findViewById(R.id.confirm_payment_google_pay_button_container);
         googlePayHandler = new GooglePayHandler(this, this, walletEnvironment, monri, buttonOptionsBuilder, this);
@@ -301,9 +293,7 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
     public static class Request implements Parcelable {
         ConfirmPaymentParams params;
         MonriApiOptions apiOptions;
-        int googleButtonType;
-        int googleButtonTheme;
-        int googleButtonCornerRadius;
+        GooglePayButtonOptions googlePayButtonOptions;
 
         public Request(ConfirmPaymentParams params, MonriApiOptions apiOptions) {
             this.params = params;
@@ -311,21 +301,17 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
         }
 
         public Request(final ConfirmPaymentParams params, final MonriApiOptions apiOptions,
-                       final int googleButtonType, final int googleButtonTheme, final int googleButtonCornerRadius
+                       final GooglePayButtonOptions googlePayButtonOptions
         ) {
             this.params = params;
             this.apiOptions = apiOptions;
-            this.googleButtonType = googleButtonType;
-            this.googleButtonTheme = googleButtonTheme;
-            this.googleButtonCornerRadius = googleButtonCornerRadius;
+            this.googlePayButtonOptions = googlePayButtonOptions;
         }
 
         protected Request(Parcel in) {
             params = in.readParcelable(ConfirmPaymentParams.class.getClassLoader());
             apiOptions = in.readParcelable(MonriApiOptions.class.getClassLoader());
-            googleButtonType = in.readInt();
-            googleButtonTheme = in.readInt();
-            googleButtonCornerRadius = in.readInt();
+            googlePayButtonOptions = in.readParcelable(GooglePayButtonOptions.class.getClassLoader());
         }
 
         public static final Creator<Request> CREATOR = new Creator<>() {
@@ -349,9 +335,7 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeParcelable(params, flags);
             dest.writeParcelable(apiOptions, flags);
-            dest.writeInt(googleButtonType);
-            dest.writeInt(googleButtonTheme);
-            dest.writeInt(googleButtonCornerRadius);
+            dest.writeParcelable(googlePayButtonOptions, flags);
         }
     }
 }

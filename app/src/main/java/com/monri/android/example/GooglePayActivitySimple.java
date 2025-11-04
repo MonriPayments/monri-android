@@ -11,7 +11,9 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultCaller;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.gms.wallet.button.ButtonConstants;
 import com.monri.android.Monri;
+import com.monri.android.google_pay.GooglePayButtonOptions;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
@@ -126,7 +128,13 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
                 TransactionParams.create().set(testCustomerParams)
         );
 
-        monri.confirmPayment(confirmPaymentParams, this::onConfirmPaymentResult);
+        final GooglePayButtonOptions googlePayButtonOptions = new GooglePayButtonOptions(
+                ButtonConstants.ButtonType.ORDER,
+                ButtonConstants.ButtonTheme.LIGHT,
+                5
+        );
+
+        monri.confirmPayment(confirmPaymentParams, this::onConfirmPaymentResult, googlePayButtonOptions);
     }
 
     public void onConfirmPaymentResult(final PaymentResult result, final Throwable cause) {

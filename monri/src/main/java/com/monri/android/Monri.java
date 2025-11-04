@@ -5,19 +5,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-
 import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.exception.MonriException;
+import com.monri.android.google_pay.GooglePayButtonOptions;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;
 import com.monri.android.model.PaymentResult;
 import com.monri.android.model.Token;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
 import androidx.activity.result.ActivityResultCaller;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
@@ -145,9 +143,9 @@ public final class Monri {
     }
 
     public void confirmPayment(final ConfirmPaymentParams confirmPaymentParams, final ActionResultConsumer<PaymentResult> callback,
-                               final int googleButtonType, final int googleButtonTheme, final int googleButtonCornerRadius)
+                               final GooglePayButtonOptions googlePayButtonOptions)
     {
-        paymentController.confirmPayment(confirmPaymentParams, callback, googleButtonType, googleButtonTheme, googleButtonCornerRadius);
+        paymentController.confirmPayment(confirmPaymentParams, callback, googlePayButtonOptions);
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {
