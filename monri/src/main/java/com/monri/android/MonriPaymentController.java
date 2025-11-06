@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import androidx.activity.result.ActivityResultLauncher;
 import com.monri.android.activity.ConfirmPaymentActivity;
-import com.monri.android.google_pay.GooglePayButtonOptions;
+import com.monri.android.googlepay.GooglePayButtonOptions;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentResult;

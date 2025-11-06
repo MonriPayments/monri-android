@@ -8,7 +8,7 @@ public class GooglePayPayment extends PaymentMethod {
 
     private final Provider provider;
 
-    final private JSONObject googlePaymentMethodData;
+    private final JSONObject googlePaymentMethodData;
 
     public final static String GOOGLE_PAYMENT_METHOD_DATA_KEY = "payment-method-data";
 

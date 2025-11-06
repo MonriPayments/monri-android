@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.exception.MonriException;
-import com.monri.android.google_pay.GooglePayButtonOptions;
+import com.monri.android.googlepay.GooglePayButtonOptions;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;

@@ -1,4 +1,4 @@
-package com.monri.android.google_pay;
+package com.monri.android.googlepay;
 
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;

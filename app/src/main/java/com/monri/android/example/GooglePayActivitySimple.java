@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.wallet.button.ButtonConstants;
 import com.monri.android.Monri;
-import com.monri.android.google_pay.GooglePayButtonOptions;
+import com.monri.android.googlepay.GooglePayButtonOptions;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
