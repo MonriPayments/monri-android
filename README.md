@@ -52,6 +52,10 @@ In [Tokens API Integration](https://github.com/MonriPayments/monri-android/wiki/
 - create token
 - how to use created token for transaction authorization on your backend
 
+# Google Pay Integration
+
+In [Google Pay Integration](https://github.com/MonriPayments/monri-android/wiki/Google-Pay-Integration) it is explained how to implement payments using Google Pay, with 3 possible approaches.
+
 # Questions
 
 If you have any questions about documentation/APIs/flow do not hesitate to contact us at support@monri.com

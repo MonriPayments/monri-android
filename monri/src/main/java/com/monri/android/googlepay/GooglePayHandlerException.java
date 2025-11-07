@@ -42,6 +42,10 @@ public class GooglePayHandlerException extends Exception {
         return errorCode;
     }
 
+    public int getSubCode() {
+        return subCode;
+    }
+
     @SuppressLint("DefaultLocale")
     @NonNull
     @Override
