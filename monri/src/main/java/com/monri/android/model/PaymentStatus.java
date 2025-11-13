@@ -10,7 +10,8 @@ public enum PaymentStatus {
     EXECUTED("executed"),
     DECLINED("declined"),
     ACTION_REQUIRED("action_required"), // pending
-    PAYMENT_METHOD_REQUIRED("payment_method_required");
+    PAYMENT_METHOD_REQUIRED("payment_method_required"),
+    GOOGLE_PAY_ERROR("google_pay_error");
 
     private final String status;
 

@@ -2,10 +2,9 @@ package com.monri.android;
 
 import android.app.Activity;
 import android.content.Intent;
-
 import androidx.activity.result.ActivityResultLauncher;
-
 import com.monri.android.activity.ConfirmPaymentActivity;
+import com.monri.android.googlepay.GooglePayButtonOptions;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentResult;
@@ -48,6 +47,16 @@ final class MonriPaymentController implements PaymentController {
         }
         this.delegatedCallback = resultCallback;
         registeredForActivityResult.launch(new ConfirmPaymentActivity.Request(params, monriApiOptions));
+    }
+
+    @Override
+    public void confirmPayment(final ConfirmPaymentParams params, final ActionResultConsumer<PaymentResult> resultCallback,
+                               final GooglePayButtonOptions googlePayButtonOptions) {
+        if (registeredForActivityResult == null) {
+            throw new NullPointerException("In Monri constructor you didn't provide activityResultCaller, registeredForActivityResult in null.");
+        }
+        this.delegatedCallback = resultCallback;
+        registeredForActivityResult.launch(new ConfirmPaymentActivity.Request(params, monriApiOptions, googlePayButtonOptions));
     }
 
     @Override

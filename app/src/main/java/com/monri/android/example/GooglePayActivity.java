@@ -25,7 +25,7 @@ import com.google.android.gms.wallet.button.PayButton;
 import com.google.android.gms.wallet.contract.TaskResultContracts;
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
-import com.monri.android.google_pay.MonriGooglePaymentRequestHelper;
+import com.monri.android.googlepay.MonriGooglePaymentRequestHelper;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
 import com.monri.android.model.GooglePayPayment;
@@ -228,7 +228,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
     }
 
     private void confirmGooglePayPayment() {
-            final GooglePayPayment payment = new GooglePayPayment(GooglePayPayment.Provider.GOOGLE_PAY, googlePaymentMethodData);
+        final GooglePayPayment payment = new GooglePayPayment(GooglePayPayment.Provider.GOOGLE_PAY, googlePaymentMethodData);
 
             final ConfirmPaymentParams confirmPaymentParams;
             confirmPaymentParams = ConfirmPaymentParams.create(
@@ -246,7 +246,7 @@ public class GooglePayActivity extends AppCompatActivity implements ViewDelegate
         if (cause != null) {
             paymentResultText = getString(R.string.google_pay_activity_confirm_payment_error, cause);
         } else {
-           paymentResultText = getString(R.string.google_pay_activity_confirm_payment_result, result.getStatus());
+           paymentResultText = getString(R.string.google_pay_activity_confirm_payment_result, result.getStatus(), result.getErrors());
         }
 
         resultTextView.setText(paymentResultText);
