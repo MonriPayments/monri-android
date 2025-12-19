@@ -15,6 +15,8 @@ import java.util.Map;
 
 public class HttpsClient {
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
     private static final String RESPONSE_ERROR_MESSAGE_KEY = "message";
 
     protected MonriHttpResult<JSONObject> httpsPOST(
@@ -34,6 +36,7 @@ public class HttpsClient {
                 final int contentLength = body.toString().getBytes(StandardCharsets.UTF_8).length;
                 urlConnection.setFixedLengthStreamingMode(contentLength);
                 urlConnection.addRequestProperty(CONTENT_LENGTH_HEADER, String.valueOf(contentLength));
+                urlConnection.addRequestProperty(CONTENT_TYPE_HEADER, APPLICATION_JSON_CONTENT_TYPE);
             }
 
             writeToOutputStream(urlConnection, body);
@@ -156,7 +159,7 @@ public class HttpsClient {
         try {
             int responseCode = urlConnection.getResponseCode();
             InputStream inputStream;
-            if (responseCode >= 200 && responseCode < 300) {
+            if (responseCode >= HttpURLConnection.HTTP_OK && responseCode < HttpURLConnection.HTTP_MULT_CHOICE) {
                 inputStream = urlConnection.getInputStream();
             } else {
                 inputStream = urlConnection.getErrorStream();
@@ -171,7 +174,7 @@ public class HttpsClient {
 
             JSONObject jsonResponse = new JSONObject(jsonStringResponse.toString());
 
-            if (responseCode >= 200 && responseCode < 300) {
+            if (responseCode >= HttpURLConnection.HTTP_OK && responseCode < HttpURLConnection.HTTP_MULT_CHOICE) {
                 return MonriHttpResult.success(jsonResponse, urlConnection.getResponseCode());
             } else {
                 String errorMessage = jsonResponse.has(RESPONSE_ERROR_MESSAGE_KEY) ? jsonResponse.getString(RESPONSE_ERROR_MESSAGE_KEY) : jsonResponse.toString();

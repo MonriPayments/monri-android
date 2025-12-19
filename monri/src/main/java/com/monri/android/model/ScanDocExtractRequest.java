@@ -5,17 +5,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ScanDocExtractRequest {
-    private static final String IMAGE_TYPE_KEY = "imageType";
-    private static final String IMAGE_CROPPED_KEY = "imageCroppped";
+    private static final String IMAGE_KEY = "Image";
+    private static final String IMAGE_TYPE_KEY = "ImageType";
+    private static final String IMAGE_CROPPED_KEY = "ImageCroppped";
     private static final String ACCEPT_TERMS_AND_CONDITIONS_KEY = "AcceptTermsAndConditions";
-    private static final String SHOULD_RETURN_DOCUMENT_IMAGE_KEY = "shouldReturnDocumentImage";
-    private static final String SKIP_DOCUMENT_SIZE_CHECK_KEY = "skipDocumentSizeCheck";
-    private static final String SKIP_IMAGE_SIZE_CHECK_KEY = "skipImageSizeCheck";
-    private static final String CAN_STORE_IMAGES_KEY = "canStoreImages";
-    private static final String DONT_USE_VALIDATION_KEY = "dontUseValidation";
+    private static final String SHOULD_RETURN_DOCUMENT_IMAGE_KEY = "ShouldReturnDocumentImage";
+    private static final String SKIP_DOCUMENT_SIZE_CHECK_KEY = "SkipDocumentSizeCheck";
+    private static final String SKIP_IMAGE_SIZE_CHECK_KEY = "SkipImageSizeCheck";
+    private static final String CAN_STORE_IMAGES_KEY = "CanStoreImages";
+    private static final String DONT_USE_VALIDATION_KEY = "DontUseValidation";
     private static final String DATA_FIELDS_KEY = "DataFields";
     private static final String SETTINGS_KEY = "Settings";
     private final boolean acceptTermsAndConditions;
+    private final String base64Image;
     private final String imageType;
     private final boolean imageCropped;
     private final boolean shouldReturnDocumentImage;
@@ -24,10 +26,12 @@ public class ScanDocExtractRequest {
     private final boolean canStoreImages;
     private final boolean dontUseValidation;
 
-    public ScanDocExtractRequest(final boolean acceptTermsAndConditions,
+    public ScanDocExtractRequest(final String base64Image,
+                                 final boolean acceptTermsAndConditions,
                                  final ScanDocExtractionConfig extractionConfig) {
         this.acceptTermsAndConditions = acceptTermsAndConditions;
-        this.imageType = extractionConfig.getImageType();
+        this.base64Image = base64Image;
+        this.imageType = extractionConfig.getImageType().getValue();
         this.imageCropped = extractionConfig.isImageCropped();
         this.shouldReturnDocumentImage = extractionConfig.isShouldReturnDocumentImage();
         this.skipDocumentSizeCheck = extractionConfig.isSkipDocumentSizeCheck();
@@ -37,7 +41,8 @@ public class ScanDocExtractRequest {
     }
 
     public JSONObject toJSONObject() throws JSONException {
-        final JSONObject dataFieldsObject = new JSONObject().put(IMAGE_TYPE_KEY, imageType)
+        final JSONObject dataFieldsObject = new JSONObject().put(IMAGE_KEY, base64Image)
+                                                            .put(IMAGE_TYPE_KEY, imageType)
                                                             .put(IMAGE_CROPPED_KEY, imageCropped);
 
         final JSONObject settingsObject = new JSONObject().put(SHOULD_RETURN_DOCUMENT_IMAGE_KEY, shouldReturnDocumentImage)

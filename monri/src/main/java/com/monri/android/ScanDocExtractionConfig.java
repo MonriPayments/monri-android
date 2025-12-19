@@ -1,7 +1,7 @@
 package com.monri.android;
 
 public class ScanDocExtractionConfig {
-    private final String imageType;
+    private final ImageType imageType;
     private final boolean imageCropped;
     private final boolean shouldReturnDocumentImage;
     private final boolean skipDocumentSizeCheck;
@@ -9,13 +9,13 @@ public class ScanDocExtractionConfig {
     private final boolean canStoreImages;
     private final boolean dontUseValidation;
 
-    public ScanDocExtractionConfig(String imageType,
-                                   boolean imageCropped,
-                                   boolean shouldReturnDocumentImage,
-                                   boolean skipDocumentSizeCheck,
-                                   boolean skipImageSizeCheck,
-                                   boolean canStoreImages,
-                                   boolean dontUseValidation) {
+    public ScanDocExtractionConfig(final ImageType imageType,
+                                   final boolean imageCropped,
+                                   final boolean shouldReturnDocumentImage,
+                                   final boolean skipDocumentSizeCheck,
+                                   final boolean skipImageSizeCheck,
+                                   final boolean canStoreImages,
+                                   final boolean dontUseValidation) {
         this.imageType = imageType;
         this.imageCropped = imageCropped;
         this.shouldReturnDocumentImage = shouldReturnDocumentImage;
@@ -25,7 +25,21 @@ public class ScanDocExtractionConfig {
         this.dontUseValidation = dontUseValidation;
     }
 
-    public String getImageType() {
+    public enum ImageType {
+        BASE64("base64");
+
+        private final String value;
+
+        ImageType(final String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public ImageType getImageType() {
         return imageType;
     }
 

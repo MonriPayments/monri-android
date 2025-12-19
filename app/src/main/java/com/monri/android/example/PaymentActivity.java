@@ -20,22 +20,18 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-
         txtViewResult = findViewById(R.id.txt_result_payment_example);
 
         findViewById(R.id.btn_payment_example).setOnClickListener(v -> newPayment(false, false));
-
         findViewById(R.id.btn_payment_example_3ds1).setOnClickListener(v -> newPayment(true, false));
-
         findViewById(R.id.btn_payment_example_save_card_for_future_payments).setOnClickListener(v -> newPayment(true, true));
-
         findViewById(R.id.btn_add_payment_method_example).setOnClickListener(v -> addPaymentMethod(false));
         findViewById(R.id.btn_add_payment_method_example_3ds1).setOnClickListener(v -> addPaymentMethod(true));
-
         findViewById(R.id.btn_payment_example_saved_card_non_3ds).setOnClickListener(v -> savedCardPayment(false));
         findViewById(R.id.btn_payment_example_saved_card_3ds).setOnClickListener(v -> savedCardPayment(true));
         findViewById(R.id.btn_google_pay_activity).setOnClickListener(v -> startGooglePayActivity());
         findViewById(R.id.btn_google_pay_activity_simple).setOnClickListener(v -> startGooglePayActivitySimple());
+        findViewById(R.id.btn_scandoc).setOnClickListener(v -> startScanDocActivity());
     }
 
     private void addPaymentMethod(boolean threeDS) {
@@ -52,6 +48,10 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void startGooglePayActivitySimple() {
         startActivity(GooglePayActivitySimple.createIntent(this));
+    }
+
+    private void startScanDocActivity() {
+        startActivity(ScanDocActivity.createIntent(this));
     }
 
     private void savedCardPayment(boolean threeDS) {

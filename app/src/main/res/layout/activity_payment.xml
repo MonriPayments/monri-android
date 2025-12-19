@@ -61,6 +61,12 @@
         android:layout_height="wrap_content"
         android:text="@string/btn_payment_google_pay_simple" />
 
+    <Button
+        android:id="@+id/btn_scandoc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_scandoc" />
+
     <TextView
         android:id="@+id/txt_result_payment_example"
         android:layout_width="match_parent"

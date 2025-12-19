@@ -1,6 +1,5 @@
 package com.monri.android;
 
-import android.graphics.Bitmap;
 import com.monri.android.model.ScanDocApiOptions;
 import com.monri.android.model.ScanDocExtractRequest;
 import com.monri.android.model.ScanDocExtractResponse;
@@ -9,24 +8,30 @@ import com.monri.android.model.ScanDocValidateResponse;
 import java.util.List;
 
 
-public class ScanDocApiImpl {
+public class ScanDocApi {
     private static final Boolean TERMS_AND_CONDITIONS_ACCEPTED = true;
     private final ScanDocApiOptions scanDocApiOptions;
     private final ScanDocHttpApiImpl scanDocHttpApiImpl;
     private final TaskRunner taskRunner;
 
-    public ScanDocApiImpl(final ScanDocApiOptions scanDocApiOptions) {
+    public ScanDocApi(final ScanDocApiOptions scanDocApiOptions) {
         this.scanDocApiOptions = scanDocApiOptions;
         this.scanDocHttpApiImpl = new ScanDocHttpApiImpl(scanDocApiOptions);
         this.taskRunner = new TaskRunner();
     }
 
-    public void validateScannedCard(final Bitmap image, final Boolean skipImageSizeCheck, final ResultCallback<ScanDocValidateResponse> resultCallback) {
+    public void validateScannedCard(
+            final String base64Image,
+            final Boolean skipImageSizeCheck,
+            final ResultCallback<ScanDocValidateResponse> resultCallback,
+            final List<String> blurValues
+    ) {
         final ScanDocValidateRequest request = new ScanDocValidateRequest(
                 TERMS_AND_CONDITIONS_ACCEPTED,
-                image.toString(),
+                base64Image,
                 skipImageSizeCheck,
-                List.of());
+                blurValues
+        );
 
         taskRunner.executeAsync(
                 () -> {
@@ -42,8 +47,13 @@ public class ScanDocApiImpl {
         );
     }
 
-    public void extractDataFromScannedCard(final ScanDocExtractionConfig scanDocExtractionConfig, final ResultCallback<ScanDocExtractResponse> resultCallback) {
+    public void extractDataFromScannedCard(
+            final String base64Image,
+            final ScanDocExtractionConfig scanDocExtractionConfig,
+            final ResultCallback<ScanDocExtractResponse> resultCallback
+    ) {
         final ScanDocExtractRequest request = new ScanDocExtractRequest(
+                base64Image,
                 TERMS_AND_CONDITIONS_ACCEPTED,
                 scanDocExtractionConfig
         );

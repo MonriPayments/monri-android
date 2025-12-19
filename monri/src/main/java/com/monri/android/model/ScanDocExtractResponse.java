@@ -1,10 +1,8 @@
 package com.monri.android.model;
 
 import static com.monri.android.json.JsonUtil.toList;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.List;
 
 public class ScanDocExtractResponse extends BaseScanDocResponse {
@@ -12,9 +10,15 @@ public class ScanDocExtractResponse extends BaseScanDocResponse {
     private static final String IMAGE_DATA_KEY = "ImageData";
     private static final String CREDIT_CARD_IMAGE_KEY = "CreditCardImage";
     private static final String ANALYSIS_TIME_KEY = "AnalysisTime";
+    private static final String OS_KEY = "OS";
+    private static final String BROWSER_KEY = "Browser";
+    private static final String DEVICE_KEY = "Device";
     private final String base64CreditCardImage;
     private final String analysisTime;
     private final ScanDocCardData cardData;
+    private final String osInfo;
+    private final String browserInfo;
+    private final String deviceInfo;
 
     private ScanDocExtractResponse(final String transactionID,
                                    final String uploadedAt,
@@ -26,12 +30,18 @@ public class ScanDocExtractResponse extends BaseScanDocResponse {
                                    final int infoCode,
                                    final String base64CreditCardImage,
                                    final String analysisTime,
-                                   final ScanDocCardData cardData
+                                   final ScanDocCardData cardData,
+                                   final String osInfo,
+                                   final String browserInfo,
+                                   final String deviceInfo
     ) {
         super(transactionID, uploadedAt, productName, errors, warnings, status, method, infoCode);
         this.base64CreditCardImage = base64CreditCardImage;
         this.analysisTime = analysisTime;
         this.cardData = cardData;
+        this.osInfo = osInfo;
+        this.browserInfo = browserInfo;
+        this.deviceInfo = deviceInfo;
     }
 
     public static ScanDocExtractResponse fromJSON(final JSONObject response) throws JSONException {
@@ -45,6 +55,34 @@ public class ScanDocExtractResponse extends BaseScanDocResponse {
                                           response.getInt(INFO_CODE_KEY),
                                           response.getJSONObject(IMAGE_DATA_KEY).getString(CREDIT_CARD_IMAGE_KEY),
                                           response.getString(ANALYSIS_TIME_KEY),
-                                          ScanDocCardData.fromJSON(response.getJSONObject(DATA_KEY)));
+                                          ScanDocCardData.fromJSON(response.getJSONObject(DATA_KEY)),
+                                          response.getString(OS_KEY),
+                                          response.getString(BROWSER_KEY),
+                                          response.getString(DEVICE_KEY)
+                );
+    }
+
+    public String getBase64CreditCardImage() {
+        return base64CreditCardImage;
+    }
+
+    public String getAnalysisTime() {
+        return analysisTime;
+    }
+
+    public ScanDocCardData getCardData() {
+        return cardData;
+    }
+
+    public String getOsInfo() {
+        return osInfo;
+    }
+
+    public String getBrowserInfo() {
+        return browserInfo;
+    }
+
+    public String getDeviceInfo() {
+        return deviceInfo;
     }
 }

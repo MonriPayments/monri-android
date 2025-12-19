@@ -1,5 +1,6 @@
 package com.monri.android.model;
 
+import androidx.annotation.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +18,7 @@ public class ScanDocValidateRequest {
     private final Boolean skipImageSizeCheck;
     private final List<String> blurValues;
 
-    public ScanDocValidateRequest(final Boolean acceptTermsAndConditions, final String base64EncodedImage, final Boolean skipImageSizeCheck, final List<String> blurValues) {
+    public ScanDocValidateRequest(final Boolean acceptTermsAndConditions, final String base64EncodedImage, final Boolean skipImageSizeCheck, @Nullable final List<String> blurValues) {
         this.acceptTermsAndConditions = acceptTermsAndConditions;
         this.base64EncodedImage = base64EncodedImage;
         this.skipImageSizeCheck = skipImageSizeCheck;
@@ -25,8 +26,8 @@ public class ScanDocValidateRequest {
     }
 
     public JSONObject toJSONObject() throws JSONException {
-        final JSONObject dataFieldsObject = new JSONObject().put(IMAGES_KEY, new JSONArray(base64EncodedImage))
-                                                            .put(BLUR_VALUES_KEY, new JSONArray(blurValues));
+        final JSONObject dataFieldsObject = new JSONObject().put(IMAGES_KEY, new JSONArray().put(base64EncodedImage));
+        if (blurValues != null && !blurValues.isEmpty()) dataFieldsObject.put(BLUR_VALUES_KEY, blurValues);
 
         final JSONObject settingsObject = new JSONObject().put(SKIP_IMAGE_SIZE_CHECK_KEY, skipImageSizeCheck);
 

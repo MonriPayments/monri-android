@@ -50,7 +50,7 @@ public class ScanDocValidateResponse extends BaseScanDocResponse{
                 response.getString(METHOD_KEY),
                 response.getInt(INFO_CODE_KEY),
                 createKeypointList(response.getJSONArray(KEYPOINTS_KEY)),
-                response.getDouble(DETECTED_BLUR_VALUE_KEY),
+                response.optDouble(DETECTED_BLUR_VALUE_KEY),
                 response.getBoolean(VALIDATED_KEY),
                 response.getString(ANALYSIS_TIME_KEY)
         );

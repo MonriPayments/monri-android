@@ -5,8 +5,8 @@ public class ScanDocApiOptions {
     private final String userKey;
     private final String subClient;
 
-    public ScanDocApiOptions(final String scanDocApiUrl, final String userKey, final String subClient) {
-        this.scanDocApiUrl = scanDocApiUrl;
+    public ScanDocApiOptions(final String scanDocApiBaseUrl, final String userKey, final String subClient) {
+        this.scanDocApiUrl = scanDocApiBaseUrl;
         this.userKey = userKey;
         this.subClient = subClient;
     }
