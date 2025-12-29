@@ -7,7 +7,6 @@ import com.monri.android.model.ScanDocValidateRequest;
 import com.monri.android.model.ScanDocValidateResponse;
 import java.util.List;
 
-
 public class ScanDocApi {
     private static final Boolean TERMS_AND_CONDITIONS_ACCEPTED = true;
     private final ScanDocApiOptions scanDocApiOptions;
@@ -21,14 +20,14 @@ public class ScanDocApi {
     }
 
     public void validateScannedCard(
-            final String base64Image,
+            final List<String> base64Images,
             final Boolean skipImageSizeCheck,
             final ResultCallback<ScanDocValidateResponse> resultCallback,
-            final List<String> blurValues
+            final List<Double> blurValues
     ) {
         final ScanDocValidateRequest request = new ScanDocValidateRequest(
                 TERMS_AND_CONDITIONS_ACCEPTED,
-                base64Image,
+                base64Images,
                 skipImageSizeCheck,
                 blurValues
         );

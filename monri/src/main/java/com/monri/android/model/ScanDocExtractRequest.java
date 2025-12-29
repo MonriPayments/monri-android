@@ -7,7 +7,7 @@ import org.json.JSONObject;
 public class ScanDocExtractRequest {
     private static final String IMAGE_KEY = "Image";
     private static final String IMAGE_TYPE_KEY = "ImageType";
-    private static final String IMAGE_CROPPED_KEY = "ImageCroppped";
+    private static final String IMAGE_CROPPED_KEY = "ImageCropped";
     private static final String ACCEPT_TERMS_AND_CONDITIONS_KEY = "AcceptTermsAndConditions";
     private static final String SHOULD_RETURN_DOCUMENT_IMAGE_KEY = "ShouldReturnDocumentImage";
     private static final String SKIP_DOCUMENT_SIZE_CHECK_KEY = "SkipDocumentSizeCheck";

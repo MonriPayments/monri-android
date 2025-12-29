@@ -56,9 +56,9 @@ public class ScanDocExtractResponse extends BaseScanDocResponse {
                                           response.getJSONObject(IMAGE_DATA_KEY).getString(CREDIT_CARD_IMAGE_KEY),
                                           response.getString(ANALYSIS_TIME_KEY),
                                           ScanDocCardData.fromJSON(response.getJSONObject(DATA_KEY)),
-                                          response.getString(OS_KEY),
-                                          response.getString(BROWSER_KEY),
-                                          response.getString(DEVICE_KEY)
+                                          response.isNull(OS_KEY) ? null : response.getString(OS_KEY),
+                                          response.isNull(BROWSER_KEY) ? null : response.getString(BROWSER_KEY),
+                                          response.isNull(DEVICE_KEY) ? null : response.getString(DEVICE_KEY)
                 );
     }
 

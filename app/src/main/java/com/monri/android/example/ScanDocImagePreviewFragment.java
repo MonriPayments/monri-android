@@ -102,7 +102,7 @@ public class ScanDocImagePreviewFragment extends Fragment {
 
     private void validateImage() {
         progressBar.setVisibility(View.VISIBLE);
-        scanDocApi.validateScannedCard(base64Image, false, new ScanDocValidationCallback(), List.of());
+        scanDocApi.validateScannedCard(List.of(base64Image), false, new ScanDocValidationCallback(), List.of());
     }
 
     private void extractData() {

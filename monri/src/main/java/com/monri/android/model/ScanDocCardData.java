@@ -1,7 +1,6 @@
 package com.monri.android.model;
 
 import androidx.annotation.Nullable;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
