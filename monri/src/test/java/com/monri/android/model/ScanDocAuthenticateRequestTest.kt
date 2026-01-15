@@ -16,7 +16,7 @@ class ScanDocAuthenticateRequestTest {
     @Test
     fun `toJSONObject should properly convert request to JSON`() {
         // given
-        val scanDocAuthenticateRequest = ScanDocAuthenticateRequest(USER_KEY, SUB_CLIENT)
+        val scanDocAuthenticateRequest = ScanDocAuthenticateRequest(USER_KEY.toByteArray(), SUB_CLIENT)
         val expectedJSON = """{"user_key":"userkey","sub_client":"subclient"}"""
 
         // when

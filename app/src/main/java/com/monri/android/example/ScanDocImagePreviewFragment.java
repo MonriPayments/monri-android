@@ -18,6 +18,7 @@ import com.monri.android.ScanDocExtractionConfig;
 import com.monri.android.model.ScanDocApiOptions;
 import com.monri.android.model.ScanDocExtractResponse;
 import com.monri.android.model.ScanDocValidateResponse;
+import java.util.Collections;
 import java.util.List;
 
 public class ScanDocImagePreviewFragment extends Fragment {
@@ -26,18 +27,25 @@ public class ScanDocImagePreviewFragment extends Fragment {
     private static final String SCANDOC_SUBCLIENT = "androidTestClient";
     private static final String BUNDLE_BASE64_IMAGE_KEY = "base64Image";
     private static final String BUNDLE_PHOTO_URI_KEY = "photoUri";
+    private static final boolean IS_IMAGE_CROPPED = false;
+    private static final boolean SHOULD_RETURN_DOCUMENT_IMAGE = true;
+    private static final boolean SHOULD_SKIP_DOCUMENT_SIZE_CHECK = false;
+    private static final boolean SHOULD_SKIP_IMAGE_SIZE_CHECK = false;
+    private static final boolean SCAN_STORE_IMAGES = false;
+    private static final boolean DONT_USE_VALIDATION = false;
+
     private ProgressBar progressBar;
     private String base64Image;
     private Uri photoUri;
     private ScanDocApi scanDocApi;
     private static final ScanDocExtractionConfig scanDocExtractionConfig = new ScanDocExtractionConfig(
             ScanDocExtractionConfig.ImageType.BASE64,
-            false,
-            true,
-            false,
-            false,
-            false,
-            false
+            IS_IMAGE_CROPPED,
+            SHOULD_RETURN_DOCUMENT_IMAGE,
+            SHOULD_SKIP_DOCUMENT_SIZE_CHECK,
+            SHOULD_SKIP_IMAGE_SIZE_CHECK,
+            SCAN_STORE_IMAGES,
+            DONT_USE_VALIDATION
     );
 
     public static ScanDocImagePreviewFragment newInstance(final String base64Image, final String photoUri) {
@@ -102,7 +110,7 @@ public class ScanDocImagePreviewFragment extends Fragment {
 
     private void validateImage() {
         progressBar.setVisibility(View.VISIBLE);
-        scanDocApi.validateScannedCard(List.of(base64Image), false, new ScanDocValidationCallback(), List.of());
+        scanDocApi.validateScannedCard(List.of(base64Image), false, new ScanDocValidationCallback(), Collections.emptyList());
     }
 
     private void extractData() {

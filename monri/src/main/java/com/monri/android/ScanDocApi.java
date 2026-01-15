@@ -9,12 +9,10 @@ import java.util.List;
 
 public class ScanDocApi {
     private static final Boolean TERMS_AND_CONDITIONS_ACCEPTED = true;
-    private final ScanDocApiOptions scanDocApiOptions;
     private final ScanDocHttpApiImpl scanDocHttpApiImpl;
     private final TaskRunner taskRunner;
 
     public ScanDocApi(final ScanDocApiOptions scanDocApiOptions) {
-        this.scanDocApiOptions = scanDocApiOptions;
         this.scanDocHttpApiImpl = new ScanDocHttpApiImpl(scanDocApiOptions);
         this.taskRunner = new TaskRunner();
     }

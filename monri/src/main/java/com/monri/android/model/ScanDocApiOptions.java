@@ -2,12 +2,12 @@ package com.monri.android.model;
 
 public class ScanDocApiOptions {
     private final String scanDocApiUrl;
-    private final String userKey;
+    private final byte[] userKey;
     private final String subClient;
 
     public ScanDocApiOptions(final String scanDocApiBaseUrl, final String userKey, final String subClient) {
         this.scanDocApiUrl = scanDocApiBaseUrl;
-        this.userKey = userKey;
+        this.userKey = userKey.getBytes();
         this.subClient = subClient;
     }
 
@@ -19,7 +19,7 @@ public class ScanDocApiOptions {
         return subClient;
     }
 
-    public String getUserKey() {
+    public byte[] getUserKey() {
         return userKey;
     }
 }
