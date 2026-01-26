@@ -16,11 +16,9 @@ public class ScanDocCardData {
     private static final String VALUE_KEY = "Value";
     @Nullable
     private final String holdersName;
-    @Nullable
     private final String cardNumber;
     @Nullable
     private final String issuedDate;
-    @Nullable
     private final String expiryDate;
     @Nullable
     private final String IBAN;
@@ -30,9 +28,9 @@ public class ScanDocCardData {
     private final String extractedTexts;
 
     private ScanDocCardData(@Nullable final String holdersName,
-                            @Nullable final String cardNumber,
+                            final String cardNumber,
                             @Nullable final String issuedDate,
-                            @Nullable final String expiryDate,
+                            final String expiryDate,
                             @Nullable final String IBAN,
                             @Nullable final String luhnCheck,
                             @Nullable final String extractedTexts) {

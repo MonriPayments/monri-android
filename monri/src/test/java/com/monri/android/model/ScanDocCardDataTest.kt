@@ -104,7 +104,7 @@ class ScanDocCardDataTest {
 
         // then
         assertThrows(JSONException::class.java) {
-            ScanDocValidateResponse.fromJSON(responseJSON)
+            ValidationResponse.fromJSON(responseJSON)
         }
     }
 }

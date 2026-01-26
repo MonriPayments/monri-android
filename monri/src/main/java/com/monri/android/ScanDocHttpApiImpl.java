@@ -2,10 +2,11 @@ package com.monri.android;
 
 import com.monri.android.model.AccessToken;
 import com.monri.android.model.ScanDocApiOptions;
+import com.monri.android.model.ScanDocCardData;
 import com.monri.android.model.ScanDocExtractRequest;
 import com.monri.android.model.ScanDocValidateRequest;
-import com.monri.android.model.ScanDocValidateResponse;
-import com.monri.android.model.ScanDocExtractResponse;
+import com.monri.android.model.ValidationResponse;
+import com.monri.android.model.ExtractionResponse;
 import org.json.JSONException;
 import java.util.Map;
 
@@ -26,14 +27,14 @@ public class ScanDocHttpApiImpl {
         );
     }
 
-    public MonriHttpResult<ScanDocValidateResponse> validateScannedCard(final ScanDocValidateRequest scanDocValidateRequest) {
+    public MonriHttpResult<ValidationResponse> validateScannedCard(final ScanDocValidateRequest scanDocValidateRequest) {
         try {
             return httpsClientProxy.doPostRequest(
                     scanDocUrlProvider.getValidationUrl(),
                     createAuthorizationHeader(),
                     scanDocValidateRequest.toJSONObject().toString(),
                     false,
-                    ScanDocValidateResponse::fromJSON
+                    ValidationResponse::fromJSON
             );
 
         } catch (final JSONException e) {
@@ -41,18 +42,29 @@ public class ScanDocHttpApiImpl {
         }
     }
 
-    public MonriHttpResult<ScanDocExtractResponse> extractDataFromScannedCard(final ScanDocExtractRequest scanDocExtractRequest) {
+    public MonriHttpResult<ExtractionResponse> extractDataFromScannedCard(final ScanDocExtractRequest scanDocExtractRequest) {
         try {
-            return httpsClientProxy.doPostRequest(
+            final MonriHttpResult<ExtractionResponse> response = httpsClientProxy.doPostRequest(
                     scanDocUrlProvider.getExtractionUrl(),
                     createAuthorizationHeader(),
                     scanDocExtractRequest.toJSONObject().toString(),
                     false,
-                    ScanDocExtractResponse::fromJSON
+                    ExtractionResponse::fromJSON
             );
+
+            if (areCardParametersEmpty(response.getResult().getCardData())) return MonriHttpResult.failed(MonriHttpException.create(MonriHttpExceptionCode.UNABLE_TO_READ_EXTRACTED_DATA));
+
+            return response;
         } catch (final JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
+    }
+
+    private boolean areCardParametersEmpty(final ScanDocCardData cardData) {
+        final String cardNumber = cardData.getCardNumber();
+        final String expiryDate = cardData.getExpiryDate();
+
+        return (cardNumber == null|| cardNumber.isEmpty() || expiryDate == null || expiryDate.isEmpty());
     }
 
     private Map<String, String> createAuthorizationHeader() throws JSONException {

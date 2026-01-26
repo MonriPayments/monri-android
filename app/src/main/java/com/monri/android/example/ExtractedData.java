@@ -3,7 +3,7 @@ package com.monri.android.example;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
-import com.monri.android.model.ScanDocExtractResponse;
+import com.monri.android.model.ExtractionResponse;
 
 public class ExtractedData implements Parcelable {
     private final String analysisTime;
@@ -49,7 +49,7 @@ public class ExtractedData implements Parcelable {
         this.iban = iban;
     }
 
-    public static ExtractedData fromExtractionResponse(final ScanDocExtractResponse extractResponse) {
+    public static ExtractedData fromExtractionResponse(final ExtractionResponse extractResponse) {
         return new ExtractedData(
                 extractResponse.getAnalysisTime(),
                 extractResponse.getCardData().getHoldersName(),

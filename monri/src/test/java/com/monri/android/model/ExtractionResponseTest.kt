@@ -7,7 +7,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class ScanDocExtractResponseTest {
+class ExtractionResponseTest {
 
     @Test
     fun `fromJSON should parse JSON to ScanDocExtractResponse object`() {
@@ -63,12 +63,12 @@ class ScanDocExtractResponseTest {
         """.trimIndent())
 
         // when
-        val scanDocExtractResponse = ScanDocExtractResponse.fromJSON(responseJSON)
+        val extractionResponse = ExtractionResponse.fromJSON(responseJSON)
 
         // then
-        assertThat("image").isEqualTo(scanDocExtractResponse.base64CreditCardImage)
-        assertThat(200).isEqualTo(scanDocExtractResponse.status)
-        assertThat("NAME SURNAME").isEqualTo(scanDocExtractResponse.cardData.holdersName)
-        assertThat(scanDocExtractResponse.browserInfo).isNull()
+        assertThat("image").isEqualTo(extractionResponse.base64CreditCardImage)
+        assertThat(200).isEqualTo(extractionResponse.status)
+        assertThat("NAME SURNAME").isEqualTo(extractionResponse.cardData.holdersName)
+        assertThat(extractionResponse.browserInfo).isNull()
     }
 }

@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScanDocValidateResponse extends BaseScanDocResponse{
+public class ValidationResponse extends BaseScanDocResponse{
     private static final String KEYPOINTS_KEY = "Keypoints";
     private static final String DETECTED_BLUR_VALUE_KEY = "DetectedBlurValue";
     private static final String VALIDATED_KEY = "Validated";
@@ -20,20 +20,20 @@ public class ScanDocValidateResponse extends BaseScanDocResponse{
     private final String analysisTime;
     private final int index;
     private final String info;
-    private ScanDocValidateResponse(final String transactionID,
-                                    final String uploadedAt,
-                                    final String productName,
-                                    final List<String> errors,
-                                    final List<String> warnings,
-                                    final int status,
-                                    final String method,
-                                    final int infoCode,
-                                    final List<ScanDocKeypoint> keypoints,
-                                    final double detectedBlurValue,
-                                    final boolean validated,
-                                    final String analysisTime,
-                                    final int index,
-                                    final String info
+    private ValidationResponse(final String transactionID,
+                               final String uploadedAt,
+                               final String productName,
+                               final List<String> errors,
+                               final List<String> warnings,
+                               final int status,
+                               final String method,
+                               final int infoCode,
+                               final List<ScanDocKeypoint> keypoints,
+                               final double detectedBlurValue,
+                               final boolean validated,
+                               final String analysisTime,
+                               final int index,
+                               final String info
     ) {
         super(transactionID, uploadedAt, productName, errors, warnings, status, method, infoCode);
 
@@ -45,9 +45,9 @@ public class ScanDocValidateResponse extends BaseScanDocResponse{
         this.info = info;
     }
 
-    public static ScanDocValidateResponse fromJSON(final JSONObject response) throws JSONException {
+    public static ValidationResponse fromJSON(final JSONObject response) throws JSONException {
 
-        return new ScanDocValidateResponse(
+        return new ValidationResponse(
                 response.getString(TRANSACTION_ID_KEY),
                 response.getString(UPLOADED_AT_KEY),
                 response.getString(PRODUCT_NAME_KEY),

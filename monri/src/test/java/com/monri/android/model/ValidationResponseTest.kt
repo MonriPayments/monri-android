@@ -7,7 +7,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class ScanDocValidateResponseTest {
+class ValidationResponseTest {
 
 
     @Test
@@ -38,7 +38,7 @@ class ScanDocValidateResponseTest {
             """.trimIndent())
 
         // when
-        val response = ScanDocValidateResponse.fromJSON(responseJSON)
+        val response = ValidationResponse.fromJSON(responseJSON)
 
         // then
         assertThat("07cdfb58-0c20-4d91-8ec5-8bb4c248b7a9").isEqualTo(response.transactionID)
@@ -75,7 +75,7 @@ class ScanDocValidateResponseTest {
             """.trimIndent())
 
         // when
-        val response = ScanDocValidateResponse.fromJSON(responseJSON)
+        val response = ValidationResponse.fromJSON(responseJSON)
 
         // then
         assertThat(response.detectedBlurValue).isNaN()

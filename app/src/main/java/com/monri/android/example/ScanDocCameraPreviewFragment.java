@@ -125,11 +125,9 @@ public class ScanDocCameraPreviewFragment extends Fragment {
 
         @Override
         public void onImageSaved(@NonNull final ImageCapture.OutputFileResults outputFileResults) {
-            final String base64Image = ImageProcessingUtil.imageToBase64StringWithCompression(photofile, 70);
-
             final ScanDocImagePreviewFragment scanDocImagePreviewFragment = ScanDocImagePreviewFragment.newInstance(
-                    base64Image,
-                    Uri.fromFile(photofile).toString());
+                    Uri.fromFile(photofile).toString()
+            );
 
             getParentFragmentManager()
                     .beginTransaction()
