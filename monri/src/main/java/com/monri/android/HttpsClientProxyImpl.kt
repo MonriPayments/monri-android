@@ -37,7 +37,7 @@ internal class HttpsClientProxyImpl(): HttpsClientProxy {
         }
         val responseJsonObject = JSONObject(response.body)
 
-        return if (response.httpCode >= HttpURLConnection.HTTP_OK && response.httpCode < HttpURLConnection.HTTP_MULT_CHOICE) {
+        return if (response.isSuccess()) {
             MonriHttpResult.success(jsonResponseMapper.map(responseJsonObject), response.httpCode)
         } else {
             val errorMessage = if (responseJsonObject.has(RESPONSE_ERROR_MESSAGE_KEY)) responseJsonObject.getString(RESPONSE_ERROR_MESSAGE_KEY) else response.body

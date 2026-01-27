@@ -15,6 +15,7 @@ public class HttpsClient {
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
+    private static final char NEWLINE_CHAR = '\n';
 
     protected HttpsResponse httpsPOST(
             final HttpsRequest.Post httpRequest
@@ -117,7 +118,7 @@ public class HttpsClient {
             final BufferedReader r = new BufferedReader(new InputStreamReader(in));
             final StringBuilder stringResponse = new StringBuilder();
             for (String line; (line = r.readLine()) != null; ) {
-                stringResponse.append(line).append('\n');
+                stringResponse.append(line).append(NEWLINE_CHAR);
             }
 
             return new HttpsResponse(responseCode, stringResponse.toString());
