@@ -85,6 +85,6 @@ public class ScanDocExtractedDataFragment extends Fragment {
         extractedTexts.setLabel(getString(R.string.scandoc_extracted_data_fragment_extracted_texts_label));
         extractedTexts.setValue(extractedData.getExtractedTexts());
 
-        imageView.setImageBitmap(ImageProcessingUtil.base64ToImage(extractedData.getBase64ImageData()));
+        imageView.setImageBitmap(ImageProcessingUtil.createBitmapFromBase64Image(extractedData.getBase64ImageData()));
     }
 }

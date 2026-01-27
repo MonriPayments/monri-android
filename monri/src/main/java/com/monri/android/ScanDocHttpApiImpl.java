@@ -64,7 +64,8 @@ public class ScanDocHttpApiImpl {
         final String cardNumber = cardData.getCardNumber();
         final String expiryDate = cardData.getExpiryDate();
 
-        return (cardNumber == null|| cardNumber.isEmpty() || expiryDate == null || expiryDate.isEmpty());
+        return cardNumber == null || cardNumber.isEmpty()
+                || expiryDate == null || expiryDate.isEmpty();
     }
 
     private Map<String, String> createAuthorizationHeader() throws JSONException {

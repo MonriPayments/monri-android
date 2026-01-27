@@ -20,14 +20,38 @@ public class ScanDocApi {
     }
 
     public void validateScannedCard(
-            final List<Bitmap> scannedCardImages,
+            final Bitmap[] scannedCardImages,
             final ValidationConfiguration validationConfiguration,
             final ResultCallback<ValidationResponse> resultCallback
     ) {
 
+        validateScannedCardInternal(
+                ImageProcessingUtil.bitmapsToBase64StringWithCompression(scannedCardImages),
+                validationConfiguration,
+                resultCallback
+        );
+    }
+
+    public void validateScannedCard(
+            final List<byte[]> scannedCardImages,
+            final ValidationConfiguration validationConfiguration,
+            final ResultCallback<ValidationResponse> resultCallback
+    ) {
+        validateScannedCardInternal(
+                ImageProcessingUtil.byteArraysToCompressedBase64Strings(scannedCardImages),
+                validationConfiguration,
+                resultCallback
+        );
+    }
+
+    private void validateScannedCardInternal(
+            final List<String> compressedBase64Images,
+            final ValidationConfiguration validationConfiguration,
+            final ResultCallback<ValidationResponse> resultCallback
+    ) {
         final ScanDocValidateRequest request = new ScanDocValidateRequest(
                 acceptTermsAndConditions,
-                ImageProcessingUtil.imagesToBase64StringWithCompression(scannedCardImages),
+                compressedBase64Images,
                 validationConfiguration.getValidationSettings().getSkipImageSizeCheck(),
                 validationConfiguration.getBlurValues()
         );
@@ -58,10 +82,39 @@ public class ScanDocApi {
             final ExtractionConfiguration extractionConfiguration,
             final ResultCallback<ExtractionResponse> resultCallback
     ) {
-        final String base64Image = ImageProcessingUtil.imageToBase64StringWithCompression(scannedCardImage);
+        extractDataFromScannedCardInternal(
+                ImageProcessingUtil.bitmapToBase64WithCompression(scannedCardImage),
+                extractionConfiguration,
+                resultCallback
+        );
+    }
 
+    public void extractDataFromScannedCard(
+            final byte[] scannedCardImage,
+            final ResultCallback<ExtractionResponse> resultCallback
+    ) {
+        extractDataFromScannedCard(scannedCardImage, new ExtractionConfiguration(), resultCallback);
+    }
+
+    public void extractDataFromScannedCard(
+            final byte[] scannedCardImageAsBase64,
+            final ExtractionConfiguration extractionConfiguration,
+            final ResultCallback<ExtractionResponse> resultCallback
+    ) {
+        extractDataFromScannedCardInternal(
+                ImageProcessingUtil.byteArrayToCompressedBase64String(scannedCardImageAsBase64),
+                extractionConfiguration,
+                resultCallback
+        );
+    }
+
+    private void extractDataFromScannedCardInternal(
+            final String compressedBase64Image,
+            final ExtractionConfiguration extractionConfiguration,
+            final ResultCallback<ExtractionResponse> resultCallback
+    ) {
         final ScanDocExtractRequest request = new ScanDocExtractRequest(
-                base64Image,
+                compressedBase64Image,
                 acceptTermsAndConditions,
                 extractionConfiguration
         );

@@ -98,7 +98,7 @@ public class ScanDocImagePreviewFragment extends Fragment {
 
     private void validateImage() {
         progressBar.setVisibility(View.VISIBLE);
-        scanDocApi.validateScannedCard(List.of(createBitmapFromUri()), new ValidationConfiguration(), new ScanDocValidationCallback());
+        scanDocApi.validateScannedCard(new Bitmap[]{createBitmapFromUri()}, new ValidationConfiguration(), new ScanDocValidationCallback());
     }
 
     private void extractData() {
@@ -132,7 +132,7 @@ public class ScanDocImagePreviewFragment extends Fragment {
         Bitmap bitmap = null;
 
         try {
-             bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver() , photoUri);
+             bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), photoUri);
         } catch (final IOException e) {
             showErrorDialog(e.getMessage());
         }

@@ -5,40 +5,46 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.util.Base64;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ImageProcessingUtil {
-    private static final int EOF = -1;
     private static final int WRITE_OFFSET = 0;
-    private static final int BUFFER_SIZE = 1024;
     private static final int SCALED_HEIGHT = 1024;
     private static final int SCALED_WIDTH = 1024;
     private static final int ROTATION_DEGREES = 90;
     private static final int COMPRESSION_QUALITY = 70;
 
-    public static String imageToBase64String(final File file) throws IOException {
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        final FileInputStream fileInputStream = new FileInputStream(file);
-        final byte[] buffer = new byte[BUFFER_SIZE];
 
-        int bytesRead;
-        while ((bytesRead = fileInputStream.read(buffer)) != EOF) {
-            outputStream.write(buffer, WRITE_OFFSET, bytesRead);
-        }
-        fileInputStream.close();
+    public static String byteArrayToCompressedBase64String(final byte[] image) {
+        final Bitmap bitmap = BitmapFactory.decodeByteArray(image, WRITE_OFFSET, image.length);
 
-        return Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP);
+        return bitmapToBase64WithCompression(bitmap);
     }
 
-    public static List<String> imagesToBase64StringWithCompression(final List<Bitmap> bitmaps) {
+    public static List<String> byteArraysToCompressedBase64Strings(final List<byte[]> images) {
+        final List<Bitmap> bitmaps = new ArrayList<>();
+
+        for (final byte[] image : images) {
+            final Bitmap bitmap = BitmapFactory.decodeByteArray(image, WRITE_OFFSET, image.length);
+            bitmaps.add(bitmap);
+        }
+
+        return bitmapsToBase64StringWithCompression(bitmaps.toArray(new Bitmap[0]));
+    }
+
+    public static Bitmap createBitmapFromBase64Image(final String base64Image) {
+        final byte[] decodedBytes = Base64.decode(base64Image, Base64.NO_WRAP);
+
+        return BitmapFactory.decodeByteArray(decodedBytes, WRITE_OFFSET, decodedBytes.length);
+    }
+
+    public static List<String> bitmapsToBase64StringWithCompression(final Bitmap[] bitmaps) {
         final List<String> base64Images = new ArrayList<>();
 
         for (final Bitmap bitmap : bitmaps) {
-            final String base64Image = imageToBase64StringWithCompression(bitmap);
+            final String base64Image = bitmapToBase64WithCompression(bitmap);
+
             base64Images.add(base64Image);
             bitmap.recycle();
         }
@@ -46,7 +52,7 @@ public class ImageProcessingUtil {
         return base64Images;
     }
 
-    public static String imageToBase64StringWithCompression(final Bitmap bitmap) {
+    public static String bitmapToBase64WithCompression(final Bitmap bitmap) {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         Bitmap reducedBitmap = Bitmap.createScaledBitmap(bitmap, SCALED_WIDTH, SCALED_HEIGHT, true);
@@ -76,11 +82,5 @@ public class ImageProcessingUtil {
                 matrix,
                 true
         );
-    }
-
-    public static Bitmap base64ToImage(final String base64Image) {
-        final byte[] decodedBytes = Base64.decode(base64Image, Base64.NO_WRAP);
-
-        return BitmapFactory.decodeByteArray(decodedBytes, WRITE_OFFSET, decodedBytes.length);
     }
 }
