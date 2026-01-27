@@ -52,7 +52,9 @@ public class ScanDocHttpApiImpl {
                     ExtractionResponse::fromJSON
             );
 
-            if (areCardParametersEmpty(response.getResult().getCardData())) return MonriHttpResult.failed(MonriHttpException.create(MonriHttpExceptionCode.UNABLE_TO_READ_EXTRACTED_DATA));
+            if (response.getCause() == null && areCardParametersEmpty(response.getResult().getCardData())) {
+                return MonriHttpResult.failed(MonriHttpException.create(MonriHttpExceptionCode.UNABLE_TO_READ_EXTRACTED_DATA));
+            }
 
             return response;
         } catch (final JSONException e) {
