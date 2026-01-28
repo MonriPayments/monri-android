@@ -1,14 +1,16 @@
 package com.monri.android.model;
 
 public class ScanDocApiOptions {
+    private final boolean acceptTermsAndConditions;
     private final String scanDocApiUrl;
-    private final String userKey;
+    private final byte[] userKey;
     private final String subClient;
 
-    public ScanDocApiOptions(final String scanDocApiUrl, final String userKey, final String subClient) {
-        this.scanDocApiUrl = scanDocApiUrl;
-        this.userKey = userKey;
+    public ScanDocApiOptions(final String scanDocApiBaseUrl, final String userKey, final String subClient, final boolean acceptTermsAndConditions) {
+        this.scanDocApiUrl = scanDocApiBaseUrl;
+        this.userKey = userKey.getBytes();
         this.subClient = subClient;
+        this.acceptTermsAndConditions = acceptTermsAndConditions;
     }
 
     public String getScanDocApiUrl() {
@@ -19,7 +21,11 @@ public class ScanDocApiOptions {
         return subClient;
     }
 
-    public String getUserKey() {
+    public byte[] getUserKey() {
         return userKey;
+    }
+
+    public boolean areTermsAndConditionsAccepted() {
+        return acceptTermsAndConditions;
     }
 }

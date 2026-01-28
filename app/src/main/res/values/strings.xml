@@ -15,6 +15,7 @@
     <string name="btn_add_payment_method_example_3ds1">New Payment Method - 3DS1</string>
     <string name="btn_payment_google_pay">Google pay payment</string>
     <string name="btn_payment_google_pay_simple">Google pay payment (alternative)</string>
+    <string name="btn_scandoc">ScanDoc</string>
     <string name="title_activity_payment_picker">PaymentPickerActivity</string>
     <string name="continue_with_3ds_enrolled_card">Continue with 3ds enrolled card</string>
     <string name="continue_with_non_3ds_enrolled_card">Continue with not enrolled 3DS card</string>
@@ -52,4 +53,22 @@
     <string name="google_pay_activity_on_not_ready_to_pay_with_google_pay_called">On not ready to pay with google pay called</string>
     <string name="google_pay_activity_failed_to_get_payment_method_data_from_user">Failed to get payment method data from user, status code: %1$d</string>
     <string name="google_pay_activity_proceed_with_google_pay_button_text">Proceed with google pay</string>
+
+    <string name="scandoc_activity_camera_permission_required">Camera permission is required for this activity</string>
+    <string name="scandoc_activity_validate_button_text">Validate</string>
+    <string name="scandoc_activity_retake_button_text">Back</string>
+    <string name="scandoc_activity_error_dialog_title">Error</string>
+    <string name="scandoc_activity_error_dialog_ok_button_text">Ok</string>
+    <string name="scandoc_activity_validation_error_text">Validation: %s</string>
+    <string name="scandoc_activity_extraction_error_text">Extraction: %s</string>
+    <string name="scandoc_extracted_data_fragment_title">Extracted data</string>
+    <string name="scandoc_extracted_data_fragment_image_data_description">Image processed by server:</string>
+    <string name="scandoc_extracted_data_fragment_analysis_time_label">Analysis time:</string>
+    <string name="scandoc_extracted_data_fragment_holder_name_label">Holder name:</string>
+    <string name="scandoc_extracted_data_fragment_iban_label">IBAN:</string>
+    <string name="scandoc_extracted_data_fragment_issued_date_label">Issued date:</string>
+    <string name="scandoc_extracted_data_fragment_card_number_label">Card number:</string>
+    <string name="scandoc_extracted_data_fragment_expiry_date_label">Expiry_date:</string>
+    <string name="scandoc_extracted_data_fragment_luhn_check_label">Luhn check:</string>
+    <string name="scandoc_extracted_data_fragment_extracted_texts_label">Extracted texts:</string>
 </resources>

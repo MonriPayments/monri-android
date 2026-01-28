@@ -2,69 +2,72 @@ package com.monri.android;
 
 import com.monri.android.model.AccessToken;
 import com.monri.android.model.ScanDocApiOptions;
+import com.monri.android.model.ScanDocCardData;
 import com.monri.android.model.ScanDocExtractRequest;
 import com.monri.android.model.ScanDocValidateRequest;
-import com.monri.android.model.ScanDocValidateResponse;
-import com.monri.android.model.ScanDocExtractResponse;
+import com.monri.android.model.ValidationResponse;
+import com.monri.android.model.ExtractionResponse;
 import org.json.JSONException;
-import org.json.JSONObject;
 import java.util.Map;
 
 public class ScanDocHttpApiImpl {
     private static final String AUTHORIZATION_KEY = "Authorization";
     private final ScanDocUrlProvider scanDocUrlProvider;
-    private final HttpsClient httpsClient;
-    private final ScanDocAuthenticationManager authenticationManager;
+    private final HttpsClientProxyImpl httpsClientProxy;
+    private final ScanDocAuthenticationManagerImpl authenticationManager;
 
     public ScanDocHttpApiImpl(final ScanDocApiOptions scanDocApiOptions) {
         this.scanDocUrlProvider = new ScanDocUrlProvider(scanDocApiOptions.getScanDocApiUrl());
-        this.httpsClient = new HttpsClient();
-        this.authenticationManager = new ScanDocAuthenticationManager(
+        this.httpsClientProxy = new HttpsClientProxyImpl();
+        this.authenticationManager = new ScanDocAuthenticationManagerImpl(
                 scanDocApiOptions.getUserKey(),
                 scanDocApiOptions.getSubClient(),
-                httpsClient,
+                this.httpsClientProxy,
                 scanDocUrlProvider
         );
     }
 
-    public MonriHttpResult<ScanDocValidateResponse> validateScannedCard(final ScanDocValidateRequest scanDocValidateRequest) {
+    public MonriHttpResult<ValidationResponse> validateScannedCard(final ScanDocValidateRequest scanDocValidateRequest) {
         try {
-            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
+            return httpsClientProxy.doPostRequest(
                     scanDocUrlProvider.getValidationUrl(),
-                    scanDocValidateRequest.toJSONObject(),
                     createAuthorizationHeader(),
-                    false
+                    scanDocValidateRequest.toJSONObject().toString(),
+                    false,
+                    ValidationResponse::fromJSON
             );
-
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(ScanDocValidateResponse.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
 
         } catch (final JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
     }
 
-    public MonriHttpResult<ScanDocExtractResponse> extractDataFromScannedCard(final ScanDocExtractRequest scanDocExtractRequest) {
+    public MonriHttpResult<ExtractionResponse> extractDataFromScannedCard(final ScanDocExtractRequest scanDocExtractRequest) {
         try {
-            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
+            final MonriHttpResult<ExtractionResponse> response = httpsClientProxy.doPostRequest(
                     scanDocUrlProvider.getExtractionUrl(),
-                    scanDocExtractRequest.toJSONObject(),
                     createAuthorizationHeader(),
-                    false
+                    scanDocExtractRequest.toJSONObject().toString(),
+                    false,
+                    ExtractionResponse::fromJSON
             );
 
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(ScanDocExtractResponse.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
+            if (response.getCause() == null && areCardParametersEmpty(response.getResult().getCardData())) {
+                return MonriHttpResult.failed(MonriHttpException.create(MonriHttpExceptionCode.UNABLE_TO_READ_EXTRACTED_DATA));
             }
 
+            return response;
         } catch (final JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
+    }
+
+    private boolean areCardParametersEmpty(final ScanDocCardData cardData) {
+        final String cardNumber = cardData.getCardNumber();
+        final String expiryDate = cardData.getExpiryDate();
+
+        return cardNumber == null || cardNumber.isEmpty()
+                || expiryDate == null || expiryDate.isEmpty();
     }
 
     private Map<String, String> createAuthorizationHeader() throws JSONException {

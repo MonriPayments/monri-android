@@ -3,6 +3,7 @@ import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 plugins {
     id "com.vanniktech.maven.publish" version "0.33.0"
     id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
 }
 
 android {
@@ -41,10 +42,9 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-
 }
 
 dependencies {
@@ -54,11 +54,13 @@ dependencies {
     api "androidx.appcompat:appcompat:1.6.1"
     // Api for this import because we use reflection to alter TextInputLayout
     api "com.google.android.material:material:1.12.0"
+    implementation 'androidx.core:core-ktx:1.15.0'
 
     compileOnly "javax.annotation:jsr250-api:${rootProject.ext.javaAnnotationVersion}"
 
     implementation "com.google.android.gms:play-services-wallet:$googlePlayServicesWalletVersion"
 
+    testImplementation("org.assertj:assertj-core:3.25.0")
     testImplementation "junit:junit:${rootProject.ext.junitVersion}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockitoCoreVersion}"
     testImplementation "org.robolectric:robolectric:${rootProject.ext.robolectricVersion}"

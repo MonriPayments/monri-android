@@ -2,7 +2,6 @@ package com.monri.android;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.GooglePayPayment;
@@ -21,235 +20,151 @@ import com.monri.android.model.PaymentStatusResponse;
 import com.monri.android.model.TransactionParams;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
 class MonriHttpApiImpl implements MonriHttpApi {
 
-    private final String baseUrl;
     private final Map<String, String> headers;
-    private final HttpsClient httpsClient;
+    private final HttpsClientProxyImpl httpsClientProxy;
+    private final MonriUrlProvider urlProvider;
     private static final String GOOGLE_PAY_TOKENIZATION_DATA_KEY = "tokenizationData";
     private static final String GOOGLE_PAY_TOKEN_KEY = "token";
     private static final String PAYMENT_METHOD_DATA_KEY = "data";
     private static final String PAYMENT_METHOD_TYPE_KEY = "type";
+    private static final String AUTHORIZATION_HEADER_KEY = "authorization";
 
     public MonriHttpApiImpl(final String baseUrl, final Map<String, String> headers) {
-        this.baseUrl = baseUrl;
         this.headers = headers;
-        this.httpsClient = new HttpsClient();
+        this.httpsClientProxy = new HttpsClientProxyImpl();
+        this.urlProvider = new MonriUrlProvider(baseUrl);
     }
 
-    //post v2/payment/{id}/confirm
     @Override
-    public MonriHttpResult<ConfirmPaymentResponse> confirmPayment(@NonNull ConfirmPaymentParams confirmPaymentParams) {
+    public MonriHttpResult<ConfirmPaymentResponse> confirmPayment(@NonNull final ConfirmPaymentParams confirmPaymentParams) {
         try {
-            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
-                    baseUrl + "/v2/payment/" + confirmPaymentParams.getPaymentId() + "/confirm",
-                    confirmPaymentParamsToJSON(confirmPaymentParams),
+            return httpsClientProxy.doPostRequest(
+                    urlProvider.getConfirmPaymentUrl(confirmPaymentParams.getPaymentId()),
                     headers,
-                    false
+                    confirmPaymentParamsToJSON(confirmPaymentParams).toString(),
+                    false,
+                    ConfirmPaymentResponse::fromJSON
             );
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(ConfirmPaymentResponse.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-        } catch (JSONException e) {
+        } catch (final Exception e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
     }
 
     @Override
     public MonriHttpResult<JSONObject> startGooglePayPayment(final String paymentId) {
-        try {
-            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
-                    baseUrl + "/v2/google-pay/" + paymentId + "/start-payment",
-                    headers
-            );
-            if (response.getCause() == null) {
-                return MonriHttpResult.success((response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-        } catch (Exception e) {
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
+        return httpsClientProxy.doPostRequest(
+                urlProvider.getGooglePayPaymentUrl(paymentId),
+                headers,
+                null,
+                false,
+                (json) -> json
+        );
     }
 
     //get v2/payment/{id}/status
     @Override
-    public MonriHttpResult<PaymentStatusResponse> paymentStatus(String id) {
-        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(baseUrl + "/v2/payment/" + id + "/status", new HashMap<>());
-
-        try {
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(PaymentStatusResponse.fromJSON(response.getResult()), response.getResponseCode());
-            }else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-
-        } catch (JSONException e) {
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
+    public MonriHttpResult<PaymentStatusResponse> paymentStatus(final String id) {
+        return httpsClientProxy.doGetRequest(
+                urlProvider.getPaymentStatusUrl(id),
+                new HashMap<>(),
+                PaymentStatusResponse::fromJSON
+        );
     }
 
     //post v2/customers
     @Override
     public MonriHttpResult<Customer> createCustomer(@NonNull final CreateCustomerParams createCustomerParams) {
         try {
-            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
-                    baseUrl + "/v2/customers",
-                    createCustomerParams.getCustomer().toJSON(),
-                    new HashMap<>() {{
-                        put("authorization", createCustomerParams.getAccessToken());
-                    }},
-                    true
+            return httpsClientProxy.doPostRequest(
+                    urlProvider.getCustomersBaseUrl(),
+                    createAuthorizationHeader(createCustomerParams.getAccessToken()),
+                    createCustomerParams.getCustomer().toJSON().toString(),
+                    true,
+                    Customer::fromJSON
             );
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
     }
 
     @Override
     public MonriHttpResult<Customer> retrieveCustomer(final GetCustomerParams retrieveCustomerParams) {
-        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(
-                baseUrl + "/v2/customers/" + retrieveCustomerParams.getCustomerUuid(),
-                new HashMap<>() {{
-                    put("authorization", retrieveCustomerParams.getAccessToken());
-                }}
+        return httpsClientProxy.doGetRequest(
+                urlProvider.getCustomerUrl(retrieveCustomerParams.getCustomerUuid()),
+                createAuthorizationHeader(retrieveCustomerParams.getAccessToken()),
+                Customer::fromJSON
         );
-
-        try {
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-        } catch (JSONException e) {
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
     }
 
     @Override
     public MonriHttpResult<Customer> retrieveCustomerViaMerchantCustomerId(final RetrieveCustomerViaMerchantCustomerUuidParams retrieveCustomerViaMerchantCustomerUuidParams) {
-        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(
-                baseUrl + "/v2/merchants/customers/" + retrieveCustomerViaMerchantCustomerUuidParams.getMerchantCustomerUuid(),
-                new HashMap<>() {{
-                    put("authorization", retrieveCustomerViaMerchantCustomerUuidParams.getAccessToken());
-                }}
+        return httpsClientProxy.doGetRequest(
+                urlProvider.getRetrieveCustomerViaMerchantCustomerIdUrl(retrieveCustomerViaMerchantCustomerUuidParams.getMerchantCustomerUuid()),
+                createAuthorizationHeader(retrieveCustomerViaMerchantCustomerUuidParams.getAccessToken()),
+                Customer::fromJSON
         );
-
-        try {
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-        } catch (JSONException e) {
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
     }
 
     @Override
     public MonriHttpResult<Customer> updateCustomer(@NonNull final UpdateCustomerParams updateCustomerParams) {
         try {
-            final MonriHttpResult<JSONObject> response = httpsClient.httpsPOST(
-                    baseUrl + "/v2/customers/" + updateCustomerParams.getCustomerUuid(),
-                    updateCustomerParams.getCustomer().toJSON(),
-                    new HashMap<>() {{
-                        put("authorization", updateCustomerParams.getAccessToken());
-                    }},
-                    true
+            return httpsClientProxy.doPostRequest(
+                    urlProvider.getCustomerUrl(updateCustomerParams.getCustomerUuid()),
+                    createAuthorizationHeader(updateCustomerParams.getAccessToken()),
+                    updateCustomerParams.getCustomer().toJSON().toString(),
+                    true,
+                    Customer::fromJSON
             );
-
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(Customer.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
         }
     }
 
     @Override
     public MonriHttpResult<DeleteCustomerResponse> deleteCustomer(final DeleteCustomerParams deleteCustomerParams) {
-        final MonriHttpResult<JSONObject> response = httpsClient.httpsDELETE(
-                baseUrl + "/v2/customers/" + deleteCustomerParams.getCustomerUuid(),
-                new HashMap<>() {{
-                    put("authorization", deleteCustomerParams.getAccessToken());
-                }}
+        return httpsClientProxy.doDeleteRequest(
+                urlProvider.getCustomerUrl(deleteCustomerParams.getCustomerUuid()),
+                createAuthorizationHeader(deleteCustomerParams.getAccessToken()),
+                DeleteCustomerResponse::fromJSON
         );
-
-        try {
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(DeleteCustomerResponse.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-        } catch (JSONException e) {
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
     }
 
     @Override
     public MonriHttpResult<MerchantCustomers> retrieveAllCustomers(final String accessToken) {
-        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(
-                baseUrl + "/v2/customers",
-                new HashMap<>() {{
-                    put("authorization", accessToken);
-                }}
+        return httpsClientProxy.doGetRequest(
+                urlProvider.getCustomersBaseUrl(),
+                createAuthorizationHeader(accessToken),
+                MerchantCustomers::fromJSON
         );
-
-        try {
-            if (response.getCause() == null) {
-                final MerchantCustomers merchantCustomers = MerchantCustomers.fromJSON(response.getResult());
-                return MonriHttpResult.success(merchantCustomers, response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-        } catch (JSONException e) {
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
     }
 
     @Override
     public MonriHttpResult<CustomerPaymentMethodResponse> getPaymentMethodsForCustomer(final CustomerPaymentMethodParams customerPaymentMethodParams) {
-        final MonriHttpResult<JSONObject> response = httpsClient.httpsGET(
-                baseUrl +
-                        "/v2/customers/" +
-                        customerPaymentMethodParams.getCustomerUuid() +
-                        "/payment-methods?limit=" +
-                        customerPaymentMethodParams.getLimit() +
-                        "&offset="
-                        + customerPaymentMethodParams.getOffset(),
-                new HashMap<>() {{
-                    put("authorization", customerPaymentMethodParams.getAccessToken());
-                }}
+        return httpsClientProxy.doGetRequest(
+                urlProvider.getPaymentMethodForCustomerUrl(
+                        customerPaymentMethodParams.getCustomerUuid(),
+                        customerPaymentMethodParams.getLimit(),
+                        customerPaymentMethodParams.getOffset()
+                ),
+                createAuthorizationHeader(customerPaymentMethodParams.getAccessToken()),
+                CustomerPaymentMethodResponse::fromJSON
         );
+    }
 
-        try {
-            if (response.getCause() == null) {
-                return MonriHttpResult.success(CustomerPaymentMethodResponse.fromJSON(response.getResult()), response.getResponseCode());
-            } else {
-                return MonriHttpResult.failed(response.getCause());
-            }
-
-        } catch (JSONException e) {
-            return MonriHttpResult.failed(MonriHttpException.create(e, MonriHttpExceptionCode.REQUEST_FAILED));
-        }
+    private Map<String, String> createAuthorizationHeader(final String authorizationValue) {
+        return  new HashMap<>() {{
+            put(AUTHORIZATION_HEADER_KEY, authorizationValue);
+        }};
     }
 
     @NonNull
     @VisibleForTesting
-    public static JSONObject confirmPaymentParamsToJSON(@NonNull ConfirmPaymentParams confirmPaymentParams) throws JSONException {
+    public static JSONObject confirmPaymentParamsToJSON(@NonNull final ConfirmPaymentParams confirmPaymentParams) throws JSONException {
         final PaymentMethodParams paymentMethodParams = confirmPaymentParams.getPaymentMethod();
         final String type = paymentMethodParams.getType();
         final Map<String, String> data = paymentMethodParams.getData();
@@ -265,7 +180,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
         } else {
             final JSONObject dataMapJSON = new JSONObject();
 
-            for (String key : data.keySet()) {
+            for (final String key : data.keySet()) {
                 dataMapJSON.put(key, data.get(key));
             }
 
@@ -275,26 +190,26 @@ class MonriHttpApiImpl implements MonriHttpApi {
         //converting transactionParams to JSON
         final TransactionParams transaction = confirmPaymentParams.getTransaction();
         final Map<String, Object> transactionData = pruneTransactionDataSetMetaData(transaction.getData());
-        JSONObject dataTransactionMapJSON = new JSONObject();
+        final JSONObject dataTransactionMapJSON = new JSONObject();
 
-        for (String key : transactionData.keySet()) {
+        for (final String key : transactionData.keySet()) {
             dataTransactionMapJSON.put(key, transactionData.get(key));
         }
 
-        JSONObject confirmPaymentParamsJSON = new JSONObject();
+        final JSONObject confirmPaymentParamsJSON = new JSONObject();
         confirmPaymentParamsJSON.put("payment_method", paymentMethodJSON);
         confirmPaymentParamsJSON.put("transaction", dataTransactionMapJSON);
         return confirmPaymentParamsJSON;
     }
 
-    private static Map<String, Object> pruneTransactionDataSetMetaData(Map<String, String> transactionData) throws JSONException {
-        Map<String, Object> returnValue = new HashMap<>(transactionData);
-        JSONObject meta = new JSONObject();
+    private static Map<String, Object> pruneTransactionDataSetMetaData(final Map<String, String> transactionData) throws JSONException {
+        final Map<String, Object> returnValue = new HashMap<>(transactionData);
+        final JSONObject meta = new JSONObject();
 
-        for (String metaKey : MetaUtility.META_KEYS) {
+        for (final String metaKey : MetaUtility.META_KEYS) {
             // integration_type
             // meta.integration_type
-            String key = String.format("meta.%s", metaKey);
+            final String key = String.format("meta.%s", metaKey);
             if (transactionData.containsKey(key)) {
                 meta.put(metaKey, transactionData.get(key));
                 returnValue.remove(key);
