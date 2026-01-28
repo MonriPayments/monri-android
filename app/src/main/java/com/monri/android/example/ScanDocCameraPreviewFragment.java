@@ -27,6 +27,7 @@ import java.io.File;
 
 public class ScanDocCameraPreviewFragment extends Fragment {
     private static final String FILE_NAME_FORMAT = "CameraX-%d.jpg";
+    private static final int EXTERNAL_MEDIA_DIRECTORY_INDEX = 0;
     private ActivityResultLauncher<String> cameraPermissionLauncher;
     private ImageCapture imageCapture;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -101,8 +102,8 @@ public class ScanDocCameraPreviewFragment extends Fragment {
     }
 
     private void captureImage() {
-        final File photoFile = new File(getActivity().getExternalMediaDirs()[0], String.format(FILE_NAME_FORMAT, System.currentTimeMillis()));
-        ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+        final File photoFile = new File(getActivity().getExternalMediaDirs()[EXTERNAL_MEDIA_DIRECTORY_INDEX], String.format(FILE_NAME_FORMAT, System.currentTimeMillis()));
+        final ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
 
         imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(getActivity()), new ImageSavedCallback(photoFile));
     }
@@ -124,11 +125,9 @@ public class ScanDocCameraPreviewFragment extends Fragment {
 
         @Override
         public void onImageSaved(@NonNull final ImageCapture.OutputFileResults outputFileResults) {
-            final String base64Image = ImageProcessingUtil.imageToBase64StringWithCompression(photofile, 70);
-
             final ScanDocImagePreviewFragment scanDocImagePreviewFragment = ScanDocImagePreviewFragment.newInstance(
-                    base64Image,
-                    Uri.fromFile(photofile).toString());
+                    Uri.fromFile(photofile).toString()
+            );
 
             getParentFragmentManager()
                     .beginTransaction()

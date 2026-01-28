@@ -14,20 +14,20 @@ public class ScanDocValidateRequest {
     private static final String DATA_FIELDS_KEY = "DataFields";
     private static final String SETTINGS_KEY = "Settings";
     private final boolean acceptTermsAndConditions;
-    private final String base64EncodedImage;
+    private final List<String> base64EncodedImages;
     private final Boolean skipImageSizeCheck;
-    private final List<String> blurValues;
+    private final List<Double> blurValues;
 
-    public ScanDocValidateRequest(final Boolean acceptTermsAndConditions, final String base64EncodedImage, final Boolean skipImageSizeCheck, @Nullable final List<String> blurValues) {
+    public ScanDocValidateRequest(final Boolean acceptTermsAndConditions, final List<String> base64EncodedImages, final Boolean skipImageSizeCheck, @Nullable final List<Double> blurValues) {
         this.acceptTermsAndConditions = acceptTermsAndConditions;
-        this.base64EncodedImage = base64EncodedImage;
+        this.base64EncodedImages = base64EncodedImages;
         this.skipImageSizeCheck = skipImageSizeCheck;
         this.blurValues = blurValues;
     }
 
     public JSONObject toJSONObject() throws JSONException {
-        final JSONObject dataFieldsObject = new JSONObject().put(IMAGES_KEY, new JSONArray().put(base64EncodedImage));
-        if (blurValues != null && !blurValues.isEmpty()) dataFieldsObject.put(BLUR_VALUES_KEY, blurValues);
+        final JSONObject dataFieldsObject = new JSONObject().put(IMAGES_KEY, new JSONArray(base64EncodedImages));
+        if (blurValues != null && !blurValues.isEmpty()) dataFieldsObject.put(BLUR_VALUES_KEY, new JSONArray(blurValues));
 
         final JSONObject settingsObject = new JSONObject().put(SKIP_IMAGE_SIZE_CHECK_KEY, skipImageSizeCheck);
 

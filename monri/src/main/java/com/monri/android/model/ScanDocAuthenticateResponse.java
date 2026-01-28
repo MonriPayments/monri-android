@@ -11,7 +11,7 @@ public class ScanDocAuthenticateResponse {
     @Nullable
     private final String refreshToken;
 
-    public ScanDocAuthenticateResponse(final String accessToken, @Nullable final String refreshToken) {
+    private ScanDocAuthenticateResponse(final String accessToken, @Nullable final String refreshToken) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }

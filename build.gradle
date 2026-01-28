@@ -1,5 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    ext {
+        kotlin_version = '2.1.0'
+    }
     repositories {
         google()
         mavenCentral()
@@ -10,6 +13,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.6.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -27,8 +31,8 @@ ext {
     javaAnnotationVersion = "1.0"
     junitVersion = "4.13.2"
     mockitoCoreVersion = "3.9.0"
-    robolectricVersion = '4.9.2'
-    monriSdkVersion = '3.1.1'
+    robolectricVersion = '4.16'
+    monriSdkVersion = '3.2.0'
 
     googlePlayServicesWalletVersion = '19.4.0'
 }

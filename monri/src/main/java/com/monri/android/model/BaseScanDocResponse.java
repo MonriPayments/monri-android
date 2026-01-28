@@ -11,14 +11,14 @@ public class BaseScanDocResponse {
     protected static final String STATUS_KEY = "Status";
     protected static final String METHOD_KEY = "Method";
     protected static final String INFO_CODE_KEY = "InfoCode";
-    public final String transactionID;
-    public final String uploadedAt;
-    public final String productName;
-    public final List<String> errors;
-    public final List<String> warnings;
-    public final int status;
-    public final String method;
-    public final int infoCode;
+    private final String transactionID;
+    private final String uploadedAt;
+    private final String productName;
+    private final List<String> errors;
+    private final List<String> warnings;
+    private final int status;
+    private final String method;
+    private final int infoCode;
 
     public BaseScanDocResponse(final String transactionID,
                                final String uploadedAt,
@@ -36,5 +36,37 @@ public class BaseScanDocResponse {
         this.status = status;
         this.method = method;
         this.infoCode = infoCode;
+    }
+
+    public String getTransactionID() {
+        return transactionID;
+    }
+
+    public int getInfoCode() {
+        return infoCode;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public List<String> getWarnings() {
+        return warnings;
+    }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public String getUploadedAt() {
+        return uploadedAt;
+    }
+
+    public String getProductName() {
+        return productName;
     }
 }

@@ -1,7 +1,9 @@
 package com.monri.android.example;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,35 +16,25 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import com.monri.android.ResultCallback;
 import com.monri.android.ScanDocApi;
-import com.monri.android.ScanDocExtractionConfig;
+import com.monri.android.ValidationConfiguration;
 import com.monri.android.model.ScanDocApiOptions;
-import com.monri.android.model.ScanDocExtractResponse;
-import com.monri.android.model.ScanDocValidateResponse;
+import com.monri.android.model.ExtractionResponse;
+import com.monri.android.model.ValidationResponse;
+import java.io.IOException;
 import java.util.List;
 
 public class ScanDocImagePreviewFragment extends Fragment {
     private static final String SCANDOC_BASE_URL = "BACKEND_BASE_URL";
     private static final String SCANDOC_USER_KEY = "USER_KEY";
     private static final String SCANDOC_SUBCLIENT = "androidTestClient";
-    private static final String BUNDLE_BASE64_IMAGE_KEY = "base64Image";
     private static final String BUNDLE_PHOTO_URI_KEY = "photoUri";
+    private static final boolean ACCEPT_SCANDOC_TERMS_AND_CONDITIONS = true;
     private ProgressBar progressBar;
-    private String base64Image;
     private Uri photoUri;
     private ScanDocApi scanDocApi;
-    private static final ScanDocExtractionConfig scanDocExtractionConfig = new ScanDocExtractionConfig(
-            ScanDocExtractionConfig.ImageType.BASE64,
-            false,
-            true,
-            false,
-            false,
-            false,
-            false
-    );
 
-    public static ScanDocImagePreviewFragment newInstance(final String base64Image, final String photoUri) {
+    public static ScanDocImagePreviewFragment newInstance(final String photoUri) {
         final Bundle bundle = new Bundle();
-        bundle.putString(BUNDLE_BASE64_IMAGE_KEY, base64Image);
         bundle.putString(BUNDLE_PHOTO_URI_KEY, photoUri);
 
         final ScanDocImagePreviewFragment newInstance =  new ScanDocImagePreviewFragment();
@@ -85,14 +77,18 @@ public class ScanDocImagePreviewFragment extends Fragment {
         final Bundle bundle = getArguments();
 
         if (bundle != null) {
-            base64Image = bundle.getString(BUNDLE_BASE64_IMAGE_KEY);
             photoUri = Uri.parse(bundle.getString(BUNDLE_PHOTO_URI_KEY));
         }
     }
 
     private void initializeScanDocApi() {
         scanDocApi = new ScanDocApi(
-                new ScanDocApiOptions(SCANDOC_BASE_URL, SCANDOC_USER_KEY, SCANDOC_SUBCLIENT)
+                new ScanDocApiOptions(
+                        SCANDOC_BASE_URL,
+                        SCANDOC_USER_KEY,
+                        SCANDOC_SUBCLIENT,
+                        ACCEPT_SCANDOC_TERMS_AND_CONDITIONS
+                )
         );
     }
 
@@ -102,17 +98,17 @@ public class ScanDocImagePreviewFragment extends Fragment {
 
     private void validateImage() {
         progressBar.setVisibility(View.VISIBLE);
-        scanDocApi.validateScannedCard(base64Image, false, new ScanDocValidationCallback(), List.of());
+        scanDocApi.validateScannedCard(new Bitmap[]{createBitmapFromUri()}, new ValidationConfiguration(), new ScanDocValidationCallback());
     }
 
     private void extractData() {
         progressBar.setVisibility(View.VISIBLE);
-        scanDocApi.extractDataFromScannedCard(base64Image, scanDocExtractionConfig, new ScanDocExtractionCallback());
+        scanDocApi.extractDataFromScannedCard(createBitmapFromUri(), new ScanDocExtractionCallback());
     }
 
-    private class ScanDocValidationCallback implements ResultCallback<ScanDocValidateResponse> {
+    private class ScanDocValidationCallback implements ResultCallback<ValidationResponse> {
         @Override
-        public void onSuccess(final ScanDocValidateResponse result) {
+        public void onSuccess(final ValidationResponse result) {
             progressBar.setVisibility(View.GONE);
             extractData();
         }
@@ -132,9 +128,21 @@ public class ScanDocImagePreviewFragment extends Fragment {
                 .show();
     }
 
-    private class ScanDocExtractionCallback implements ResultCallback<ScanDocExtractResponse> {
+    private Bitmap createBitmapFromUri() {
+        Bitmap bitmap = null;
+
+        try {
+             bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), photoUri);
+        } catch (final IOException e) {
+            showErrorDialog(e.getMessage());
+        }
+
+        return bitmap;
+    }
+
+    private class ScanDocExtractionCallback implements ResultCallback<ExtractionResponse> {
         @Override
-        public void onSuccess(final ScanDocExtractResponse result) {
+        public void onSuccess(final ExtractionResponse result) {
             final ScanDocExtractedDataFragment extractedDataFragment = ScanDocExtractedDataFragment.newInstance(result);
 
             getParentFragmentManager()

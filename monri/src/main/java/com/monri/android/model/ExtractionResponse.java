@@ -5,7 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.List;
 
-public class ScanDocExtractResponse extends BaseScanDocResponse {
+public class ExtractionResponse extends BaseScanDocResponse {
     private static final String DATA_KEY = "Data";
     private static final String IMAGE_DATA_KEY = "ImageData";
     private static final String CREDIT_CARD_IMAGE_KEY = "CreditCardImage";
@@ -20,20 +20,20 @@ public class ScanDocExtractResponse extends BaseScanDocResponse {
     private final String browserInfo;
     private final String deviceInfo;
 
-    private ScanDocExtractResponse(final String transactionID,
-                                   final String uploadedAt,
-                                   final String productName,
-                                   final List<String> errors,
-                                   final List<String> warnings,
-                                   final int status,
-                                   final String method,
-                                   final int infoCode,
-                                   final String base64CreditCardImage,
-                                   final String analysisTime,
-                                   final ScanDocCardData cardData,
-                                   final String osInfo,
-                                   final String browserInfo,
-                                   final String deviceInfo
+    private ExtractionResponse(final String transactionID,
+                               final String uploadedAt,
+                               final String productName,
+                               final List<String> errors,
+                               final List<String> warnings,
+                               final int status,
+                               final String method,
+                               final int infoCode,
+                               final String base64CreditCardImage,
+                               final String analysisTime,
+                               final ScanDocCardData cardData,
+                               final String osInfo,
+                               final String browserInfo,
+                               final String deviceInfo
     ) {
         super(transactionID, uploadedAt, productName, errors, warnings, status, method, infoCode);
         this.base64CreditCardImage = base64CreditCardImage;
@@ -44,8 +44,8 @@ public class ScanDocExtractResponse extends BaseScanDocResponse {
         this.deviceInfo = deviceInfo;
     }
 
-    public static ScanDocExtractResponse fromJSON(final JSONObject response) throws JSONException {
-        return new ScanDocExtractResponse(response.getString(TRANSACTION_ID_KEY),
+    public static ExtractionResponse fromJSON(final JSONObject response) throws JSONException {
+        return new ExtractionResponse(response.getString(TRANSACTION_ID_KEY),
                                           response.getString(UPLOADED_AT_KEY),
                                           response.getString(PRODUCT_NAME_KEY),
                                           toList(response.getJSONArray(ERRORS_KEY)),
@@ -56,9 +56,9 @@ public class ScanDocExtractResponse extends BaseScanDocResponse {
                                           response.getJSONObject(IMAGE_DATA_KEY).getString(CREDIT_CARD_IMAGE_KEY),
                                           response.getString(ANALYSIS_TIME_KEY),
                                           ScanDocCardData.fromJSON(response.getJSONObject(DATA_KEY)),
-                                          response.getString(OS_KEY),
-                                          response.getString(BROWSER_KEY),
-                                          response.getString(DEVICE_KEY)
+                                          response.isNull(OS_KEY) ? null : response.getString(OS_KEY),
+                                          response.isNull(BROWSER_KEY) ? null : response.getString(BROWSER_KEY),
+                                          response.isNull(DEVICE_KEY) ? null : response.getString(DEVICE_KEY)
                 );
     }
 

@@ -1,13 +1,15 @@
 package com.monri.android.model;
 
-import com.monri.android.ScanDocExtractionConfig;
+import com.monri.android.ExtractionConfiguration;
+import com.monri.android.ExtractionSettings;
+import com.monri.android.ImageConfiguration;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ScanDocExtractRequest {
     private static final String IMAGE_KEY = "Image";
     private static final String IMAGE_TYPE_KEY = "ImageType";
-    private static final String IMAGE_CROPPED_KEY = "ImageCroppped";
+    private static final String IMAGE_CROPPED_KEY = "ImageCropped";
     private static final String ACCEPT_TERMS_AND_CONDITIONS_KEY = "AcceptTermsAndConditions";
     private static final String SHOULD_RETURN_DOCUMENT_IMAGE_KEY = "ShouldReturnDocumentImage";
     private static final String SKIP_DOCUMENT_SIZE_CHECK_KEY = "SkipDocumentSizeCheck";
@@ -28,16 +30,19 @@ public class ScanDocExtractRequest {
 
     public ScanDocExtractRequest(final String base64Image,
                                  final boolean acceptTermsAndConditions,
-                                 final ScanDocExtractionConfig extractionConfig) {
+                                 final ExtractionConfiguration extractionConfig) {
+        final ImageConfiguration imageConfiguration = extractionConfig.getImageConfiguration();
+        final ExtractionSettings extractionSettings = extractionConfig.getExtractionSettings();
+
         this.acceptTermsAndConditions = acceptTermsAndConditions;
         this.base64Image = base64Image;
-        this.imageType = extractionConfig.getImageType().getValue();
-        this.imageCropped = extractionConfig.isImageCropped();
-        this.shouldReturnDocumentImage = extractionConfig.isShouldReturnDocumentImage();
-        this.skipDocumentSizeCheck = extractionConfig.isSkipDocumentSizeCheck();
-        this.skipImageSizeCheck = extractionConfig.isSkipImageSizeCheck();
-        this.canStoreImages = extractionConfig.isCanStoreImages();
-        this.dontUseValidation = extractionConfig.isDontUseValidation();
+        this.imageType = imageConfiguration.getImageType().value;
+        this.imageCropped = imageConfiguration.isImageCropped();
+        this.shouldReturnDocumentImage = extractionSettings.getShouldReturnDocumentImage();
+        this.skipDocumentSizeCheck = extractionSettings.getSkipDocumentSizeCheck();
+        this.skipImageSizeCheck = extractionSettings.getSkipImageSizeCheck();
+        this.canStoreImages = extractionSettings.getCanStoreImages();
+        this.dontUseValidation = extractionSettings.getDontUseValidation();
     }
 
     public JSONObject toJSONObject() throws JSONException {

@@ -8,7 +8,8 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import com.monri.android.model.ScanDocExtractResponse;
+import com.monri.android.ImageProcessingUtil;
+import com.monri.android.model.ExtractionResponse;
 
 public class ScanDocExtractedDataFragment extends Fragment {
     private static final String BUNDLE_EXTRACTED_DATA_KEY = "extractedData";
@@ -23,7 +24,7 @@ public class ScanDocExtractedDataFragment extends Fragment {
     private ImageView imageView;
     private ExtractedData extractedData;
 
-    public static ScanDocExtractedDataFragment newInstance(final ScanDocExtractResponse extractResponse) {
+    public static ScanDocExtractedDataFragment newInstance(final ExtractionResponse extractResponse) {
         final Bundle bundle = new Bundle();
 
         bundle.putParcelable(BUNDLE_EXTRACTED_DATA_KEY, ExtractedData.fromExtractionResponse(extractResponse));
@@ -84,6 +85,6 @@ public class ScanDocExtractedDataFragment extends Fragment {
         extractedTexts.setLabel(getString(R.string.scandoc_extracted_data_fragment_extracted_texts_label));
         extractedTexts.setValue(extractedData.getExtractedTexts());
 
-        imageView.setImageBitmap(ImageProcessingUtil.base64ToImage(extractedData.getBase64ImageData()));
+        imageView.setImageBitmap(ImageProcessingUtil.createBitmapFromBase64Image(extractedData.getBase64ImageData()));
     }
 }

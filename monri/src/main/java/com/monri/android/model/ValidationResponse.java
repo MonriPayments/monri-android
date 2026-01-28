@@ -7,28 +7,33 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScanDocValidateResponse extends BaseScanDocResponse{
+public class ValidationResponse extends BaseScanDocResponse{
     private static final String KEYPOINTS_KEY = "Keypoints";
     private static final String DETECTED_BLUR_VALUE_KEY = "DetectedBlurValue";
     private static final String VALIDATED_KEY = "Validated";
     private static final String ANALYSIS_TIME_KEY = "AnalysisTime";
+    private static final String INDEX_KEY = "Index";
+    private static final String INFO_KEY = "Info";
     public final List<ScanDocKeypoint> keypoints;
-    public final double detectedBlurValue;
-    public final boolean validated;
-    public final String analysisTime;
-
-    private ScanDocValidateResponse(final String transactionID,
-                                   final String uploadedAt,
-                                   final String productName,
-                                   final List<String> errors,
-                                   final List<String> warnings,
-                                   final int status,
-                                   final String method,
-                                   final int infoCode,
-                                   final List<ScanDocKeypoint> keypoints,
-                                   final double detectedBlurValue,
-                                   final boolean validated,
-                                   final String analysisTime
+    private final double detectedBlurValue;
+    private final boolean validated;
+    private final String analysisTime;
+    private final int index;
+    private final String info;
+    private ValidationResponse(final String transactionID,
+                               final String uploadedAt,
+                               final String productName,
+                               final List<String> errors,
+                               final List<String> warnings,
+                               final int status,
+                               final String method,
+                               final int infoCode,
+                               final List<ScanDocKeypoint> keypoints,
+                               final double detectedBlurValue,
+                               final boolean validated,
+                               final String analysisTime,
+                               final int index,
+                               final String info
     ) {
         super(transactionID, uploadedAt, productName, errors, warnings, status, method, infoCode);
 
@@ -36,11 +41,13 @@ public class ScanDocValidateResponse extends BaseScanDocResponse{
         this.detectedBlurValue = detectedBlurValue;
         this.validated = validated;
         this.analysisTime = analysisTime;
+        this.index = index;
+        this.info = info;
     }
 
-    public static ScanDocValidateResponse fromJSON(final JSONObject response) throws JSONException {
+    public static ValidationResponse fromJSON(final JSONObject response) throws JSONException {
 
-        return new ScanDocValidateResponse(
+        return new ValidationResponse(
                 response.getString(TRANSACTION_ID_KEY),
                 response.getString(UPLOADED_AT_KEY),
                 response.getString(PRODUCT_NAME_KEY),
@@ -52,7 +59,9 @@ public class ScanDocValidateResponse extends BaseScanDocResponse{
                 createKeypointList(response.getJSONArray(KEYPOINTS_KEY)),
                 response.optDouble(DETECTED_BLUR_VALUE_KEY),
                 response.getBoolean(VALIDATED_KEY),
-                response.getString(ANALYSIS_TIME_KEY)
+                response.getString(ANALYSIS_TIME_KEY),
+                response.optInt(INDEX_KEY),
+                response.getString(INFO_KEY)
         );
     }
 
@@ -67,5 +76,29 @@ public class ScanDocValidateResponse extends BaseScanDocResponse{
         }
 
         return keypoints;
+    }
+
+    public List<ScanDocKeypoint> getKeypoints() {
+        return keypoints;
+    }
+
+    public double getDetectedBlurValue() {
+        return detectedBlurValue;
+    }
+
+    public boolean isValidated() {
+        return validated;
+    }
+
+    public String getAnalysisTime() {
+        return analysisTime;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public String getInfo() {
+        return info;
     }
 }

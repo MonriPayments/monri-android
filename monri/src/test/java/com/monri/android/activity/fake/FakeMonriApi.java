@@ -7,6 +7,7 @@ import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
+import org.json.JSONObject;
 
 /**
  * Fake MonriApi that can return expected values.
@@ -46,5 +47,10 @@ public final class FakeMonriApi implements MonriApi {
 
     public interface PaymentStatusHandler {
         void onCheckPaymentStatus(PaymentStatusParams params, ResultCallback<PaymentStatusResponse> callback);
+    }
+
+    @Override
+    public void startGooglePayPayment(String paymentId, ResultCallback<JSONObject> callback) {
+
     }
 }

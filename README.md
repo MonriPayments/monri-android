@@ -12,7 +12,7 @@ We support Android 4.4 (API level 19) and above.
 Installing the Monri Android library is simple using  [Android Studio](https://developer.android.com/studio/intro)  and  [IntelliJ](https://www.jetbrains.com/help/idea/getting-started-with-android-development.html). You don’t need to clone a repo or download any files. Just add the following to your project’s  `build.gradle`  file, inside the dependencies section.
 
 ```gradle
-implementation 'com.monri:monri-android:3.0.+'
+implementation 'com.monri:monri-android:3.2.0'
 ```
 
 ## Proguard rules
@@ -55,6 +55,10 @@ In [Tokens API Integration](https://github.com/MonriPayments/monri-android/wiki/
 # Google Pay Integration
 
 In [Google Pay Integration](https://github.com/MonriPayments/monri-android/wiki/Google-Pay-Integration) it is explained how to implement payments using Google Pay, with 3 possible approaches.
+
+# ScanDoc AI Integration
+
+In [ScanDoc AI Integration](https://github.com/MonriPayments/monri-android/wiki/ScanDoc-AI-Integration) it is explained how to use the ScanDoc AI feature to extract data from credit card images.
 
 # Questions
 
