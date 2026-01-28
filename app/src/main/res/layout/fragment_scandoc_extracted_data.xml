@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:text="@string/scandoc_extracted_data_fragment_title"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <com.monri.android.example.LabeledTextView
+        android:id="@+id/analysis_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.monri.android.example.LabeledTextView
+        android:id="@+id/holder_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.monri.android.example.LabeledTextView
+        android:id="@+id/iban"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.monri.android.example.LabeledTextView
+        android:id="@+id/issued_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.monri.android.example.LabeledTextView
+        android:id="@+id/card_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.monri.android.example.LabeledTextView
+        android:id="@+id/expiry_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.monri.android.example.LabeledTextView
+        android:id="@+id/luhn_check"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.monri.android.example.LabeledTextView
+        android:id="@+id/extracted_texts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/scandoc_extracted_data_fragment_image_data_description"
+        android:textAlignment="center"
+        android:textSize="18sp" />
+
+    <ImageView
+        android:id="@+id/image_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="15dp" />
+
+</LinearLayout>

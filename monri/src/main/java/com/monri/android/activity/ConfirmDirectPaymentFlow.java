@@ -1,7 +1,6 @@
 package com.monri.android.activity;
 
 import android.webkit.WebViewClient;
-
 import com.monri.android.MonriApi;
 import com.monri.android.ResultCallback;
 import com.monri.android.direct_payment.DirectPaymentWebViewClient;
@@ -12,7 +11,6 @@ import com.monri.android.model.DirectPayment;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentStatusParams;
 import com.monri.android.model.PaymentStatusResponse;
-
 import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
