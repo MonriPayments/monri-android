@@ -29,3 +29,5 @@
 -keep public enum com.monri.** {
   *;
 }
+-keep class com.monri.android.example.** { *; }
+-keep,allowobfuscation,allowshrinking class io.reactivex.Single { *; }

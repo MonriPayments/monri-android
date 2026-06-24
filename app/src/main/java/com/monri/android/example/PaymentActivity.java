@@ -19,6 +19,7 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
+        ExtensionFunctionsKt.enableEdgeToEdge(this, findViewById(R.id.payment_activity_root), true);
 
         txtViewResult = findViewById(R.id.txt_result_payment_example);
 

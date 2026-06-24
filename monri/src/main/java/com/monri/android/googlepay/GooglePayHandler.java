@@ -123,7 +123,8 @@ public class GooglePayHandler {
             final JSONObject googlePaymentMethodData = monriGooglePaymentRequestHelper.getPaymentMethodDataFromPaymentData(paymentData);
 
             final GooglePayPayment googlePayPayment = new GooglePayPayment(GooglePayPayment.Provider.GOOGLE_PAY, googlePaymentMethodData);
-            final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(this.confirmPaymentParams.getPaymentId(), googlePayPayment.toPaymentMethodParams(), this.confirmPaymentParams.getTransaction());
+            final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(this.confirmPaymentParams.getPaymentId(), googlePayPayment.toPaymentMethodParams(), this.confirmPaymentParams.getTransaction())
+                                                                                  .setBrowserInfo(this.confirmPaymentParams.getBrowserInfo());
 
             googlePayHandlerCallbacks.onConfirmGooglePayPaymentDataReady(confirmPaymentParams);
         } catch (Exception e) {

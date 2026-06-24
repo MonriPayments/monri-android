@@ -1,5 +1,6 @@
 package com.monri.android;
 
+import com.monri.android.model.BrowserInfo;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
@@ -14,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -140,6 +142,53 @@ public class HttpRequestTest {
         Assert.assertTrue(jsonObject.has("payment_method"));
         Assert.assertFalse(jsonObject.has("_payment_method"));
 
+    }
+
+    @Test
+    public void confirmPaymentParamsToJSONWithoutBrowserInfoOmitsKey() throws JSONException {
+        final JSONObject jsonObject = MonriHttpApiImpl.confirmPaymentParamsToJSON(getConfirmPaymentParams());
+
+        Assert.assertFalse(jsonObject.getJSONObject("transaction").has("browser_info"));
+    }
+
+    @Test
+    public void confirmPaymentParamsToJSONIncludesBrowserInfo() throws JSONException {
+        final BrowserInfo browserInfo = new BrowserInfo(
+                1080, 1920, 24, "Mozilla/5.0 ...", -120, "en", false,
+                "*/*", "Mozilla/5.0 ...", "en"
+        );
+
+        final ConfirmPaymentParams confirmPaymentParams = getConfirmPaymentParams().setBrowserInfo(browserInfo);
+
+        final JSONObject jsonObject = MonriHttpApiImpl.confirmPaymentParamsToJSON(confirmPaymentParams);
+
+        final JSONObject transactionJSON = jsonObject.getJSONObject("transaction");
+        Assert.assertTrue(transactionJSON.has("browser_info"));
+        final JSONObject browserInfoJSON = transactionJSON.getJSONObject("browser_info");
+        Assert.assertEquals(1080, browserInfoJSON.getInt("screen_width"));
+        Assert.assertEquals(1920, browserInfoJSON.getInt("screen_height"));
+        Assert.assertEquals(24, browserInfoJSON.getInt("color_depth"));
+        Assert.assertEquals("Mozilla/5.0 ...", browserInfoJSON.getString("user_agent"));
+        Assert.assertEquals(-120, browserInfoJSON.getInt("time_zone_offset"));
+        Assert.assertEquals("en", browserInfoJSON.getString("language"));
+        Assert.assertFalse(browserInfoJSON.getBoolean("java_enabled"));
+        Assert.assertEquals("*/*", browserInfoJSON.getString("http_accept"));
+        Assert.assertEquals("Mozilla/5.0 ...", browserInfoJSON.getString("http_user_agent"));
+        Assert.assertEquals("en", browserInfoJSON.getString("http_accept_language"));
+    }
+
+    @Test
+    public void browserInfoCreateCollectsDeviceData() throws JSONException {
+        final BrowserInfo browserInfo = BrowserInfo.create(RuntimeEnvironment.getApplication());
+
+        final JSONObject json = browserInfo.toJSON();
+        Assert.assertTrue(json.getInt("screen_width") > 0);
+        Assert.assertTrue(json.getInt("screen_height") > 0);
+        Assert.assertEquals(24, json.getInt("color_depth"));
+        Assert.assertFalse(json.getBoolean("java_enabled"));
+        Assert.assertEquals("*/*", json.getString("http_accept"));
+        Assert.assertEquals(json.getString("user_agent"), json.getString("http_user_agent"));
+        Assert.assertEquals(json.getString("language"), json.getString("http_accept_language"));
     }
 
 }

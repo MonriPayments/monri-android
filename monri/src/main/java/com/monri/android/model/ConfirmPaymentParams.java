@@ -15,6 +15,8 @@ public class ConfirmPaymentParams implements Parcelable {
 
     private TransactionParams transaction;
 
+    private BrowserInfo browserInfo;
+
     private ConfirmPaymentParams(String paymentId, PaymentMethodParams paymentMethod, TransactionParams transaction) {
         this.paymentId = paymentId;
         this.paymentMethod = paymentMethod;
@@ -55,6 +57,15 @@ public class ConfirmPaymentParams implements Parcelable {
         return this;
     }
 
+    public BrowserInfo getBrowserInfo() {
+        return browserInfo;
+    }
+
+    public ConfirmPaymentParams setBrowserInfo(final BrowserInfo browserInfo) {
+        this.browserInfo = browserInfo;
+        return this;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -65,12 +76,14 @@ public class ConfirmPaymentParams implements Parcelable {
         dest.writeString(this.paymentId);
         dest.writeParcelable(this.paymentMethod, flags);
         dest.writeParcelable(this.transaction, flags);
+        dest.writeParcelable(this.browserInfo, flags);
     }
 
     protected ConfirmPaymentParams(Parcel in) {
         this.paymentId = in.readString();
         this.paymentMethod = in.readParcelable(PaymentMethodParams.class.getClassLoader());
         this.transaction = in.readParcelable(TransactionParams.class.getClassLoader());
+        this.browserInfo = in.readParcelable(BrowserInfo.class.getClassLoader());
     }
 
     public static final Creator<ConfirmPaymentParams> CREATOR = new Creator<ConfirmPaymentParams>() {

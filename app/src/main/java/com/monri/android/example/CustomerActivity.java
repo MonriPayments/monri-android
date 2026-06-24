@@ -103,6 +103,8 @@ public class CustomerActivity extends AppCompatActivity implements ViewDelegate 
 
         customerApiResult = findViewById(R.id.customer_api_result);
 
+        ExtensionFunctionsKt.enableEdgeToEdge(this, findViewById(R.id.customer_activity_root), false);
+
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(((ActivityResultCaller) this), MonriApiOptions.create(orderRepository.authenticityToken(), true));
 

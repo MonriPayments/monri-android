@@ -21,6 +21,8 @@ public class ExamplesActivity extends AppCompatActivity implements ViewDelegate 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_examples);
 
+        ExtensionFunctionsKt.enableEdgeToEdge(this, findViewById(R.id.examples_activity_root), false);
+
         final OrderRepository orderRepository = new OrderRepository(this, this);
 
         this.<Button>findViewById(R.id.btn_payment_with_new_card).setOnClickListener(v -> {

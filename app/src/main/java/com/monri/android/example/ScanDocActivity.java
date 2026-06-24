@@ -18,9 +18,11 @@ public class ScanDocActivity extends FragmentActivity {
 
         setContentView(R.layout.activity_scandoc);
 
+        ExtensionFunctionsKt.enableEdgeToEdge(this, findViewById(R.id.scandoc_fragment_container), false);
+
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.fragment_container, new ScanDocCameraPreviewFragment(), null)
+                .add(R.id.scandoc_fragment_container, new ScanDocCameraPreviewFragment(), null)
                 .commit();
     }
 }

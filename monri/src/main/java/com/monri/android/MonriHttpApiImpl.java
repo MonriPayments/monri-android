@@ -2,6 +2,7 @@ package com.monri.android;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import com.monri.android.model.BrowserInfo;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.ConfirmPaymentResponse;
 import com.monri.android.model.GooglePayPayment;
@@ -33,6 +34,7 @@ class MonriHttpApiImpl implements MonriHttpApi {
     private static final String PAYMENT_METHOD_DATA_KEY = "data";
     private static final String PAYMENT_METHOD_TYPE_KEY = "type";
     private static final String AUTHORIZATION_HEADER_KEY = "authorization";
+    private static final String BROWSER_INFO_KEY = "browser_info";
 
     public MonriHttpApiImpl(final String baseUrl, final Map<String, String> headers) {
         this.headers = headers;
@@ -194,6 +196,11 @@ class MonriHttpApiImpl implements MonriHttpApi {
 
         for (final String key : transactionData.keySet()) {
             dataTransactionMapJSON.put(key, transactionData.get(key));
+        }
+
+        final BrowserInfo browserInfo = confirmPaymentParams.getBrowserInfo();
+        if (browserInfo != null) {
+            dataTransactionMapJSON.put(BROWSER_INFO_KEY, browserInfo.toJSON());
         }
 
         final JSONObject confirmPaymentParamsJSON = new JSONObject();

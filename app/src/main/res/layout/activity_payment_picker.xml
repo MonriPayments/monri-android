@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".PaymentPickerActivity">
+    tools:context=".PaymentPickerActivity"
+    android:id="@+id/payment_picker_activity_root">
 
     <LinearLayout
         android:id="@+id/payment_picker_new_card"

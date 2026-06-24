@@ -1,6 +1,13 @@
+import java.text.SimpleDateFormat
+import com.android.build.gradle.internal.tasks.FinalizeBundleTask
+
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+}
+
+static def getIsoDate() {
+    return new SimpleDateFormat("yyyy.MM.dd").format(new Date())
 }
 
 android {
@@ -17,11 +24,12 @@ android {
         applicationId "com.monri.android.example"
         minSdkVersion 23
         targetSdkVersion 36
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -42,6 +50,26 @@ android {
     lintOptions {
         // suppress missing translation warning for test app
         disable 'MissingTranslation'
+    }
+
+    applicationVariants.configureEach { variant ->
+        changeApplicationOutputNames(variant)
+    }
+}
+
+def changeApplicationOutputNames(variant) {
+    def artifactNameBase = "monriAndroid_" + getIsoDate() + "-v" + variant.versionName + "-" + variant.versionCode + "-" + variant.name
+
+    // Rename .apk
+    variant.outputs.all { output ->
+        outputFileName = "${artifactNameBase}.apk"
+    }
+
+    // Rename .aab
+    tasks.named("sign${variant.name.capitalize()}Bundle", FinalizeBundleTask) {
+        File file = finalBundleFile.asFile.get()
+        File finalFile = new File(file.parentFile, "${artifactNameBase}.aab")
+        finalBundleFile.set(finalFile)
     }
 }
 

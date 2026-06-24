@@ -51,6 +51,8 @@ public class SavedCardPaymentActivity extends AppCompatActivity implements ViewD
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saved_card_payment);
 
+        ExtensionFunctionsKt.enableEdgeToEdge(this, findViewById(R.id.saved_card_payment_activity), false);
+
         final Intent intent = getIntent();
         final String panToken = intent.getStringExtra("PAN_TOKEN");
         final String maskedPan = intent.getStringExtra("MASKED_PAN");
