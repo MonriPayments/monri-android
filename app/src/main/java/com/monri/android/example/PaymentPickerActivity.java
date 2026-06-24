@@ -199,14 +199,12 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                         .setCountry("BA")
                         .setEmail("tester+android_sdk@monri.com");
 
-                final BrowserInfo browserInfo = BrowserInfo.create(getApplicationContext());
-
                 final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(
                         newPaymentResponse.getClientSecret(),
                         paymentMethodParamsSupplier.get(),
                         TransactionParams.create()
                                 .set(customerParams)
-                ).setBrowserInfo(browserInfo);
+                );
 
                 monri.confirmPayment(confirmPaymentParams, (result, throwable) -> {
                     if (throwable != null) {

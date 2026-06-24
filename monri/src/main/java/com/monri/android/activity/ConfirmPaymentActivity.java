@@ -25,6 +25,7 @@ import com.monri.android.googlepay.GooglePayButtonOptions;
 import com.monri.android.googlepay.GooglePayHandler;
 import com.monri.android.googlepay.GooglePayHandlerCallbacks;
 import com.monri.android.googlepay.GooglePayHandlerException;
+import com.monri.android.model.BrowserInfo;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentMethod;
@@ -157,6 +158,7 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
     }
 
     private void confirmDirectPayment(final ConfirmPaymentParams confirmPaymentParams, final MonriApiOptions apiOptions) {
+        ensureBrowserInfo(confirmPaymentParams);
         final ConfirmDirectPaymentFlow confirmDirectPaymentFlow = ConfirmDirectPaymentFlow.create(backgroundThreadExecutor, this, monri.getMonriApi(), confirmPaymentParams, apiOptions);
         confirmDirectPaymentFlow.execute();
     }
@@ -179,9 +181,17 @@ public class ConfirmPaymentActivity extends ComponentActivity implements UiDeleg
     }
 
     private void confirmCardRelatedPayment(final ConfirmPaymentParams confirmPaymentParams) {
+        ensureBrowserInfo(confirmPaymentParams);
+
         final ConfirmPaymentResponseCallback responseCallback = ConfirmPaymentResponseCallback.create(this, monri.getMonriApi());
 
         monri.getMonriApi().confirmPayment(confirmPaymentParams, responseCallback);
+    }
+
+    private void ensureBrowserInfo(final ConfirmPaymentParams confirmPaymentParams) {
+        if (confirmPaymentParams.getBrowserInfo() == null) {
+            confirmPaymentParams.setBrowserInfo(BrowserInfo.create(getApplicationContext()));
+        }
     }
 
     @Override
