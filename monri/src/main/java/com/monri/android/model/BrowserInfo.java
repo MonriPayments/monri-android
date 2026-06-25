@@ -15,6 +15,7 @@ import java.util.TimeZone;
 public class BrowserInfo implements Parcelable {
 
     private static final int COLOR_DEPTH = 24;
+    private static final int MILLIS_PER_MINUTE = 60000;
     private static final String HTTP_ACCEPT = "*/*";
     private static final String SYSTEM_USER_AGENT_KEY = "http.agent";
     private static final String SCREEN_WIDTH_KEY = "screen_width";
@@ -92,7 +93,7 @@ public class BrowserInfo implements Parcelable {
 
     private static int resolveTimeZoneOffset() {
         final int offsetMillis = TimeZone.getDefault().getOffset(new Date().getTime());
-        return -offsetMillis / 60000;
+        return -offsetMillis / MILLIS_PER_MINUTE;
     }
 
     @NonNull
