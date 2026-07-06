@@ -25,4 +25,8 @@ public interface PaymentController {
     void handlePaymentResult(int requestCode, Intent data, ResultCallback<PaymentResult> callback);
 
     void acceptResult(PaymentResult result, Throwable throwable);
+
+    default boolean hasResultConsumer() {
+        return false;
+    }
 }
