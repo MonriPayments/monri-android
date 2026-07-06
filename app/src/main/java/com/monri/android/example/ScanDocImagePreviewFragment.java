@@ -21,7 +21,6 @@ import com.monri.android.model.ScanDocApiOptions;
 import com.monri.android.model.ExtractionResponse;
 import com.monri.android.model.ValidationResponse;
 import java.io.IOException;
-import java.util.List;
 
 public class ScanDocImagePreviewFragment extends Fragment {
     private static final String SCANDOC_BASE_URL = "BACKEND_BASE_URL";
@@ -147,7 +146,7 @@ public class ScanDocImagePreviewFragment extends Fragment {
 
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, extractedDataFragment)
+                    .replace(R.id.scandoc_fragment_container, extractedDataFragment)
                     .commit();
         }
 

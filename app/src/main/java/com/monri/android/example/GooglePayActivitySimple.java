@@ -57,6 +57,7 @@ public class GooglePayActivitySimple extends AppCompatActivity implements ViewDe
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_google_pay_simple);
+        ExtensionFunctionsKt.enableEdgeToEdge(this, findViewById(R.id.google_pay_activity_simple_root), false);
 
         resultTextView = findViewById(R.id.google_pay_result_textview);
         progressBar = findViewById(R.id.progress_bar);

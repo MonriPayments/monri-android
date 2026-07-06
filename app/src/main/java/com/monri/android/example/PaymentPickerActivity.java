@@ -15,6 +15,7 @@ import androidx.core.util.Supplier;
 
 import com.monri.android.Monri;
 import com.monri.android.ResultCallback;
+import com.monri.android.model.BrowserInfo;
 import com.monri.android.model.Card;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.CustomerParams;
@@ -83,6 +84,8 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_picker);
+
+        ExtensionFunctionsKt.enableEdgeToEdge(this, findViewById(R.id.payment_picker_activity_root), false);
 
         orderRepository = new OrderRepository(this, this);
         monri = new Monri(((ActivityResultCaller) this), MonriApiOptions.create(orderRepository.authenticityToken(), true));
@@ -196,12 +199,14 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                         .setCountry("BA")
                         .setEmail("tester+android_sdk@monri.com");
 
-                monri.confirmPayment(ConfirmPaymentParams.create(
+                final ConfirmPaymentParams confirmPaymentParams = ConfirmPaymentParams.create(
                         newPaymentResponse.getClientSecret(),
                         paymentMethodParamsSupplier.get(),
                         TransactionParams.create()
                                 .set(customerParams)
-                ), (result, throwable) -> {
+                );
+
+                monri.confirmPayment(confirmPaymentParams, (result, throwable) -> {
                     if (throwable != null) {
                         txtViewResult.setText(String.format("%s%n%n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
                         Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();

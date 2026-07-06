@@ -131,7 +131,7 @@ public class ScanDocCameraPreviewFragment extends Fragment {
 
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, scanDocImagePreviewFragment)
+                    .replace(R.id.scandoc_fragment_container, scanDocImagePreviewFragment)
                     .addToBackStack(null)
                     .commit();
         }

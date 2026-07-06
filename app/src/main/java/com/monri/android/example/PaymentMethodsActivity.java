@@ -23,6 +23,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_methods);
 
+        ExtensionFunctionsKt.enableEdgeToEdge(this, findViewById(R.id.payment_methods_activity_root), false);
+
         this.prepareTransactionResponse = getIntent().getParcelableExtra("PREPARE_TRANSACTION_RESPONSE");
 
         this.<Button>findViewById(R.id.btn_payment_method_1).setOnClickListener(v -> {

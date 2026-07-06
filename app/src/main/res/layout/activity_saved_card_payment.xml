@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".SavedCardPaymentActivity">
+    tools:context=".SavedCardPaymentActivity"
+    android:id="@+id/saved_card_payment_activity">
 
     <TextView
         android:id="@+id/tv_card_type"
