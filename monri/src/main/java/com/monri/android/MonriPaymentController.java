@@ -5,6 +5,8 @@ import android.content.Intent;
 import androidx.activity.result.ActivityResultLauncher;
 import com.monri.android.activity.ConfirmPaymentActivity;
 import com.monri.android.googlepay.GooglePayButtonOptions;
+import com.monri.android.logger.MonriLogger;
+import com.monri.android.logger.MonriLoggerFactory;
 import com.monri.android.model.ConfirmPaymentParams;
 import com.monri.android.model.MonriApiOptions;
 import com.monri.android.model.PaymentResult;
@@ -14,6 +16,11 @@ import com.monri.android.model.PaymentResult;
  * MonriAndroid
  */
 final class MonriPaymentController implements PaymentController {
+
+    private static final MonriLogger logger = MonriLoggerFactory.get("MonriPaymentController");
+
+    private static final String NO_CALLBACK_ATTACHED_WARNING = "PaymentResult received but no confirmPayment callback is attached. " +
+            "Use Monri#setPaymentResultConsumer to receive results after activity recreation.";
 
     private final int PAYMENT_REQUEST_CODE = 10000;
     private final int AUTHENTICATE_PAYMENT_REQUEST_CODE = 10001;
@@ -85,11 +92,19 @@ final class MonriPaymentController implements PaymentController {
     }
 
     @Override
-    public void acceptResult(PaymentResult result, Throwable throwable) {
-        if (delegatedCallback == null) {
-             throw new NullPointerException("delegatedCallback is null");
+    public void acceptResult(final PaymentResult result, final Throwable throwable) {
+        final ActionResultConsumer<PaymentResult> callback = delegatedCallback;
+        delegatedCallback = null;
+
+        if (callback == null) {
+            logger.warn(NO_CALLBACK_ATTACHED_WARNING);
         } else {
-            delegatedCallback.accept(result, throwable);
+            callback.accept(result, throwable);
         }
+    }
+
+    @Override
+    public boolean hasResultConsumer() {
+        return delegatedCallback != null;
     }
 }

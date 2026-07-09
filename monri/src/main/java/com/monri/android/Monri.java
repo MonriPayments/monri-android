@@ -39,6 +39,9 @@ public final class Monri {
     private MonriApi monriApi;
     private final ActivityResultLauncher<ConfirmPaymentActivity.Request> registeredForActivityResult;
     private PaymentController paymentController;
+    private ActionResultConsumer<PaymentResult> paymentResultConsumer;
+    private PaymentResult pendingPaymentResult;
+    private boolean hasPendingPaymentResult;
 
     @VisibleForTesting
     private
@@ -81,7 +84,7 @@ public final class Monri {
     public Monri(final ActivityResultCaller activityResultCaller) {
         registeredForActivityResult = activityResultCaller.registerForActivityResult(
                 new ConfirmPaymentActivityResultContract(),
-                result -> paymentController.acceptResult(result.getPaymentResult(), null)
+                result -> deliverPaymentResult(result == null ? null : result.getPaymentResult())
         );
     }
 
@@ -146,6 +149,30 @@ public final class Monri {
                                final GooglePayButtonOptions googlePayButtonOptions)
     {
         paymentController.confirmPayment(confirmPaymentParams, callback, googlePayButtonOptions);
+    }
+
+    public void setPaymentResultConsumer(@NonNull final ActionResultConsumer<PaymentResult> consumer) {
+        paymentResultConsumer = consumer;
+
+        if (hasPendingPaymentResult) {
+            hasPendingPaymentResult = false;
+
+            final PaymentResult result = pendingPaymentResult;
+            pendingPaymentResult = null;
+
+            consumer.accept(result, null);
+        }
+    }
+
+    private void deliverPaymentResult(final PaymentResult paymentResult) {
+        if (paymentController != null && paymentController.hasResultConsumer()) {
+            paymentController.acceptResult(paymentResult, null);
+        } else if (paymentResultConsumer != null) {
+            paymentResultConsumer.accept(paymentResult, null);
+        } else {
+            pendingPaymentResult = paymentResult;
+            hasPendingPaymentResult = true;
+        }
     }
 
     private void tokenTaskPostExecution(ResponseWrapper result, TokenCallback callback) {

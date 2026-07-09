@@ -103,6 +103,8 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
         }
 
         directPaymentViewSetup();
+
+        monri.setPaymentResultConsumer(this::showPaymentResult);
     }
 
     private void savedCardPaymentViewSetup(Intent intent) {
@@ -206,17 +208,19 @@ public class PaymentPickerActivity extends AppCompatActivity implements ResultCa
                                 .set(customerParams)
                 );
 
-                monri.confirmPayment(confirmPaymentParams, (result, throwable) -> {
-                    if (throwable != null) {
-                        txtViewResult.setText(String.format("%s%n%n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
-                        Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(this, String.format("Transaction processed with result %s", result.getStatus()), Toast.LENGTH_LONG).show();
-                        txtViewResult.setText(result.toString());
-                    }
-                });
+                monri.confirmPayment(confirmPaymentParams, this::showPaymentResult);
             }
         };
+    }
+
+    private void showPaymentResult(final PaymentResult result, final Throwable throwable) {
+        if (throwable != null) {
+            txtViewResult.setText(String.format("%s%n%n%s", throwable.getCause(), Arrays.toString(throwable.getStackTrace())));
+            Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
+        } else if (result != null) {
+            Toast.makeText(this, String.format("Transaction processed with result %s", result.getStatus()), Toast.LENGTH_LONG).show();
+            txtViewResult.setText(result.toString());
+        }
     }
 
     PaymentMethodParams nonThreeDsCard() {
