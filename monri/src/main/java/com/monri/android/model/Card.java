@@ -1,6 +1,5 @@
 package com.monri.android.model;
 
-import android.annotation.SuppressLint;
 import android.text.TextUtils;
 
 import androidx.annotation.IntRange;
@@ -16,6 +15,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.monri.android.MonriTextUtils.nullIfBlank;
@@ -31,13 +31,12 @@ public class Card extends PaymentMethod {
         return PaymentMethod.TYPE_CARD;
     }
 
-    @SuppressLint("DefaultLocale")
     @Override
     public Map<String, String> data() {
         Map<String, String> data = new HashMap<>();
 
         data.put("pan", nullIfBlank(getNumber()));
-        data.put("expiration_date", String.format("%d%02d", getExpYear() - 2000, getExpMonth()));
+        data.put("expiration_date", String.format(Locale.US, "%d%02d", getExpYear() - 2000, getExpMonth()));
         data.put("cvv", nullIfBlank(getCVC()));
         data.put("tokenize_pan", Boolean.toString(isTokenizePan()));
         return data;

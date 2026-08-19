@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class CardTest {
@@ -140,6 +142,30 @@ public class CardTest {
                             card.getBrand()
                     );
                 });
+    }
+
+    @Test
+    public void expirationDateIsAsciiRegardlessOfDeviceLocale() {
+        final Locale originalLocale = Locale.getDefault();
+        // Locales that render digits with non-ASCII glyphs (Persian, Arabic).
+        final List<Locale> nonLatinDigitLocales = Arrays.asList(
+                new Locale("fa", "IR"),
+                new Locale("ar", "SA"),
+                new Locale("bn", "IN")
+        );
+        try {
+            for (Locale locale : nonLatinDigitLocales) {
+                Locale.setDefault(locale);
+                Card card = new Card("4111 1111 1111 1111", 12, 2026, "123");
+                final Map<String, String> data = card.data();
+                Assert.assertEquals(
+                        String.format("expiration_date must be ASCII digits for locale %s", locale),
+                        "2612",
+                        data.get("expiration_date"));
+            }
+        } finally {
+            Locale.setDefault(originalLocale);
+        }
     }
 
     @SuppressWarnings("ConstantConditions")
