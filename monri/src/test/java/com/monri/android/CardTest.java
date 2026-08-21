@@ -154,9 +154,9 @@ public class CardTest {
                 new Locale("bn", "IN")
         );
         try {
-            for (Locale locale : nonLatinDigitLocales) {
+            for (final Locale locale : nonLatinDigitLocales) {
                 Locale.setDefault(locale);
-                Card card = new Card("4111 1111 1111 1111", 12, 2026, "123");
+                final Card card = new Card("4111 1111 1111 1111", 12, 2026, "123");
                 final Map<String, String> data = card.data();
                 Assert.assertEquals(
                         String.format("expiration_date must be ASCII digits for locale %s", locale),
